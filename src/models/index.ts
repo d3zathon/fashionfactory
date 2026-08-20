@@ -39,6 +39,7 @@ export interface Collection {
   productIds: string[];
   image?: ProductImage;
   active: boolean;
+  sortOrder: number;
 }
 
 export interface InstagramPost {
