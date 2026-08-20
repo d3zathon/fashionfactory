@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 
-export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
     console.error("Fashion Factory frontend error", error);
-  }, []);
+  }, [error]);
 
   return (
     <main className="route-state route-state-error">
