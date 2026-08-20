@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { Footer } from "@/components/Footer";
+import { MobileActionBar } from "@/components/MobileActionBar";
+import { Navbar } from "@/components/Navbar";
 import { useCategories, useProducts, useStoreSettings } from "@/hooks";
 import { AnalyticsService } from "@/services";
 
@@ -16,6 +19,7 @@ export default function CollectionPage() {
 
   return (
     <main className="collection-page">
+      <Navbar tone="light" />
       <div className="container collection-top">
         <Link href="/" className="back"><ArrowLeft size={16} /> Home</Link>
         <p className="eyebrow">Fashion Factory Nepal</p>
@@ -76,6 +80,8 @@ export default function CollectionPage() {
           </div>
         </>
       )}
+      <Footer />
+      <MobileActionBar />
     </main>
   );
 }
