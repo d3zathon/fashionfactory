@@ -33,8 +33,8 @@ export const categories: Category[] = [
 ];
 
 export const collections: Collection[] = [
-  { id: "all", name: "The Collection", slug: "all", description: "A curated development catalogue for the storefront experience.", productIds: ["p1", "p2", "p3", "p4", "p5", "p6"], active: true, sortOrder: 1 },
-  { id: "featured", name: "Featured", slug: "featured", description: "Selected pieces highlighted on the storefront.", productIds: ["p1", "p2", "p3", "p5"], active: true, sortOrder: 2 },
+  { id: "all", name: "The Collection", slug: "all", description: "A curated catalogue for the storefront experience.", productIds: ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9"], active: true, sortOrder: 1 },
+  { id: "featured", name: "Featured", slug: "featured", description: "Selected pieces highlighted on the storefront.", productIds: ["p1", "p2", "p3", "p5", "p7"], active: true, sortOrder: 2 },
 ];
 
 export const products: Product[] = [
@@ -44,6 +44,9 @@ export const products: Product[] = [
   { id: "p4", name: "Minimal Accessories", slug: "minimal-accessories", categoryId: "accessories", description: "Simple details that complete a look.", images: [image("p4", "https://images.unsplash.com/photo-1612902456551-333ac5afa26e?auto=format&fit=crop&w=1200&q=85", "Fashion accessories")], featured: true },
   { id: "p5", name: "Weekend Edit", slug: "weekend-edit", categoryId: "womens", description: "An easygoing look for relaxed days.", sizes: ["S", "M", "L"], colors: ["White", "Black"], images: [image("p5", "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=1200&q=85", "Casual fashion look")], featured: true },
   { id: "p6", name: "Giftable Detail", slug: "giftable-detail", categoryId: "gifts", description: "A small fashion find with easy gifting appeal.", images: [image("p6", "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&w=1200&q=85", "Fashion gift detail")], featured: false },
+  { id: "p7", name: "Clean Everyday Tee", slug: "clean-everyday-tee", categoryId: "mens", description: "A simple wardrobe staple for everyday styling.", sizes: ["M", "L", "XL"], colors: ["White", "Charcoal"], images: [image("p7", "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=85", "Everyday t-shirt")], featured: true },
+  { id: "p8", name: "Soft Layering Piece", slug: "soft-layering-piece", categoryId: "new", description: "A relaxed layer for building a versatile look.", sizes: ["S", "M", "L"], colors: ["Beige", "Black"], images: [image("p8", "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=1200&q=85", "Layering piece")], featured: true },
+  { id: "p9", name: "Finishing Touch", slug: "finishing-touch", categoryId: "accessories", description: "A minimal accessory to complete a look.", images: [image("p9", "https://images.unsplash.com/photo-1523779917675-b6ed3a42a561?auto=format&fit=crop&w=1200&q=85", "Accessory detail")], featured: false },
 ];
 
 export const instagramPosts: InstagramPost[] = [
