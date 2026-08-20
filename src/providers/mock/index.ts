@@ -11,7 +11,9 @@ export const mockProductProvider: ProductProvider = {
 
 export const mockCategoryProvider: CategoryProvider = {
   async getCategories() { return categories.filter((category) => category.active).sort((a, b) => a.sortOrder - b.sortOrder); },
-  async getCategory(slug) { return categories.find((category) => category.active && category.slug === slug) ?? null; },
+  async getCategory(identifier) {
+    return categories.find((category) => category.active && (category.id === identifier || category.slug === identifier)) ?? null;
+  },
 };
 
 export const mockCollectionProvider: CollectionProvider = {
