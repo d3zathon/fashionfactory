@@ -4,11 +4,16 @@ import { useState } from "react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 
-export function Navbar() {
+interface NavbarProps {
+  tone?: "dark" | "light";
+}
+
+export function Navbar({ tone = "dark" }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const className = tone === "light" ? "nav nav-light" : "nav";
 
   return (
-    <header className="nav">
+    <header className={className}>
       <div className="container nav-inner">
         <Link href="/" className="brand" aria-label="Fashion Factory Nepal home" onClick={() => setMenuOpen(false)}>
           <span>FASHION</span><strong>FACTORY</strong><small>NEPAL</small>
