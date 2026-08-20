@@ -1,4 +1,4 @@
-import type { Category, FAQ, HomepageContent, InstagramPost, Product, StoreSettings, Testimonial } from "@/models";
+import type { Category, Collection, FAQ, HomepageContent, InstagramPost, Product, StoreSettings, Testimonial } from "@/models";
 
 const image = (id: string, src: string, alt: string) => ({ id, src, alt });
 
@@ -17,6 +17,7 @@ export const homepageContent: HomepageContent = {
   eyebrow: "Kathmandu, Nepal",
   headline: "Define Your Style.",
   description: "Discover fashion at Fashion Factory Nepal, Kathmandu.",
+  heroImage: image("hero", "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2200&q=88", "Fashion clothing displayed on a rack"),
   introductionTitle: "Fashion Made Easy to Discover.",
   introductionBody: "Fashion Factory is a Kathmandu-based fashion and clothing retail destination. Browse the collection, connect with the store, and visit in person to find your next look.",
   finalCtaTitle: "Your Next Look Starts Here.",
@@ -31,17 +32,24 @@ export const categories: Category[] = [
   { id: "gifts", name: "Gifts", slug: "gifts", description: "Thoughtful finds to take home.", active: true, sortOrder: 5 },
 ];
 
+export const collections: Collection[] = [
+  { id: "all", name: "The Collection", slug: "all", description: "A curated development catalogue for the storefront experience.", productIds: ["p1", "p2", "p3", "p4", "p5", "p6"], active: true, sortOrder: 1 },
+  { id: "featured", name: "Featured", slug: "featured", description: "Selected pieces highlighted on the storefront.", productIds: ["p1", "p2", "p3", "p5"], active: true, sortOrder: 2 },
+];
+
 export const products: Product[] = [
   { id: "p1", name: "Everyday Overshirt", slug: "everyday-overshirt", categoryId: "mens", description: "A versatile layered piece.", sizes: ["M", "L", "XL"], colors: ["Black", "Stone"], images: [image("p1", "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=1200&q=85", "Neutral overshirt")], featured: true },
   { id: "p2", name: "Relaxed Statement Look", slug: "relaxed-statement-look", categoryId: "womens", description: "A polished silhouette for everyday styling.", sizes: ["S", "M", "L"], colors: ["Cream", "Black"], images: [image("p2", "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=85", "Fashion look")], featured: true },
   { id: "p3", name: "Classic Layer", slug: "classic-layer", categoryId: "new", description: "An easy piece to build a look around.", sizes: ["M", "L"], images: [image("p3", "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=85", "Layered fashion")], featured: true },
   { id: "p4", name: "Minimal Accessories", slug: "minimal-accessories", categoryId: "accessories", description: "Simple details that complete a look.", images: [image("p4", "https://images.unsplash.com/photo-1612902456551-333ac5afa26e?auto=format&fit=crop&w=1200&q=85", "Fashion accessories")], featured: true },
+  { id: "p5", name: "Weekend Edit", slug: "weekend-edit", categoryId: "womens", description: "An easygoing look for relaxed days.", sizes: ["S", "M", "L"], colors: ["White", "Black"], images: [image("p5", "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=1200&q=85", "Casual fashion look")], featured: true },
+  { id: "p6", name: "Giftable Detail", slug: "giftable-detail", categoryId: "gifts", description: "A small fashion find with easy gifting appeal.", images: [image("p6", "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&w=1200&q=85", "Fashion gift detail")], featured: false },
 ];
 
 export const instagramPosts: InstagramPost[] = [
   { id: "ig1", image: image("ig1", "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=85", "Fashion rack"), caption: "What's new in store.", permalink: storeSettings.instagramUrl, publishedAt: "2026-08-15" },
   { id: "ig2", image: image("ig2", "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=85", "Clothing collection"), caption: "Find your next look.", permalink: storeSettings.instagramUrl, publishedAt: "2026-08-12" },
-  { id: "ig3", image: image("ig3", "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1000&q=85", "Contemporary fashion"), caption: "Style, your way.", permalink: storeSettings.instagramUrl, publishedAt: "2026-08-09" },
+  { id: "ig3", image: image("ig3", "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1000&q=85", "Contemporary fashion"), permalink: storeSettings.instagramUrl, publishedAt: "2026-08-09" },
   { id: "ig4", image: image("ig4", "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1000&q=85", "Fashion store"), caption: "Visit us in Kathmandu.", permalink: storeSettings.instagramUrl, publishedAt: "2026-08-05" },
 ];
 
