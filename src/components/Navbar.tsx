@@ -3,11 +3,9 @@
 import { useState } from "react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import Link from "next/link";
-import { useStoreSettings } from "@/hooks";
 
 export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  useStoreSettings();
 
   return (
     <header className="nav">
