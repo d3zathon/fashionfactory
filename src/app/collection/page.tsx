@@ -20,12 +20,14 @@ export default function CollectionPage() {
   return (
     <main className="collection-page">
       <Navbar tone="light" />
-      <div className="container collection-top">
-        <Link href="/" className="back"><ArrowLeft size={16} /> Home</Link>
-        <p className="eyebrow">Fashion Factory Nepal</p>
-        <h1 className="serif">The Collection.</h1>
-        <p className="muted">Browse the current development catalogue. Product inventory and pricing can be connected to the backend later.</p>
-      </div>
+      <section className="collection-hero">
+        <div className="container collection-top">
+          <Link href="/" className="back"><ArrowLeft size={16} /> Home</Link>
+          <p className="eyebrow">Fashion Factory Nepal</p>
+          <h1 className="serif">Explore the Collection.</h1>
+          <p className="muted">Discover featured styles and categories, then ask the store about current availability before you visit.</p>
+        </div>
+      </section>
 
       {loading ? (
         <div className="container state-block" role="status">Loading the collection…</div>
@@ -48,6 +50,7 @@ export default function CollectionPage() {
                       <h2 className="section-title">{category.name}</h2>
                       {category.description && <p className="muted category-description">{category.description}</p>}
                     </div>
+                    <span className="category-count">{categoryProducts.length} {categoryProducts.length === 1 ? "piece" : "pieces"}</span>
                   </div>
 
                   {categoryProducts.length ? (
@@ -55,13 +58,15 @@ export default function CollectionPage() {
                       {categoryProducts.map((product) => {
                         const message = `Hi Fashion Factory, I would like to ask about ${product.name}. Is it currently available?`;
                         return (
-                          <article key={product.id}>
-                            <Link href={`/products/${product.slug}`} onClick={() => AnalyticsService.track("product_click", { product: product.id })}>
+                          <article key={product.id} className="collection-product-card">
+                            <Link href={`/products/${product.slug}`} className="collection-product-image" onClick={() => AnalyticsService.track("product_click", { product: product.id })}>
                               <img src={product.images[0]?.src} alt={product.images[0]?.alt ?? product.name} loading="lazy" />
                             </Link>
-                            <div>
-                              <p>{product.name}</p>
-                              <span>{product.description}</span>
+                            <div className="collection-product-copy">
+                              <div>
+                                <p>{product.name}</p>
+                                <span>{product.description}</span>
+                              </div>
                               <div className="collection-product-actions">
                                 <Link href={`/products/${product.slug}`} onClick={() => AnalyticsService.track("product_click", { product: product.id })}>View product <ArrowUpRight size={14} /></Link>
                                 <a href={`https://wa.me/${whatsappBase}?text=${encodeURIComponent(message)}`} target="_blank" rel="noreferrer" onClick={() => AnalyticsService.track("whatsapp_click", { product: product.id })}>Ask availability <ArrowUpRight size={14} /></a>
@@ -72,7 +77,7 @@ export default function CollectionPage() {
                       })}
                     </div>
                   ) : (
-                    <div className="state-block state-compact">No products are available in this category yet.</div>
+                    <div className="state-block state-compact">More pieces will appear here as the catalogue grows.</div>
                   )}
                 </section>
               );
