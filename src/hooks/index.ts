@@ -8,13 +8,18 @@ function useAsync<T>(loader: () => Promise<T>, initial: T) {
   const [data, setData] = useState<T>(initial);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError(null);
-    loader().then((value) => active && setData(value)).catch((err) => active && setError(err instanceof Error ? err : new Error("Unable to load data"))).finally(() => active && setLoading(false));
+    loader()
+      .then((value) => active && setData(value))
+      .catch((err) => active && setError(err instanceof Error ? err : new Error("Unable to load data")))
+      .finally(() => active && setLoading(false));
     return () => { active = false; };
   }, [loader]);
+
   return { data, loading, error };
 }
 
@@ -23,7 +28,10 @@ export const useFeaturedProducts = () => useAsync<Product[]>(ProductService.getF
 export const useCategories = () => useAsync<Category[]>(CategoryService.getCategories, []);
 export const useCollections = () => useAsync<Collection[]>(CollectionService.getCollections, []);
 export const useStoreSettings = () => useAsync<StoreSettings>(StoreSettingsService.getStoreSettings, {} as StoreSettings);
-export const useInstagram = () => useAsync<InstagramPost[]>(() => InstagramService.getLatestPosts(4), []);
+export const useInstagram = () => {
+  const loadInstagram = useCallback(() => InstagramService.getLatestPosts(4), []);
+  return useAsync<InstagramPost[]>(loadInstagram, []);
+};
 export const useTestimonials = () => useAsync<Testimonial[]>(TestimonialService.getTestimonials, []);
 export const useHomepageContent = () => useAsync<HomepageContent>(ContentService.getHomepageContent, {} as HomepageContent);
 export const useFAQs = () => useAsync<FAQ[]>(ContentService.getFAQs, []);
