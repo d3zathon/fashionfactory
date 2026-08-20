@@ -10,7 +10,7 @@ export interface ProductProvider {
 
 export interface CategoryProvider {
   getCategories(): Promise<Category[]>;
-  getCategory(slug: string): Promise<Category | null>;
+  getCategory(identifier: string): Promise<Category | null>;
 }
 
 export interface CollectionProvider {
