@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import Link from "next/link";
+import styles from "./Navbar.module.css";
 
 interface NavbarProps {
   tone?: "dark" | "light";
@@ -10,7 +11,7 @@ interface NavbarProps {
 
 export function Navbar({ tone = "dark" }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const className = tone === "light" ? "nav nav-light" : "nav";
+  const className = tone === "light" ? `nav ${styles.light}` : "nav";
 
   return (
     <header className={className}>
