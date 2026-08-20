@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowUpRight, ChevronDown, Instagram, MapPin, Menu, MessageCircle, Phone, X } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Instagram, MapPin, MessageCircle, Phone } from "lucide-react";
 import { ContactForm } from "@/components/ContactForm";
+import { Footer } from "@/components/Footer";
+import { MobileActionBar } from "@/components/MobileActionBar";
+import { Navbar } from "@/components/Navbar";
 import { useCategories, useFAQs, useFeaturedProducts, useHomepageContent, useInstagram, useStoreSettings, useTestimonials } from "@/hooks";
 import { AnalyticsService } from "@/services";
 
@@ -10,7 +12,6 @@ const whatsapp = (number: string, message: string) => `https://wa.me/${number}?t
 const fallbackHero = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2200&q=88";
 
 export default function HomePage() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const { data: home } = useHomepageContent();
   const { data: store } = useStoreSettings();
   const { data: categories } = useCategories();
@@ -22,16 +23,11 @@ export default function HomePage() {
   const wa = store?.whatsappNumber ? whatsapp(store.whatsappNumber, "Hi Fashion Factory, I found you through your website and would like to know more about your collection.") : "#";
 
   return <main>
-    <header className="nav"><div className="container nav-inner">
-      <a href="#top" className="brand" aria-label="Fashion Factory Nepal home"><span>FASHION</span><strong>FACTORY</strong><small>NEPAL</small></a>
-      <nav className={menuOpen ? "nav-links open" : "nav-links"} aria-label="Primary navigation">{["Collection","About","Instagram","Visit Us","Contact"].map((item)=><a key={item} href={`#${item.toLowerCase().replace(" ","-")}`} onClick={()=>setMenuOpen(false)}>{item}</a>)}<a className="nav-cta" href="#visit-us">Visit Store <ArrowUpRight size={16}/></a></nav>
-      <button className="menu" type="button" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={()=>setMenuOpen(!menuOpen)}>{menuOpen?<X/>:<Menu/>}</button>
-    </div></header>
-
+    <Navbar />
     <section id="top" className="hero"><div className="hero-image" style={{ backgroundImage: `url(${home?.heroImage?.src ?? fallbackHero})` }}><div className="hero-overlay"/></div><div className="container hero-content"><p className="eyebrow">{home?.eyebrow}</p><h1 className="serif">{home?.headline}</h1><p>{home?.description}</p><div className="hero-actions"><a className="btn btn-dark" href="#collection" onClick={()=>track("collection_click")}>Explore Collection <ArrowUpRight size={17}/></a><a className="btn btn-light" href="#visit-us">Visit Store</a></div></div></section>
 
     <section className="quick" aria-label="Quick contact actions"><div className="container quick-grid">
-      <a href={`tel:${store?.phone}`} onClick={()=>track("phone_click")}><Phone size={19}/><span>Call</span></a>
+      <a href={store?.phone ? `tel:${store.phone}` : undefined} onClick={()=>track("phone_click")}><Phone size={19}/><span>Call</span></a>
       <a href={wa} target="_blank" rel="noreferrer" onClick={()=>track("whatsapp_click")}><MessageCircle size={19}/><span>WhatsApp</span></a>
       <a href={store?.mapsUrl} target="_blank" rel="noreferrer" onClick={()=>track("maps_click")}><MapPin size={19}/><span>Directions</span></a>
       <a href={store?.instagramUrl} target="_blank" rel="noreferrer" onClick={()=>track("instagram_click")}><Instagram size={19}/><span>Instagram</span></a>
@@ -49,7 +45,7 @@ export default function HomePage() {
 
     <section className="section social-proof"><div className="container"><div className="section-head"><div><p className="eyebrow">Social proof</p><h2 className="section-title">What customers say.</h2></div></div>{testimonials.length ? <div className="testimonial-grid">{testimonials.map((testimonial)=><article key={testimonial.id} className="testimonial-card"><p>“{testimonial.quote}”</p><span>{testimonial.name}</span></article>)}</div> : <div className="state-block">Verified customer reviews will appear here when connected to the store's review or testimonial source.</div>}</div></section>
 
-    <section id="visit-us" className="section visit"><div className="container visit-grid"><div><p className="eyebrow">Visit Fashion Factory</p><h2 className="section-title">Kathmandu,<br/>Nepal.</h2><p className="muted">{store?.locationLabel}</p><p className="hours">{store?.openingHours}</p><div className="visit-actions"><a className="btn btn-dark" href={store?.mapsUrl} target="_blank" rel="noreferrer" onClick={()=>track("maps_click")}>Get Directions <MapPin size={16}/></a><a className="btn btn-light" href={`tel:${store?.phone}`} onClick={()=>track("phone_click")}>Call Store</a></div></div><div className="map"><iframe title="Fashion Factory Kathmandu map" src="https://www.google.com/maps?q=27.6740549,85.2814038&z=16&output=embed" loading="lazy"/></div></div></section>
+    <section id="visit-us" className="section visit"><div className="container visit-grid"><div><p className="eyebrow">Visit Fashion Factory</p><h2 className="section-title">Kathmandu,<br/>Nepal.</h2><p className="muted">{store?.locationLabel}</p><p className="hours">{store?.openingHours}</p><div className="visit-actions"><a className="btn btn-dark" href={store?.mapsUrl} target="_blank" rel="noreferrer" onClick={()=>track("maps_click")}>Get Directions <MapPin size={16}/></a><a className="btn btn-light" href={store?.phone ? `tel:${store.phone}` : undefined} onClick={()=>track("phone_click")}>Call Store</a></div></div><div className="map"><iframe title="Fashion Factory Kathmandu map" src="https://www.google.com/maps?q=27.6740549,85.2814038&z=16&output=embed" loading="lazy"/></div></div></section>
 
     <section className="section faq"><div className="container faq-grid"><div><p className="eyebrow">Need to know</p><h2 className="section-title">Questions,<br/>answered.</h2></div><div>{faqs.map(faq=><details key={faq.id}><summary>{faq.question}<ChevronDown size={18}/></summary><p>{faq.answer}</p></details>)}</div></div></section>
 
@@ -57,7 +53,7 @@ export default function HomePage() {
 
     <section className="final"><div className="container final-inner"><p className="eyebrow">Fashion Factory Nepal</p><h2 className="serif">{home?.finalCtaTitle}</h2><p>{home?.finalCtaBody}</p><div className="final-actions"><a className="btn btn-dark" href={store?.mapsUrl} target="_blank" rel="noreferrer">Get Directions</a><a className="btn btn-light" href={wa} target="_blank" rel="noreferrer">WhatsApp Us</a><a className="btn btn-light" href={store?.instagramUrl} target="_blank" rel="noreferrer">Follow Instagram</a></div></div></section>
 
-    <footer><div className="container footer-grid"><div><a className="brand footer-brand" href="#top"><span>FASHION</span><strong>FACTORY</strong><small>NEPAL</small></a><p className="muted">{store?.locationLabel}</p></div><div><p className="eyebrow">Explore</p><a href="#collection">Collection</a><a href="#about">About</a><a href="#instagram">Instagram</a><a href="#visit-us">Visit Us</a><a href="#contact">Contact</a></div><div><p className="eyebrow">Connect</p><a href={`tel:${store?.phone}`}>{store?.phone}</a><a href={wa} target="_blank" rel="noreferrer">WhatsApp</a><a href={store?.instagramUrl} target="_blank" rel="noreferrer">{store?.instagramHandle}</a><a href={store?.mapsUrl} target="_blank" rel="noreferrer">Google Maps</a></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} Fashion Factory Nepal</span><span>{store?.openingHours}</span></div></footer>
-    <div className="mobile-actions"><a href={`tel:${store?.phone}`}><Phone size={17}/>Call</a><a href={wa} target="_blank" rel="noreferrer"><MessageCircle size={17}/>WhatsApp</a><a href={store?.mapsUrl} target="_blank" rel="noreferrer"><MapPin size={17}/>Directions</a></div>
+    <Footer />
+    <MobileActionBar />
   </main>;
 }
