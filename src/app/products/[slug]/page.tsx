@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, MapPin } from "lucide-react";
 import { notFound } from "next/navigation";
+import { Footer } from "@/components/Footer";
+import { MobileActionBar } from "@/components/MobileActionBar";
+import { Navbar } from "@/components/Navbar";
 import { CategoryService, ProductService, StoreSettingsService } from "@/services";
 import styles from "./product.module.css";
 
@@ -35,6 +38,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <main className={styles.page}>
+      <Navbar tone="light" />
       <div className="container">
         <Link href="/collection" className={styles.back}><ArrowLeft size={16} /> Back to collection</Link>
         <div className={styles.detail}>
@@ -60,6 +64,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </aside>
         </div>
       </div>
+      <Footer />
+      <MobileActionBar />
     </main>
   );
 }
