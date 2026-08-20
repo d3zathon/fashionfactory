@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./route-state.css";
 
 export const metadata: Metadata = {
   title: "Fashion Factory Nepal | Fashion Store in Kathmandu",
