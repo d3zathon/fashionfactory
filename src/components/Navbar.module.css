@@ -1,0 +1,1 @@
+.light{color:var(--ink);position:relative}.light::after{display:none}.light :global(.nav-cta){border-color:var(--line);background:var(--white);backdrop-filter:none}.light :global(.menu){color:var(--ink)}
