@@ -1,8 +1,26 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { DM_Sans, Playfair_Display } from "next/font/google";
 import { StoreSettingsService } from "@/services";
 import "./globals.css";
 import "./route-state.css";
+
+// Self-hosted and preloaded by Next rather than fetched from Google at runtime.
+// The previous CSS @import blocked rendering on a third-party round trip and
+// caused a visible font swap on every page load.
+const sans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const serif = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-serif",
+  display: "swap",
+});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
@@ -32,8 +50,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <body>
+        {/* First focusable element on every page: lets keyboard and screen-reader
+            users jump past the navigation instead of tabbing through it each time. */}
+        <a className="skip-link" href="#main">Skip to content</a>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinesses) }} />
         {gaId && (
           <>

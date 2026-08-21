@@ -8,7 +8,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
   }, [error]);
 
   return (
-    <main className="route-state route-state-error">
+    <main id="main" className="route-state route-state-error">
       <div className="container">
         <span className="eyebrow">Fashion Factory Nepal</span>
         <h1 className="serif">Something went wrong.</h1>

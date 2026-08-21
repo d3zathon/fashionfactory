@@ -23,11 +23,17 @@ export default function HomePage() {
   const track = (event: string, properties?: Record<string, string | number | boolean>) => AnalyticsService.track(event, properties);
   const wa = whatsappHref(store?.whatsappNumber, GENERAL_WHATSAPP_MESSAGE);
 
-  return <main>
+  const heroSrc = home?.heroImage?.src ?? fallbackHero;
+
+  return <main id="main">
+    {/* The hero is the LCP element but is a CSS background image, which the
+        browser cannot discover until stylesheets and JS have run. Preloading it
+        starts the fetch immediately. React hoists this link into <head>. */}
+    <link rel="preload" as="image" href={heroSrc} fetchPriority="high" />
     <Navbar />
 
     <section id="top" className="hero">
-      <div className="hero-image" style={{ backgroundImage: `url(${home?.heroImage?.src ?? fallbackHero})` }} aria-hidden="true"><div className="hero-overlay" /></div>
+      <div className="hero-image" style={{ backgroundImage: `url(${heroSrc})` }} aria-hidden="true"><div className="hero-overlay" /></div>
       <div className="container hero-content">
         <p className="eyebrow">{home?.eyebrow}</p>
         <h1 className="serif">{home?.headline}</h1>

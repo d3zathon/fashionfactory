@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <main className="route-state route-state-error">
+    <main id="main" className="route-state route-state-error">
       <div className="container">
         <span className="eyebrow">Fashion Factory Nepal</span>
         <h1 className="serif">Page not found.</h1>

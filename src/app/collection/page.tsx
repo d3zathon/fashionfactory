@@ -19,7 +19,7 @@ export default function CollectionPage() {
   const whatsappBase = store?.whatsappNumber;
 
   return (
-    <main className="collection-page">
+    <main id="main" className="collection-page">
       <Navbar tone="light" />
       <section className="collection-hero">
         <div className="container collection-top">
