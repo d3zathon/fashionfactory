@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { requireAdmin } from "@/lib/supabase/server";
 
-export async function POST(request: Request) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+export async function POST() {
   const githubToken = process.env.GITHUB_PUBLISH_TOKEN;
   const githubRepo = process.env.GITHUB_REPO;
   const workflowFile = process.env.GITHUB_WORKFLOW_FILE ?? "publish.yml";
@@ -11,23 +9,15 @@ export async function POST(request: Request) {
   // leaving the deployed site unchanged, so require this to be set explicitly.
   const ref = process.env.GITHUB_PUBLISH_REF;
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.json({ success: false, error: "Supabase is not configured on this host yet." }, { status: 503 });
+  // Authorization, not just authentication — membership in admin_users is
+  // re-checked here server-side, independent of middleware and of any client state.
+  const identity = await requireAdmin();
+  if (!identity) {
+    return NextResponse.json({ success: false, error: "Not authorized." }, { status: 403 });
   }
+
   if (!githubToken || !githubRepo || !ref) {
     return NextResponse.json({ success: false, error: "Publish pipeline is not configured on this host yet." }, { status: 503 });
-  }
-
-  const authHeader = request.headers.get("authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice("Bearer ".length) : null;
-  if (!token) {
-    return NextResponse.json({ success: false, error: "Not signed in." }, { status: 401 });
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: userData, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !userData.user) {
-    return NextResponse.json({ success: false, error: "Not signed in." }, { status: 401 });
   }
 
   const response = await fetch(`https://api.github.com/repos/${githubRepo}/actions/workflows/${workflowFile}/dispatches`, {

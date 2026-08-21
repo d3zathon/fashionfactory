@@ -67,12 +67,40 @@ Admin (Supabase, live CRUD + RLS)
   -> push triggers the host's normal redeploy
 ```
 
+### Authorization model
+
+Being signed in grants **nothing**. Access is granted only by membership in
+`public.admin_users`, and that is enforced at three independent layers:
+
+1. **`src/middleware.ts`** — runs before any `/admin` page or `/api/admin` route.
+   Verifies the session with `getUser()` (which revalidates the token, unlike
+   `getSession()`, whose cookie payload is not trustworthy on its own), then
+   checks `admin_users` membership. Non-admins are redirected; API calls get 403.
+2. **Server-side re-check** — `requireAdmin()` in `src/lib/supabase/server.ts`,
+   called inside the publish route itself, so the endpoint is safe even if
+   middleware matching ever changes.
+3. **RLS** — every policy calls `private.is_admin()`. This is the last line of
+   defense and holds even if the app is bypassed entirely and the REST API is
+   called directly with the anon key.
+
+Sessions are cookie-based (`@supabase/ssr`), not `localStorage` — that is what
+makes server-side checks possible at all.
+
+Adding an admin is deliberately a SQL/dashboard operation, so the web host never
+needs a privileged key:
+
+```sql
+insert into public.admin_users (user_id, email)
+select id, email from auth.users where email = 'owner@example.com';
+```
+
 Setup:
 1. Create a free Supabase project, then run `supabase/schema.sql` in its SQL
-   editor (creates the `products` table, RLS policies, and the `product-images`
-   storage bucket + policies).
-2. In Authentication > Providers, turn off public sign-ups, then manually add
-   the one owner account under Authentication > Users.
+   editor (creates `products`, `admin_users`, `private.is_admin()`, RLS
+   policies, and the `product-images` storage bucket + policies).
+2. In Authentication > Providers, turn off public sign-ups, manually add the
+   owner account under Authentication > Users, then grant it admin rights with
+   the SQL above.
 3. Set `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` on the host,
    and `GITHUB_PUBLISH_TOKEN` (+ `GITHUB_REPO`) alongside the existing Telegram
    secrets — the latter are server-only, never `NEXT_PUBLIC_`.

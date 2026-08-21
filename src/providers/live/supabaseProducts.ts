@@ -1,4 +1,4 @@
-import { getSupabaseClient } from "@/lib/supabaseClient";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import { compressImageToWebp } from "@/lib/imageCompression";
 
 export interface AdminProduct {

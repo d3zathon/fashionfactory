@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
+import { getSupabaseClient, isSupabaseConfigured } from "./supabase/client";
 
 export interface AdminSessionState {
   configured: boolean;
