@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-08-22T00:00:00.000Z",
+  "settings": {
+    "name": "Fashion Factory Nepal",
+    "locationLabel": "Kathmandu Valley, Nepal · Kirtipur & Budhanilkantha",
+    "phone": "+977 9840260456",
+    "instagramHandle": "@fashion.factory_2022",
+    "instagramUrl": "https://www.instagram.com/fashion.factory_2022/",
+    "openingHours": "9:00 AM – 5:00 PM daily",
+    "whatsappNumber": "9779840260456"
+  },
+  "locations": [
+    {
+      "id": "kirtipur",
+      "name": "Fashion Factory — Kirtipur",
+      "address": "M7FJ+JHC, Kirtipur 44600, Nepal",
+      "mapsUrl": "https://www.google.com/maps/place/Fashion+Factory/@27.67409,85.2814289,3647m/data=!3m1!1e3!4m10!1m2!2m1!1sfashion+factory!3m6!1s0x39eb19d5f435a403:0x7d3cfd5ad03122c1!8m2!3d27.6740549!4d85.2814038!15sCg9mYXNoaW9uIGZhY3RvcnmSAQlnaWZ0X3Nob3DgAQA!16s%2Fg%2F11sxvnp1t0?entry=ttu&g_ep=EgoyMDI2MDgxNy4wIKXMDSoASAFQAw%3D%3D",
+      "lat": 27.6740549,
+      "lng": 85.2814038,
+      "sortOrder": 1
+    },
+    {
+      "id": "budhanilkantha",
+      "name": "Fashion Factory — Budhanilkantha",
+      "address": "Q9G6+FMJ, Budhanilkantha 44600, Nepal",
+      "mapsUrl": "https://www.google.com/maps/place/Fashion+factory+budhanilkantha/@27.7762096,85.3590733,911m/data=!3m2!1e3!4b1!4m6!3m5!1s0x39eb1d004815b655:0x9d3cda67e875d3e0!8m2!3d27.7762049!4d85.3616482!16s%2Fg%2F11m5qgldvt?entry=ttu&g_ep=EgoyMDI2MDgxNy4wIKXMDSoASAFQAw%3D%3D",
+      "lat": 27.7762049,
+      "lng": 85.3616482,
+      "sortOrder": 2
+    }
+  ]
+}

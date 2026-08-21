@@ -7,6 +7,8 @@ import { signOut } from "@/lib/adminAuth";
 const NAV = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/products", label: "Products" },
+  { href: "/admin/categories", label: "Categories" },
+  { href: "/admin/settings", label: "Settings" },
 ];
 
 export function AdminChrome({ email }: { email: string }) {

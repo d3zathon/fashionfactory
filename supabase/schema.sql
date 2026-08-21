@@ -110,6 +110,102 @@ create trigger products_touch_updated_at
   for each row execute function private.touch_updated_at();
 
 -- ---------------------------------------------------------------------------
+-- Categories, store settings and branches
+-- ---------------------------------------------------------------------------
+-- Owner-editable via /admin/categories and /admin/settings. Public reads are
+-- allowed (this is published contact/catalogue data); writes are admin-only.
+
+create table if not exists public.categories (
+  id text primary key,
+  name text not null,
+  slug text not null unique,
+  description text,
+  active boolean not null default true,
+  sort_order integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+-- Singleton: the boolean PK plus check constraint permits exactly one row.
+create table if not exists public.store_settings (
+  id boolean primary key default true check (id),
+  name text not null,
+  location_label text not null,
+  phone text not null,
+  instagram_handle text not null,
+  instagram_url text not null,
+  opening_hours text not null,
+  whatsapp_number text not null,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.store_locations (
+  id text primary key,
+  name text not null,
+  address text not null,
+  maps_url text not null,
+  lat double precision not null,
+  lng double precision not null,
+  sort_order integer not null default 0,
+  active boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.categories enable row level security;
+alter table public.store_settings enable row level security;
+alter table public.store_locations enable row level security;
+
+create index if not exists categories_sort_idx on public.categories (active, sort_order);
+create index if not exists products_category_id_idx on public.products (category_id);
+
+-- Products reference categories for real, instead of a hand-maintained CHECK list.
+alter table public.products drop constraint if exists products_category_id_check;
+alter table public.products drop constraint if exists products_category_id_fkey;
+alter table public.products
+  add constraint products_category_id_fkey
+  foreign key (category_id) references public.categories(id) on update cascade on delete restrict;
+
+create policy "anon can read active categories" on public.categories
+  for select to anon using (active = true);
+create policy "admins manage categories" on public.categories
+  for all to authenticated using (private.is_admin()) with check (private.is_admin());
+
+create policy "anon can read store settings" on public.store_settings
+  for select to anon using (true);
+create policy "admins manage store settings" on public.store_settings
+  for all to authenticated using (private.is_admin()) with check (private.is_admin());
+
+create policy "anon can read active locations" on public.store_locations
+  for select to anon using (active = true);
+create policy "admins manage locations" on public.store_locations
+  for all to authenticated using (private.is_admin()) with check (private.is_admin());
+
+drop trigger if exists categories_touch_updated_at on public.categories;
+create trigger categories_touch_updated_at before insert or update on public.categories
+  for each row execute function private.touch_updated_at();
+drop trigger if exists store_settings_touch_updated_at on public.store_settings;
+create trigger store_settings_touch_updated_at before insert or update on public.store_settings
+  for each row execute function private.touch_updated_at();
+drop trigger if exists store_locations_touch_updated_at on public.store_locations;
+create trigger store_locations_touch_updated_at before insert or update on public.store_locations
+  for each row execute function private.touch_updated_at();
+
+-- Seed the five categories the storefront is built around, plus current store
+-- details. Idempotent — safe to re-run.
+insert into public.categories (id, name, slug, description, active, sort_order) values
+  ('new','New Arrivals','new-arrivals','Fresh pieces to discover.',true,1),
+  ('mens','Men''s','mens','Everyday and occasion-ready styles.',true,2),
+  ('womens','Women''s','womens','Contemporary pieces for your wardrobe.',true,3),
+  ('accessories','Accessories','accessories','Finishing touches for your look.',true,4),
+  ('gifts','Gifts','gifts','Thoughtful finds to take home.',true,5)
+on conflict (id) do nothing;
+
+insert into public.store_settings (id, name, location_label, phone, instagram_handle, instagram_url, opening_hours, whatsapp_number)
+values (true, 'Fashion Factory Nepal', 'Kathmandu Valley, Nepal · Kirtipur & Budhanilkantha',
+        '+977 9840260456', '@fashion.factory_2022', 'https://www.instagram.com/fashion.factory_2022/',
+        '9:00 AM – 5:00 PM daily', '9779840260456')
+on conflict (id) do nothing;
+
+-- ---------------------------------------------------------------------------
 -- Storage
 -- ---------------------------------------------------------------------------
 

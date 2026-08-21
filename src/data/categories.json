@@ -1,0 +1,10 @@
+{
+  "generatedAt": "2026-08-22T00:00:00.000Z",
+  "categories": [
+    { "id": "new", "name": "New Arrivals", "slug": "new-arrivals", "description": "Fresh pieces to discover.", "active": true, "sortOrder": 1 },
+    { "id": "mens", "name": "Men's", "slug": "mens", "description": "Everyday and occasion-ready styles.", "active": true, "sortOrder": 2 },
+    { "id": "womens", "name": "Women's", "slug": "womens", "description": "Contemporary pieces for your wardrobe.", "active": true, "sortOrder": 3 },
+    { "id": "accessories", "name": "Accessories", "slug": "accessories", "description": "Finishing touches for your look.", "active": true, "sortOrder": 4 },
+    { "id": "gifts", "name": "Gifts", "slug": "gifts", "description": "Thoughtful finds to take home.", "active": true, "sortOrder": 5 }
+  ]
+}

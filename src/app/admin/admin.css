@@ -49,6 +49,13 @@
 .admin-publish-sub{font-size:.76rem}
 .admin-publish-dirty{border-color:var(--accent)}
 .admin-success{color:#2d6b47;font-size:.82rem}
+.admin-fieldset{border:1px solid var(--line);padding:16px;margin:0;display:grid;gap:12px;min-width:0}
+.admin-fieldset legend{font-weight:700;font-size:.82rem;padding:0 6px}
+.admin-coords{font-size:.76rem;margin:0}
+.admin-category-card{grid-template-columns:1fr auto}
+.admin-category-note{grid-column:1/-1;font-size:.76rem;margin:0}
+.admin-inline-form{display:grid;gap:10px;min-width:0}
+.admin-badge{display:inline-block;background:var(--line);color:var(--ink);font-size:.66rem;font-weight:700;padding:2px 7px;margin-left:6px;vertical-align:middle;text-transform:uppercase;letter-spacing:.04em}
 .admin-page{max-width:760px;margin:0 auto;padding:20px 16px 100px}
 .admin-page-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
 .admin-publish-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;background:var(--white);border:1px solid var(--line);padding:14px 16px;margin-bottom:20px}
@@ -71,4 +78,7 @@
 .admin-progress{font-size:.8rem;color:var(--muted)}
 .admin-empty{padding:32px 0;color:var(--muted);text-align:center}
 .admin-confirm{display:flex;flex-direction:column;gap:8px;background:#f3ece2;border:1px solid var(--line);padding:12px;grid-column:1/-1}
-@media(max-width:480px){.admin-product-card{grid-template-columns:56px 1fr;grid-template-rows:auto auto}.admin-product-actions{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}}
+@media(max-width:480px){.admin-product-card{grid-template-columns:56px 1fr;grid-template-rows:auto auto}.admin-product-actions{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}
+/* Category cards have no thumbnail, so they must not inherit the 56px image
+   column above — it squeezed the text into an unreadable ~56px strip. */
+.admin-category-card{grid-template-columns:1fr}.admin-category-card .admin-product-info{grid-column:1/-1}}

@@ -61,11 +61,24 @@ Admin (Supabase, live CRUD + RLS)
   -> "Publish to site" button
   -> POST /api/admin/publish (verifies the session, then triggers a GitHub
      workflow_dispatch using a server-only GITHUB_PUBLISH_TOKEN)
-  -> .github/workflows/publish.yml runs scripts/generate-products-json.mjs
+  -> .github/workflows/publish.yml runs scripts/generate-site-data.mjs
      (using the Supabase service-role key, a GitHub Actions secret — never a
-     host env var, never client code) and commits src/data/products.json
+     host env var, never client code), validates the data, and commits
+     src/data/products.json, categories.json and store.json
   -> push triggers the host's normal redeploy
 ```
+
+The generator validates before writing and exits non-zero on problems that
+would break the storefront — a product with no slug, a duplicate slug, a
+product pointing at an inactive category, no active categories, or a missing
+store-settings row. Missing product photos are warnings, not failures.
+
+Admin sections: **Overview** (what needs attention), **Products** (CRUD,
+reorder, visibility, image upload), **Categories** (rename/describe/reorder/
+hide the five fixed categories — ids and slugs are locked because products
+reference them and they appear in live URLs), and **Settings** (store contact
+details and branch addresses, which drive every Call/WhatsApp/Directions CTA
+on the public site).
 
 ### Authorization model
 

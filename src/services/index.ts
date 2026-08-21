@@ -1,6 +1,6 @@
-import { mockCategoryProvider, mockCollectionProvider, mockContentProvider, mockStoreSettingsProvider, mockTestimonialProvider } from "@/providers/mock";
+import { mockCollectionProvider, mockContentProvider, mockTestimonialProvider } from "@/providers/mock";
 import { mockMediaProvider, noOpAnalyticsProvider } from "@/providers/mock/integrations";
-import { staticProductProvider } from "@/providers/static";
+import { staticCategoryProvider, staticProductProvider, staticStoreSettingsProvider } from "@/providers/static";
 import { liveContactProvider } from "@/providers/live/contact";
 import { liveInstagramProvider } from "@/providers/live/instagram";
 import { webAnalyticsProvider } from "@/providers/live/analytics";
@@ -9,10 +9,10 @@ import { webAnalyticsProvider } from "@/providers/live/analytics";
 // panel's "Publish" flow regenerates from Supabase — see src/app/admin and
 // .github/workflows/publish.yml. The public site never calls Supabase directly.
 export const ProductService = staticProductProvider;
-export const CategoryService = mockCategoryProvider;
+export const CategoryService = staticCategoryProvider;
 export const CollectionService = mockCollectionProvider;
 export const ContentService = mockContentProvider;
-export const StoreSettingsService = mockStoreSettingsProvider;
+export const StoreSettingsService = staticStoreSettingsProvider;
 export const TestimonialService = mockTestimonialProvider;
 export const MediaService = mockMediaProvider;
 
