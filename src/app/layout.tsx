@@ -9,23 +9,24 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 export const metadata: Metadata = {
   ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
   title: "Fashion Factory Nepal | Fashion Store in Kathmandu",
-  description: "Discover fashion at Fashion Factory Nepal in Kathmandu. Browse the collection, contact the store, and get directions to Sorakhutte.",
-  keywords: ["Fashion Factory Nepal", "fashion store Kathmandu", "clothing store Kathmandu", "fashion shop Kathmandu", "clothing store near Sorakhutte"],
+  description: "Discover fashion at Fashion Factory Nepal. Browse the collection, contact the store, and get directions to our Kirtipur and Budhanilkantha branches.",
+  keywords: ["Fashion Factory Nepal", "fashion store Kathmandu", "clothing store Kathmandu", "fashion shop Kathmandu", "Fashion Factory Kirtipur", "Fashion Factory Budhanilkantha"],
   openGraph: { title: "Fashion Factory Nepal", description: "Define Your Style.", type: "website" },
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const store = await StoreSettingsService.getStoreSettings();
-  const localBusiness = {
+  const localBusinesses = store.locations.map((location) => ({
     "@context": "https://schema.org",
     "@type": "ClothingStore",
-    name: store.name,
+    name: location.name,
     telephone: store.phone,
-    address: { "@type": "PostalAddress", addressLocality: "Kathmandu", addressCountry: "NP" },
+    address: { "@type": "PostalAddress", streetAddress: location.address, addressCountry: "NP" },
+    geo: { "@type": "GeoCoordinates", latitude: location.lat, longitude: location.lng },
     openingHours: "Mo-Su 09:00-17:00",
     sameAs: [store.instagramUrl],
-    url: store.mapsUrl,
-  };
+    url: location.mapsUrl,
+  }));
 
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
@@ -33,7 +34,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en">
       <body>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinesses) }} />
         {gaId && (
           <>
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive" />

@@ -89,7 +89,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             <div className={styles.actions}>
               <a className="btn btn-dark" href={whatsappUrl} target="_blank" rel="noreferrer">Ask for Availability <ArrowUpRight size={16} /></a>
-              <a className="btn btn-light" href={store.mapsUrl} target="_blank" rel="noreferrer"><MapPin size={16} /> Visit Store</a>
+              <Link className="btn btn-light" href="/#visit-us"><MapPin size={16} /> Visit Store</Link>
             </div>
           </aside>
         </div>

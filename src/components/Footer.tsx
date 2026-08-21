@@ -28,7 +28,12 @@ export function Footer() {
           <a href={telHref(store?.phone)}>{store?.phone}</a>
           <a href={whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
           <a href={store?.instagramUrl} target="_blank" rel="noreferrer">{store?.instagramHandle}</a>
-          <a href={store?.mapsUrl} target="_blank" rel="noreferrer">Google Maps</a>
+        </div>
+        <div>
+          <p className="eyebrow">Locations</p>
+          {store?.locations?.map((location) => (
+            <a key={location.id} href={location.mapsUrl} target="_blank" rel="noreferrer">{location.name}</a>
+          ))}
         </div>
       </div>
       <div className="container footer-bottom">

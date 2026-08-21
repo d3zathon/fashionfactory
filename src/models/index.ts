@@ -50,14 +50,22 @@ export interface InstagramPost {
   publishedAt: string;
 }
 
+export interface StoreLocation {
+  id: string;
+  name: string;
+  address: string;
+  mapsUrl: string;
+  lat: number;
+  lng: number;
+}
+
 export interface StoreSettings {
   name: string;
   locationLabel: string;
-  address?: string;
   phone: string;
   instagramHandle: string;
   instagramUrl: string;
-  mapsUrl: string;
+  locations: StoreLocation[];
   openingHours: string;
   whatsappNumber: string;
 }

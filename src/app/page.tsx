@@ -43,7 +43,7 @@ export default function HomePage() {
       <div className="container quick-grid">
         <a href={telHref(store?.phone)} onClick={() => track("phone_click")}><Phone size={19} /><span>Call</span></a>
         <a href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click")}><MessageCircle size={19} /><span>WhatsApp</span></a>
-        <a href={store?.mapsUrl} target="_blank" rel="noreferrer" onClick={() => track("maps_click")}><MapPin size={19} /><span>Directions</span></a>
+        <Link href="#visit-us" onClick={() => track("maps_click")}><MapPin size={19} /><span>Directions</span></Link>
         <a href={store?.instagramUrl} target="_blank" rel="noreferrer" onClick={() => track("instagram_click")}><Instagram size={19} /><span>Instagram</span></a>
       </div>
     </section>
@@ -129,10 +129,28 @@ export default function HomePage() {
     <section id="visit-us" className="section visit">
       <div className="container visit-grid">
         <div>
-          <p className="eyebrow">Visit Fashion Factory</p><h2 className="section-title">Kathmandu,<br />Nepal.</h2><p className="muted">{store?.locationLabel}</p><p className="hours">{store?.openingHours}</p>
-          <div className="visit-actions"><a className="btn btn-dark" href={store?.mapsUrl} target="_blank" rel="noreferrer" onClick={() => track("maps_click")}>Get Directions <MapPin size={16} /></a><a className="btn btn-light" href={telHref(store?.phone)} onClick={() => track("phone_click")}>Call Store</a></div>
+          <p className="eyebrow">Visit Fashion Factory</p><h2 className="section-title">Kathmandu,<br />Nepal.</h2><p className="muted">{store?.locationLabel}</p>
+          <div className="location-list">
+            {store?.locations?.map((location) => (
+              <div className="location-card" key={location.id}>
+                <h3>{location.name}</h3>
+                <p className="muted">{location.address}</p>
+                <p className="hours">{store?.openingHours}</p>
+                <div className="visit-actions">
+                  <a className="btn btn-dark" href={location.mapsUrl} target="_blank" rel="noreferrer" onClick={() => track("maps_click", { location: location.id })}>Get Directions <MapPin size={16} /></a>
+                  <a className="btn btn-light" href={telHref(store?.phone)} onClick={() => track("phone_click")}>Call Store</a>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="map"><iframe title="Fashion Factory Kathmandu map" src="https://www.google.com/maps?q=27.6740549,85.2814038&z=16&output=embed" loading="lazy" /></div>
+        <div className="visit-maps">
+          {store?.locations?.map((location) => (
+            <div className="map" key={location.id}>
+              <iframe title={`${location.name} map`} src={`https://www.google.com/maps?q=${location.lat},${location.lng}&z=16&output=embed`} loading="lazy" />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
 
@@ -153,7 +171,7 @@ export default function HomePage() {
     <section className="final">
       <div className="container final-inner">
         <p className="eyebrow">Fashion Factory Nepal</p><h2 className="serif">{home?.finalCtaTitle}</h2><p>{home?.finalCtaBody}</p>
-        <div className="final-actions"><a className="btn btn-dark" href={store?.mapsUrl} target="_blank" rel="noreferrer">Get Directions</a><a className="btn btn-light" href={wa} target="_blank" rel="noreferrer">WhatsApp Us</a><a className="btn btn-light" href={store?.instagramUrl} target="_blank" rel="noreferrer">Follow Instagram</a></div>
+        <div className="final-actions"><Link className="btn btn-dark" href="#visit-us">Get Directions</Link><a className="btn btn-light" href={wa} target="_blank" rel="noreferrer">WhatsApp Us</a><a className="btn btn-light" href={store?.instagramUrl} target="_blank" rel="noreferrer">Follow Instagram</a></div>
       </div>
     </section>
 
