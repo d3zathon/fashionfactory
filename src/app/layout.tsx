@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { StoreSettingsService } from "@/services";
 import "./globals.css";
 import "./route-state.css";
 
@@ -9,17 +10,18 @@ export const metadata: Metadata = {
   openGraph: { title: "Fashion Factory Nepal", description: "Define Your Style.", type: "website" },
 };
 
-const localBusiness = {
-  "@context": "https://schema.org",
-  "@type": "ClothingStore",
-  name: "Fashion Factory Nepal",
-  telephone: "+977 9864831830",
-  address: { "@type": "PostalAddress", addressLocality: "Kathmandu", addressCountry: "NP" },
-  openingHours: "Mo-Su 09:00-17:00",
-  sameAs: ["https://www.instagram.com/fashion.factory_2022/"],
-  url: "https://www.google.com/maps/place/Fashion+Factory/@27.67409,85.2814289,3685m/data=!3m1!1e3!4m10!1m2!2m1!1sfashion+factory!3m6!1s0x39eb19d5f435a403:0x7d3cfd5ad03122c1!8m2!3d27.6740549!4d85.2814038!15sCg9mYXNoaW9uIGZhY3RvcnmSAQlnaWZ0X3Nob3DgAQA!16s%2Fg%2F11sxvnp1t0",
-};
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const store = await StoreSettingsService.getStoreSettings();
+  const localBusiness = {
+    "@context": "https://schema.org",
+    "@type": "ClothingStore",
+    name: store.name,
+    telephone: store.phone,
+    address: { "@type": "PostalAddress", addressLocality: "Kathmandu", addressCountry: "NP" },
+    openingHours: "Mo-Su 09:00-17:00",
+    sameAs: [store.instagramUrl],
+    url: store.mapsUrl,
+  };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="en"><body><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }} />{children}</body></html>;
 }

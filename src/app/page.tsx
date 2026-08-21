@@ -8,10 +8,9 @@ import { MobileActionBar } from "@/components/MobileActionBar";
 import { Navbar } from "@/components/Navbar";
 import { useCategories, useFAQs, useFeaturedProducts, useHomepageContent, useInstagram, useStoreSettings, useTestimonials } from "@/hooks";
 import { AnalyticsService } from "@/services";
+import { GENERAL_WHATSAPP_MESSAGE, productWhatsappMessage, telHref, whatsappHref } from "@/lib/links";
 
-const whatsapp = (number: string, message: string) => `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 const fallbackHero = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2200&q=88";
-const fallbackWhatsappNumber = "9779840260456";
 
 export default function HomePage() {
   const { data: home } = useHomepageContent();
@@ -22,7 +21,7 @@ export default function HomePage() {
   const { data: testimonials } = useTestimonials();
   const { data: faqs } = useFAQs();
   const track = (event: string, properties?: Record<string, string | number | boolean>) => AnalyticsService.track(event, properties);
-  const wa = whatsapp(store?.whatsappNumber ?? fallbackWhatsappNumber, "Hi Fashion Factory, I found you through your website and would like to know more about your collection.");
+  const wa = whatsappHref(store?.whatsappNumber, GENERAL_WHATSAPP_MESSAGE);
 
   return <main>
     <Navbar />
@@ -42,7 +41,7 @@ export default function HomePage() {
 
     <section className="quick" aria-label="Quick contact actions">
       <div className="container quick-grid">
-        <a href={store?.phone ? `tel:${store.phone}` : undefined} onClick={() => track("phone_click")}><Phone size={19} /><span>Call</span></a>
+        <a href={telHref(store?.phone)} onClick={() => track("phone_click")}><Phone size={19} /><span>Call</span></a>
         <a href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click")}><MessageCircle size={19} /><span>WhatsApp</span></a>
         <a href={store?.mapsUrl} target="_blank" rel="noreferrer" onClick={() => track("maps_click")}><MapPin size={19} /><span>Directions</span></a>
         <a href={store?.instagramUrl} target="_blank" rel="noreferrer" onClick={() => track("instagram_click")}><Instagram size={19} /><span>Instagram</span></a>
@@ -86,7 +85,7 @@ export default function HomePage() {
                 <Link href={`/products/${product.slug}`} onClick={() => track("product_click", { product: product.id })} aria-label={`View ${product.name}`}>
                   <img src={product.images[0]?.src} alt={product.images[0]?.alt ?? product.name} loading={i < 2 ? "eager" : "lazy"} />
                 </Link>
-                <a href={whatsapp(store?.whatsappNumber ?? fallbackWhatsappNumber, `Hi Fashion Factory, I would like to ask about ${product.name}. Is it currently available?`)} target="_blank" rel="noreferrer" className="product-action" onClick={() => track("whatsapp_click", { product: product.id })}>Ask for Availability <ArrowUpRight size={15} /></a>
+                <a href={whatsappHref(store?.whatsappNumber, productWhatsappMessage(product.name))} target="_blank" rel="noreferrer" className="product-action" onClick={() => track("whatsapp_click", { product: product.id })}>Ask for Availability <ArrowUpRight size={15} /></a>
               </div>
               <div className="product-meta">
                 <div><p><Link href={`/products/${product.slug}`}>{product.name}</Link></p><small>{categories.find(c => c.id === product.categoryId)?.name}</small></div>
@@ -131,7 +130,7 @@ export default function HomePage() {
       <div className="container visit-grid">
         <div>
           <p className="eyebrow">Visit Fashion Factory</p><h2 className="section-title">Kathmandu,<br />Nepal.</h2><p className="muted">{store?.locationLabel}</p><p className="hours">{store?.openingHours}</p>
-          <div className="visit-actions"><a className="btn btn-dark" href={store?.mapsUrl} target="_blank" rel="noreferrer" onClick={() => track("maps_click")}>Get Directions <MapPin size={16} /></a><a className="btn btn-light" href={store?.phone ? `tel:${store.phone}` : undefined} onClick={() => track("phone_click")}>Call Store</a></div>
+          <div className="visit-actions"><a className="btn btn-dark" href={store?.mapsUrl} target="_blank" rel="noreferrer" onClick={() => track("maps_click")}>Get Directions <MapPin size={16} /></a><a className="btn btn-light" href={telHref(store?.phone)} onClick={() => track("phone_click")}>Call Store</a></div>
         </div>
         <div className="map"><iframe title="Fashion Factory Kathmandu map" src="https://www.google.com/maps?q=27.6740549,85.2814038&z=16&output=embed" loading="lazy" /></div>
       </div>

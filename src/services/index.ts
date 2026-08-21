@@ -1,5 +1,5 @@
-import { mockCategoryProvider, mockContactProvider, mockContentProvider, mockInstagramProvider, mockProductProvider, mockStoreSettingsProvider, mockTestimonialProvider } from "@/providers/mock";
-import { mockCollectionProvider, mockMediaProvider, noOpAnalyticsProvider } from "@/providers/mock/integrations";
+import { mockCategoryProvider, mockCollectionProvider, mockContactProvider, mockContentProvider, mockInstagramProvider, mockProductProvider, mockStoreSettingsProvider, mockTestimonialProvider } from "@/providers/mock";
+import { mockMediaProvider, noOpAnalyticsProvider } from "@/providers/mock/integrations";
 
 export const ProductService = mockProductProvider;
 export const CategoryService = mockCategoryProvider;

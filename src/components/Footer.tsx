@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useStoreSettings } from "@/hooks";
+import { GENERAL_WHATSAPP_MESSAGE, telHref, whatsappHref } from "@/lib/links";
 
 export function Footer() {
   const { data: store } = useStoreSettings();
-  const whatsapp = store?.whatsappNumber ? `https://wa.me/${store.whatsappNumber}?text=${encodeURIComponent("Hi Fashion Factory, I found you through your website and would like to know more about your collection.")}` : "#";
+  const whatsapp = whatsappHref(store?.whatsappNumber, GENERAL_WHATSAPP_MESSAGE);
 
   return (
     <footer>
@@ -24,7 +25,7 @@ export function Footer() {
         </div>
         <div>
           <p className="eyebrow">Connect</p>
-          <a href={store?.phone ? `tel:${store.phone}` : undefined}>{store?.phone}</a>
+          <a href={telHref(store?.phone)}>{store?.phone}</a>
           <a href={whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
           <a href={store?.instagramUrl} target="_blank" rel="noreferrer">{store?.instagramHandle}</a>
           <a href={store?.mapsUrl} target="_blank" rel="noreferrer">Google Maps</a>

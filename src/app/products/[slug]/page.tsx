@@ -6,13 +6,18 @@ import { Footer } from "@/components/Footer";
 import { MobileActionBar } from "@/components/MobileActionBar";
 import { Navbar } from "@/components/Navbar";
 import { CategoryService, ProductService, StoreSettingsService } from "@/services";
+import { productWhatsappMessage, whatsappHref } from "@/lib/links";
 import styles from "./product.module.css";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const dynamicParams = true;
+// The catalogue is enumerated by generateStaticParams, so any slug outside it
+// does not exist. Allowing dynamic params here made unknown slugs render the
+// not-found UI with a 200 status (a soft 404) cached for a year; false makes
+// the router return a real 404 before the page renders.
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   const products = await ProductService.getProducts();
@@ -41,8 +46,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const category = await CategoryService.getCategory(product.categoryId);
   const store = await StoreSettingsService.getStoreSettings();
-  const message = `Hi Fashion Factory, I would like to ask about ${product.name}. Is it currently available?`;
-  const whatsappUrl = `https://wa.me/${store.whatsappNumber}?text=${encodeURIComponent(message)}`;
+  const whatsappUrl = whatsappHref(store.whatsappNumber, productWhatsappMessage(product.name));
 
   return (
     <main className={styles.page}>

@@ -7,8 +7,7 @@ import { MobileActionBar } from "@/components/MobileActionBar";
 import { Navbar } from "@/components/Navbar";
 import { useCategories, useProducts, useStoreSettings } from "@/hooks";
 import { AnalyticsService } from "@/services";
-
-const fallbackWhatsappNumber = "9779840260456";
+import { productWhatsappMessage, whatsappHref } from "@/lib/links";
 
 export default function CollectionPage() {
   const { data: products, loading: productsLoading, error: productsError } = useProducts();
@@ -17,7 +16,7 @@ export default function CollectionPage() {
 
   const loading = productsLoading || categoriesLoading;
   const error = productsError || categoriesError;
-  const whatsappBase = store?.whatsappNumber ?? fallbackWhatsappNumber;
+  const whatsappBase = store?.whatsappNumber;
 
   return (
     <main className="collection-page">
@@ -58,7 +57,7 @@ export default function CollectionPage() {
                   {categoryProducts.length ? (
                     <div className="collection-products">
                       {categoryProducts.map((product) => {
-                        const message = `Hi Fashion Factory, I would like to ask about ${product.name}. Is it currently available?`;
+                        const message = productWhatsappMessage(product.name);
                         return (
                           <article key={product.id} className="collection-product-card">
                             <Link href={`/products/${product.slug}`} className="collection-product-image" onClick={() => AnalyticsService.track("product_click", { product: product.id })}>
@@ -71,7 +70,7 @@ export default function CollectionPage() {
                               </div>
                               <div className="collection-product-actions">
                                 <Link href={`/products/${product.slug}`} onClick={() => AnalyticsService.track("product_click", { product: product.id })}>View product <ArrowUpRight size={14} /></Link>
-                                <a href={`https://wa.me/${whatsappBase}?text=${encodeURIComponent(message)}`} target="_blank" rel="noreferrer" onClick={() => AnalyticsService.track("whatsapp_click", { product: product.id })}>Ask availability <ArrowUpRight size={14} /></a>
+                                <a href={whatsappHref(whatsappBase, message)} target="_blank" rel="noreferrer" onClick={() => AnalyticsService.track("whatsapp_click", { product: product.id })}>Ask availability <ArrowUpRight size={14} /></a>
                               </div>
                             </div>
                           </article>
