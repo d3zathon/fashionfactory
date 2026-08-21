@@ -8,6 +8,8 @@ import { Navbar } from "@/components/Navbar";
 import { useCategories, useProducts, useStoreSettings } from "@/hooks";
 import { AnalyticsService } from "@/services";
 
+const fallbackWhatsappNumber = "9779840260456";
+
 export default function CollectionPage() {
   const { data: products, loading: productsLoading, error: productsError } = useProducts();
   const { data: categories, loading: categoriesLoading, error: categoriesError } = useCategories();
@@ -15,7 +17,7 @@ export default function CollectionPage() {
 
   const loading = productsLoading || categoriesLoading;
   const error = productsError || categoriesError;
-  const whatsappBase = store?.whatsappNumber ?? "9779864831830";
+  const whatsappBase = store?.whatsappNumber ?? fallbackWhatsappNumber;
 
   return (
     <main className="collection-page">
