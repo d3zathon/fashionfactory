@@ -1,13 +1,5 @@
-import { categories, collections, faqs, homepageContent, instagramPosts, products, storeSettings, testimonials } from "@/data/mock";
-import type { CategoryProvider, CollectionProvider, ContactProvider, ContentProvider, InstagramProvider, ProductProvider, StoreSettingsProvider, TestimonialProvider } from "../interfaces";
-
-export const mockProductProvider: ProductProvider = {
-  async getProducts() { return products; },
-  async getProduct(id) { return products.find((product) => product.id === id) ?? null; },
-  async getProductBySlug(slug) { return products.find((product) => product.slug === slug) ?? null; },
-  async getFeaturedProducts() { return products.filter((product) => product.featured); },
-  async getProductsByCategory(categoryId) { return products.filter((product) => product.categoryId === categoryId); },
-};
+import { categories, collections, faqs, homepageContent, instagramPosts, storeSettings, testimonials } from "@/data/mock";
+import type { CategoryProvider, CollectionProvider, ContactProvider, ContentProvider, InstagramProvider, StoreSettingsProvider, TestimonialProvider } from "../interfaces";
 
 export const mockCategoryProvider: CategoryProvider = {
   async getCategories() { return categories.filter((category) => category.active).sort((a, b) => a.sortOrder - b.sortOrder); },

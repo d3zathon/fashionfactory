@@ -1,10 +1,14 @@
-import { mockCategoryProvider, mockCollectionProvider, mockProductProvider, mockContentProvider, mockStoreSettingsProvider, mockTestimonialProvider } from "@/providers/mock";
+import { mockCategoryProvider, mockCollectionProvider, mockContentProvider, mockStoreSettingsProvider, mockTestimonialProvider } from "@/providers/mock";
 import { mockMediaProvider, noOpAnalyticsProvider } from "@/providers/mock/integrations";
+import { staticProductProvider } from "@/providers/static";
 import { liveContactProvider } from "@/providers/live/contact";
 import { liveInstagramProvider } from "@/providers/live/instagram";
 import { webAnalyticsProvider } from "@/providers/live/analytics";
 
-export const ProductService = mockProductProvider;
+// Products are read from the committed src/data/products.json, which the admin
+// panel's "Publish" flow regenerates from Supabase — see src/app/admin and
+// .github/workflows/publish.yml. The public site never calls Supabase directly.
+export const ProductService = staticProductProvider;
 export const CategoryService = mockCategoryProvider;
 export const CollectionService = mockCollectionProvider;
 export const ContentService = mockContentProvider;

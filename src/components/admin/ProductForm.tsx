@@ -1,0 +1,127 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  CATEGORY_OPTIONS,
+  createProduct,
+  getProduct,
+  updateProduct,
+  uploadProductImage,
+  type AdminProduct,
+} from "@/providers/live/supabaseProducts";
+
+export function ProductForm({ productId }: { productId?: string }) {
+  const router = useRouter();
+  const isEdit = Boolean(productId);
+
+  const [loading, setLoading] = useState(isEdit);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [name, setName] = useState("");
+  const [categoryId, setCategoryId] = useState(CATEGORY_OPTIONS[0].id);
+  const [description, setDescription] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isVisible, setIsVisibleState] = useState(true);
+  const existingProductRef = useRef<AdminProduct | null>(null);
+
+  useEffect(() => {
+    if (!productId) return;
+    let active = true;
+    getProduct(productId)
+      .then((product) => {
+        if (!active || !product) return;
+        existingProductRef.current = product;
+        setName(product.name);
+        setCategoryId(product.categoryId);
+        setDescription(product.description ?? "");
+        setImageUrl(product.imageUrl);
+        setIsVisibleState(product.isVisible);
+      })
+      .catch((err) => active && setError(err instanceof Error ? err.message : "Unable to load product."))
+      .finally(() => active && setLoading(false));
+    return () => { active = false; };
+  }, [productId]);
+
+  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const url = await uploadProductImage(file, imageUrl);
+      setImageUrl(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Image upload failed.");
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  }
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      const input = { name, categoryId, description: description || null, imageUrl, isVisible };
+      if (productId) await updateProduct(productId, input);
+      else await createProduct(input);
+      router.push("/admin/products");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to save product.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) return <div className="admin-page"><p className="admin-muted" role="status">Loading…</p></div>;
+
+  return (
+    <div className="admin-page">
+      <div className="admin-page-head">
+        <h1 className="admin-title">{isEdit ? "Edit product" : "Add product"}</h1>
+      </div>
+
+      <form className="admin-form" onSubmit={handleSubmit}>
+        <label className="admin-field">
+          <span>Name</span>
+          <input value={name} onChange={(event) => setName(event.target.value)} required minLength={2} />
+        </label>
+
+        <label className="admin-field">
+          <span>Category</span>
+          <select value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
+            {CATEGORY_OPTIONS.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
+          </select>
+        </label>
+
+        <label className="admin-field">
+          <span>Description (optional)</span>
+          <textarea value={description} onChange={(event) => setDescription(event.target.value)} />
+        </label>
+
+        <div className="admin-upload-row">
+          <span className="admin-field-label">Photo</span>
+          {imageUrl && <img className="admin-image-preview" src={imageUrl} alt="Product preview" />}
+          <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} disabled={uploading} />
+          {uploading && <p className="admin-progress" role="status">Compressing and uploading…</p>}
+        </div>
+
+        <label className="admin-toggle">
+          <input type="checkbox" checked={isVisible} onChange={(event) => setIsVisibleState(event.target.checked)} />
+          Visible on site
+        </label>
+
+        {error && <p className="admin-error" role="alert">{error}</p>}
+
+        <div className="admin-form-actions">
+          <button className="admin-btn admin-btn-dark" type="submit" disabled={saving || uploading}>{saving ? "Saving…" : "Save"}</button>
+          <button className="admin-btn admin-btn-light" type="button" onClick={() => router.push("/admin/products")}>Cancel</button>
+        </div>
+      </form>
+    </div>
+  );
+}

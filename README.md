@@ -45,6 +45,52 @@ All three secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `INSTAGRAM_ACCESS_T
 
 Future integrations (a real product/CMS/DB backend) should implement the remaining provider interfaces in `src/providers/interfaces.ts` and be wired the same way, without changing presentation components. See `.env.example` for all configuration placeholders.
 
+## Admin panel (`/admin`)
+
+A self-serve panel so the shop owner can manage product photos/name/category/
+visibility/order without touching code — one owner, one login, no analytics,
+no order management, no rich-text editor.
+
+**The public site never calls Supabase directly.** Products are read from the
+committed `src/data/products.json`, exactly like every other mock data file — zero
+network calls, and the site is unaffected even if the Supabase project is paused
+or deleted. The admin's **Publish to site** button is what closes the loop:
+
+```
+Admin (Supabase, live CRUD + RLS)
+  -> "Publish to site" button
+  -> POST /api/admin/publish (verifies the session, then triggers a GitHub
+     workflow_dispatch using a server-only GITHUB_PUBLISH_TOKEN)
+  -> .github/workflows/publish.yml runs scripts/generate-products-json.mjs
+     (using the Supabase service-role key, a GitHub Actions secret — never a
+     host env var, never client code) and commits src/data/products.json
+  -> push triggers the host's normal redeploy
+```
+
+Setup:
+1. Create a free Supabase project, then run `supabase/schema.sql` in its SQL
+   editor (creates the `products` table, RLS policies, and the `product-images`
+   storage bucket + policies).
+2. In Authentication > Providers, turn off public sign-ups, then manually add
+   the one owner account under Authentication > Users.
+3. Set `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` on the host,
+   and `GITHUB_PUBLISH_TOKEN` (+ `GITHUB_REPO`) alongside the existing Telegram
+   secrets — the latter are server-only, never `NEXT_PUBLIC_`.
+   Note: unlike the server-only secrets, `NEXT_PUBLIC_*` values are inlined into
+   the bundle **at build time**, so adding them requires a redeploy before
+   `/admin` picks them up.
+4. Add `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_ANON_KEY` as
+   **GitHub Actions secrets** (Settings > Secrets and variables > Actions) — the
+   service-role key must never leave GitHub Actions.
+
+Until those are configured, `/admin` shows a clear "not configured" state — same
+inert-by-default pattern as the Telegram/Instagram integrations above.
+
+`.github/workflows/keepalive.yml` pings Supabase every 3 days (`workflow_dispatch`
+also available) to stay ahead of the free tier's 7-day inactivity pause; it no-ops
+cleanly if the secrets above aren't set yet. `/admin` is excluded from search via
+`robots.ts` and per-page `noindex` metadata.
+
 ## Important
 
 Development imagery is clearly separated from business data so real store/product media can be substituted through `MediaService` without rewriting the UI. No credentials or API secrets belong in the frontend.
