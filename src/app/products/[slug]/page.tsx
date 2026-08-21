@@ -60,6 +60,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const store = await StoreSettingsService.getStoreSettings();
   const whatsappUrl = whatsappHref(store.whatsappNumber, productWhatsappMessage(product.name));
 
+  // Same category first; top up from the rest of the catalogue so a category
+  // with only one product still offers somewhere to go next.
+  const sameCategory = (await ProductService.getProductsByCategory(product.categoryId))
+    .filter((candidate) => candidate.id !== product.id);
+  const others = (await ProductService.getProducts())
+    .filter((candidate) => candidate.id !== product.id && candidate.categoryId !== product.categoryId);
+  const related = [...sameCategory, ...others].slice(0, 4);
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   const productUrl = siteUrl ? `${siteUrl}/products/${product.slug}` : undefined;
 
@@ -143,6 +151,30 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
           </aside>
         </div>
+
+        {related.length > 0 && (
+          <section className={styles.related} aria-labelledby="related-heading">
+            <div className={styles.relatedHead}>
+              <h2 id="related-heading" className="serif">
+                {sameCategory.length > 0 && category ? `More in ${category.name}` : "More from the collection"}
+              </h2>
+              <Link className={styles.relatedLink} href="/collection">
+                View the collection <ArrowUpRight size={14} />
+              </Link>
+            </div>
+            <div className={styles.relatedGrid}>
+              {related.map((item) => (
+                <Link className={styles.relatedCard} key={item.id} href={`/products/${item.slug}`}>
+                  <figure>
+                    <img src={item.images[0]?.src} alt={item.images[0]?.alt ?? item.name} loading="lazy" />
+                  </figure>
+                  <p>{item.name}</p>
+                  <span>{item.categoryId === product.categoryId ? category?.name : "Collection"}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       <Footer />
