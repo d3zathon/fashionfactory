@@ -33,7 +33,7 @@ export default function CollectionPage() {
       {loading ? (
         <div className="container state-block" role="status">Loading the collection…</div>
       ) : error ? (
-        <div className="container state-block state-error" role="alert">We couldn't load the collection right now. Please try again.</div>
+        <div className="container state-block state-error" role="alert">We couldn&rsquo;t load the collection right now. Please try again.</div>
       ) : (
         <>
           <div className="container filter-row" aria-label="Collection categories">

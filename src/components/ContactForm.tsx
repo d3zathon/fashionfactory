@@ -59,7 +59,7 @@ export function ContactForm() {
       <label>Message<textarea name="message" required rows={5} placeholder="Tell us what you'd like to know..." aria-invalid={Boolean(errors.message)} aria-describedby={errors.message ? "contact-message-error" : undefined} />{errors.message && <span id="contact-message-error" className="field-error">{errors.message}</span>}</label>
       <button className="btn btn-dark" disabled={state === "loading"}>{state === "loading" ? "Sending…" : "Send Inquiry"}</button>
       {state === "success" && <p className="form-success" role="status">Thanks — your inquiry was received.</p>}
-      {state === "error" && !Object.keys(errors).length && <p className="form-error" role="alert">We couldn't send your inquiry. Please try again.</p>}
+      {state === "error" && !Object.keys(errors).length && <p className="form-error" role="alert">We couldn&rsquo;t send your inquiry. Please try again.</p>}
     </form>
   );
 }

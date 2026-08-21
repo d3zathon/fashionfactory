@@ -112,7 +112,7 @@ export default function HomePage() {
     <section id="instagram" className="section instagram">
       <div className="container">
         <div className="section-head">
-          <div><p className="eyebrow">Social edit</p><h2 className="section-title">What's New at Fashion Factory</h2><p className="muted">Follow {store?.instagramHandle} for new styles and updates.</p></div>
+          <div><p className="eyebrow">Social edit</p><h2 className="section-title">What&rsquo;s New at Fashion Factory</h2><p className="muted">Follow {store?.instagramHandle} for new styles and updates.</p></div>
           <a className="btn btn-light" href={store?.instagramUrl} target="_blank" rel="noreferrer" onClick={() => track("instagram_click")}>Follow on Instagram <Instagram size={16} /></a>
         </div>
         <div className="ig-grid">{instagram.map(post => <a href={post.permalink} target="_blank" rel="noreferrer" key={post.id}><img src={post.image.src} alt={post.image.alt} loading="lazy" /></a>)}</div>
@@ -122,7 +122,7 @@ export default function HomePage() {
     <section className="section social-proof">
       <div className="container">
         <div className="section-head"><div><p className="eyebrow">Social proof</p><h2 className="section-title">What customers say.</h2></div></div>
-        {testimonials.length ? <div className="testimonial-grid">{testimonials.map(testimonial => <article key={testimonial.id} className="testimonial-card"><p>“{testimonial.quote}”</p><span>{testimonial.name}</span></article>)}</div> : <div className="state-block">Verified customer reviews will appear here when connected to the store's review or testimonial source.</div>}
+        {testimonials.length ? <div className="testimonial-grid">{testimonials.map(testimonial => <article key={testimonial.id} className="testimonial-card"><p>“{testimonial.quote}”</p><span>{testimonial.name}</span></article>)}</div> : <div className="state-block">Verified customer reviews will appear here when connected to the store&rsquo;s review or testimonial source.</div>}
       </div>
     </section>
 

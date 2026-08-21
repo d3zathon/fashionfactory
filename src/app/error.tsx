@@ -12,7 +12,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
       <div className="container">
         <span className="eyebrow">Fashion Factory Nepal</span>
         <h1 className="serif">Something went wrong.</h1>
-        <p>We couldn't load this page right now. Please try again.</p>
+        <p>We couldn&rsquo;t load this page right now. Please try again.</p>
         <button className="btn btn-dark" type="button" onClick={() => reset()}>Try again</button>
       </div>
     </main>
