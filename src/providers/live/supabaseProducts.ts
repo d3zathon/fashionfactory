@@ -141,14 +141,22 @@ function storagePathFromUrl(url: string): string | null {
   return url.slice(index + marker.length);
 }
 
+// Deletes a file from the image bucket, ignoring anything that isn't one of
+// our storage URLs. Safe to call with a null/foreign URL.
+export async function deleteProductImage(url: string | null | undefined): Promise<void> {
+  if (!url) return;
+  const client = requireClient();
+  const path = storagePathFromUrl(url);
+  if (path) await client.storage.from(STORAGE_BUCKET).remove([path]);
+}
+
 export async function deleteProduct(product: AdminProduct): Promise<void> {
   const client = requireClient();
-  if (product.imageUrl) {
-    const path = storagePathFromUrl(product.imageUrl);
-    if (path) await client.storage.from(STORAGE_BUCKET).remove([path]);
-  }
+  // Delete the row first: if this fails the image is still intact, whereas the
+  // reverse order would leave a surviving row pointing at a deleted file.
   const { error } = await client.from("products").delete().eq("id", product.id);
   if (error) throw new Error(error.message);
+  await deleteProductImage(product.imageUrl);
 }
 
 export async function setVisible(id: string, isVisible: boolean): Promise<void> {
@@ -174,7 +182,11 @@ export async function moveProduct(all: AdminProduct[], id: string, direction: "u
   if (secondError) throw new Error(secondError.message);
 }
 
-export async function uploadProductImage(file: File, previousUrl?: string | null): Promise<string> {
+// Uploads only — it deliberately does NOT delete the image being replaced.
+// The caller removes the old file after the product row is successfully saved,
+// so abandoning the form (Cancel) can't leave a saved product pointing at a
+// file that has already been deleted from storage.
+export async function uploadProductImage(file: File): Promise<string> {
   const client = requireClient();
   const compressed = await compressImageToWebp(file);
   const path = `${crypto.randomUUID()}.webp`;
@@ -184,11 +196,6 @@ export async function uploadProductImage(file: File, previousUrl?: string | null
     upsert: false,
   });
   if (uploadError) throw new Error(uploadError.message);
-
-  if (previousUrl) {
-    const previousPath = storagePathFromUrl(previousUrl);
-    if (previousPath) await client.storage.from(STORAGE_BUCKET).remove([previousPath]);
-  }
 
   const { data } = client.storage.from(STORAGE_BUCKET).getPublicUrl(path);
   return data.publicUrl;

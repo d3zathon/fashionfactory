@@ -7,12 +7,14 @@ export async function POST(request: Request) {
   const githubToken = process.env.GITHUB_PUBLISH_TOKEN;
   const githubRepo = process.env.GITHUB_REPO;
   const workflowFile = process.env.GITHUB_WORKFLOW_FILE ?? "publish.yml";
-  const ref = process.env.GITHUB_PUBLISH_REF ?? "main";
+  // No silent default: publishing to the wrong branch looks like success while
+  // leaving the deployed site unchanged, so require this to be set explicitly.
+  const ref = process.env.GITHUB_PUBLISH_REF;
 
   if (!supabaseUrl || !supabaseAnonKey) {
     return NextResponse.json({ success: false, error: "Supabase is not configured on this host yet." }, { status: 503 });
   }
-  if (!githubToken || !githubRepo) {
+  if (!githubToken || !githubRepo || !ref) {
     return NextResponse.json({ success: false, error: "Publish pipeline is not configured on this host yet." }, { status: 503 });
   }
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   CATEGORY_OPTIONS,
   createProduct,
+  deleteProductImage,
   getProduct,
   updateProduct,
   uploadProductImage,
@@ -51,8 +52,15 @@ export function ProductForm({ productId }: { productId?: string }) {
     setUploading(true);
     setError(null);
     try {
-      const url = await uploadProductImage(file, imageUrl);
+      const url = await uploadProductImage(file);
+      // If this replaces an image uploaded earlier in this same unsaved session,
+      // that one was never referenced by a saved row — drop it now rather than
+      // leaving it orphaned in storage.
+      const superseded = imageUrl;
       setImageUrl(url);
+      if (superseded && superseded !== existingProductRef.current?.imageUrl) {
+        await deleteProductImage(superseded);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Image upload failed.");
     } finally {
@@ -67,14 +75,33 @@ export function ProductForm({ productId }: { productId?: string }) {
     setError(null);
     try {
       const input = { name, categoryId, description: description || null, imageUrl, isVisible };
+      const previousImageUrl = existingProductRef.current?.imageUrl ?? null;
       if (productId) await updateProduct(productId, input);
       else await createProduct(input);
+      // Only now that the row points at the new file is it safe to remove the old one.
+      if (previousImageUrl && previousImageUrl !== imageUrl) {
+        await deleteProductImage(previousImageUrl);
+      }
       router.push("/admin/products");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to save product.");
     } finally {
       setSaving(false);
     }
+  }
+
+  // Leaving without saving: discard an image uploaded during this session so it
+  // doesn't sit in storage unreferenced. The previously saved image is untouched.
+  async function handleCancel() {
+    const saved = existingProductRef.current?.imageUrl ?? null;
+    if (imageUrl && imageUrl !== saved) {
+      try {
+        await deleteProductImage(imageUrl);
+      } catch {
+        // Best effort — navigating away matters more than a stray file.
+      }
+    }
+    router.push("/admin/products");
   }
 
   if (loading) return <div className="admin-page"><p className="admin-muted" role="status">Loading…</p></div>;
@@ -104,9 +131,11 @@ export function ProductForm({ productId }: { productId?: string }) {
         </label>
 
         <div className="admin-upload-row">
-          <span className="admin-field-label">Photo</span>
           {imageUrl && <img className="admin-image-preview" src={imageUrl} alt="Product preview" />}
-          <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} disabled={uploading} />
+          <label className="admin-field">
+            <span>Photo</span>
+            <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} disabled={uploading} />
+          </label>
           {uploading && <p className="admin-progress" role="status">Compressing and uploading…</p>}
         </div>
 
@@ -119,7 +148,7 @@ export function ProductForm({ productId }: { productId?: string }) {
 
         <div className="admin-form-actions">
           <button className="admin-btn admin-btn-dark" type="submit" disabled={saving || uploading}>{saving ? "Saving…" : "Save"}</button>
-          <button className="admin-btn admin-btn-light" type="button" onClick={() => router.push("/admin/products")}>Cancel</button>
+          <button className="admin-btn admin-btn-light" type="button" disabled={saving || uploading} onClick={handleCancel}>Cancel</button>
         </div>
       </form>
     </div>

@@ -4,8 +4,13 @@
 .admin-auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--paper)}
 .admin-card{background:var(--white);border:1px solid var(--line);padding:28px;width:min(420px,100%)}
 .admin-login-form{display:grid;gap:16px}
-.admin-field{display:grid;gap:6px;font-size:.8rem;font-weight:600}
-.admin-field input,.admin-field select,.admin-field textarea{border:1px solid var(--line);background:transparent;padding:13px 14px;font-size:1rem;min-height:48px}
+.admin-field{display:grid;gap:6px;font-size:.8rem;font-weight:600;min-width:0}
+.admin-field input,.admin-field select,.admin-field textarea{border:1px solid var(--line);background:transparent;padding:13px 14px;font-size:1rem;min-height:48px;width:100%;max-width:100%;min-width:0}
+/* A native file input reports a ~370px min-content width and refuses to shrink,
+   which pushes the whole layout viewport wider than a 320px phone. Constrain it
+   explicitly so the form fits the smallest supported screen. */
+.admin-field input[type=file]{padding:12px;font-size:.82rem;overflow:hidden}
+.admin-field input[type=file]::file-selector-button{font:inherit;font-size:.82rem;padding:8px 12px;margin-right:10px;border:1px solid var(--ink);background:transparent;cursor:pointer}
 .admin-field textarea{min-height:96px;resize:vertical;font-family:inherit}
 .admin-error{color:#9b332c;font-size:.85rem;margin:0}
 .admin-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border:1px solid var(--ink);font-weight:600;font-size:.9rem;background:transparent;transition:transform .15s ease}
