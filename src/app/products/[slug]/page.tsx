@@ -33,9 +33,21 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const product = await getProduct(slug);
   if (!product) return { title: "Product | Fashion Factory Nepal" };
 
+  const description = product.description ?? `Ask Fashion Factory Nepal about ${product.name}.`;
+  const image = product.images[0]?.src;
+
   return {
     title: `${product.name} | Fashion Factory Nepal`,
-    description: product.description ?? `Ask Fashion Factory Nepal about ${product.name}.`,
+    description,
+    // Relative canonical resolves against metadataBase (NEXT_PUBLIC_SITE_URL).
+    alternates: { canonical: `/products/${product.slug}` },
+    openGraph: {
+      title: `${product.name} | Fashion Factory Nepal`,
+      description,
+      type: "website",
+      url: `/products/${product.slug}`,
+      ...(image ? { images: [{ url: image, alt: product.images[0]?.alt ?? product.name }] } : {}),
+    },
   };
 }
 
@@ -48,8 +60,46 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const store = await StoreSettingsService.getStoreSettings();
   const whatsappUrl = whatsappHref(store.whatsappNumber, productWhatsappMessage(product.name));
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const productUrl = siteUrl ? `${siteUrl}/products/${product.slug}` : undefined;
+
+  // Product schema without an Offer: this store publishes no prices and has no
+  // checkout, so claiming price/availability would be false structured data.
+  // Google accepts a priceless Product; a fabricated Offer risks a manual action.
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    ...(product.description ? { description: product.description } : {}),
+    ...(product.images[0]?.src ? { image: product.images.map((i) => i.src) } : {}),
+    ...(category ? { category: category.name } : {}),
+    ...(productUrl ? { url: productUrl } : {}),
+    brand: { "@type": "Brand", name: store.name },
+    ...(product.colors?.length ? { color: product.colors.join(", ") } : {}),
+    ...(product.sizes?.length ? { size: product.sizes } : {}),
+  };
+
+  const breadcrumbSchema = siteUrl
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+          { "@type": "ListItem", position: 2, name: "Collection", item: `${siteUrl}/collection` },
+          ...(category
+            ? [{ "@type": "ListItem", position: 3, name: category.name, item: `${siteUrl}/collection#${category.slug}` }]
+            : []),
+          { "@type": "ListItem", position: category ? 4 : 3, name: product.name, item: productUrl },
+        ],
+      }
+    : null;
+
   return (
     <main className={styles.page}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
+      {breadcrumbSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      )}
       <Navbar tone="light" />
       <div className="container">
         <Link href="/collection" className={styles.back}><ArrowLeft size={16} /> Back to collection</Link>
