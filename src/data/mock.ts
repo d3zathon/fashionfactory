@@ -10,7 +10,7 @@ export const storeSettings: StoreSettings = {
   instagramUrl: "https://www.instagram.com/fashion.factory_2022/",
   mapsUrl: "https://www.google.com/maps/place/Fashion+Factory/@27.67409,85.2814289,3685m/data=!3m1!1e3!4m10!1m2!2m1!1sfashion+factory!3m6!1s0x39eb19d5f435a403:0x7d3cfd5ad03122c1!8m2!3d27.6740549!4d85.2814038!15sCg9mYXNoaW9uIGZhY3RvcnmSAQlnaWZ0X3Nob3DgAQA!16s%2Fg%2F11sxvnp1t0",
   openingHours: "9:00 AM – 5:00 PM daily",
-  whatsappNumber: "9779864831830",
+  whatsappNumber: "9779840260456",
 };
 
 export const homepageContent: HomepageContent = {
