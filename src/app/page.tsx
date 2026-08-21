@@ -11,6 +11,7 @@ import { AnalyticsService } from "@/services";
 
 const whatsapp = (number: string, message: string) => `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 const fallbackHero = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2200&q=88";
+const fallbackWhatsappNumber = "9779840260456";
 
 export default function HomePage() {
   const { data: home } = useHomepageContent();
@@ -21,7 +22,7 @@ export default function HomePage() {
   const { data: testimonials } = useTestimonials();
   const { data: faqs } = useFAQs();
   const track = (event: string, properties?: Record<string, string | number | boolean>) => AnalyticsService.track(event, properties);
-  const wa = store?.whatsappNumber ? whatsapp(store.whatsappNumber, "Hi Fashion Factory, I found you through your website and would like to know more about your collection.") : "#";
+  const wa = whatsapp(store?.whatsappNumber ?? fallbackWhatsappNumber, "Hi Fashion Factory, I found you through your website and would like to know more about your collection.");
 
   return <main>
     <Navbar />
@@ -85,7 +86,7 @@ export default function HomePage() {
                 <Link href={`/products/${product.slug}`} onClick={() => track("product_click", { product: product.id })} aria-label={`View ${product.name}`}>
                   <img src={product.images[0]?.src} alt={product.images[0]?.alt ?? product.name} loading={i < 2 ? "eager" : "lazy"} />
                 </Link>
-                <a href={whatsapp(store?.whatsappNumber ?? "9779864831830", `Hi Fashion Factory, I would like to ask about ${product.name}. Is it currently available?`)} target="_blank" rel="noreferrer" className="product-action" onClick={() => track("whatsapp_click", { product: product.id })}>Ask for Availability <ArrowUpRight size={15} /></a>
+                <a href={whatsapp(store?.whatsappNumber ?? fallbackWhatsappNumber, `Hi Fashion Factory, I would like to ask about ${product.name}. Is it currently available?`)} target="_blank" rel="noreferrer" className="product-action" onClick={() => track("whatsapp_click", { product: product.id })}>Ask for Availability <ArrowUpRight size={15} /></a>
               </div>
               <div className="product-meta">
                 <div><p><Link href={`/products/${product.slug}`}>{product.name}</Link></p><small>{categories.find(c => c.id === product.categoryId)?.name}</small></div>
