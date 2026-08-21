@@ -5,7 +5,7 @@ const image = (id: string, src: string, alt: string) => ({ id, src, alt });
 export const storeSettings: StoreSettings = {
   name: "Fashion Factory Nepal",
   locationLabel: "Kathmandu, Nepal · Sorakhutte area",
-  phone: "+977 9864831830",
+  phone: "+977 9840260456",
   instagramHandle: "@fashion.factory_2022",
   instagramUrl: "https://www.instagram.com/fashion.factory_2022/",
   mapsUrl: "https://www.google.com/maps/place/Fashion+Factory/@27.67409,85.2814289,3685m/data=!3m1!1e3!4m10!1m2!2m1!1sfashion+factory!3m6!1s0x39eb19d5f435a403:0x7d3cfd5ad03122c1!8m2!3d27.6740549!4d85.2814038!15sCg9mYXNoaW9uIGZhY3RvcnmSAQlnaWZ0X3Nob3DgAQA!16s%2Fg%2F11sxvnp1t0",
