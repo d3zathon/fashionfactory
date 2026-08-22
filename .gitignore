@@ -22,3 +22,10 @@ yarn-error.log*
 
 # os
 .DS_Store
+
+# vercel
+.vercel
+
+# extra env forms (.env and .env*.local are covered above)
+.env.development
+.env.production
