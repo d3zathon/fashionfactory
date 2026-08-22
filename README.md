@@ -1,6 +1,11 @@
 # Fashion Factory Nepal
 
-Production-oriented frontend foundation for Fashion Factory Nepal, Kathmandu.
+A storefront for Fashion Factory Nepal, Kathmandu — and the platform it runs on.
+One codebase serves any number of stores: everything store-specific (name,
+contact details, social handles, branding, copy, which sections render) is data,
+not code. Fashion Factory is the default store.
+
+**Deploying it? Start with [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).**
 
 ## Stack
 
@@ -16,26 +21,55 @@ UI components
   -> hooks
   -> services
   -> provider adapters
-  -> mock provider (current)
-  -> API/CMS provider (future)
+  -> static provider   (committed JSON — what the live storefront reads)
+  -> live providers    (Supabase, Instagram, Telegram — admin and integrations)
+  -> mock providers    (development content)
 ```
 
 Business content lives in `src/data` and domain contracts live in `src/models`. UI components should consume hooks/services rather than importing mock data directly.
+
+### One codebase, many stores
+
+`StoreProfile` (`src/models`) is the tenant contract: identity, contact details,
+social handles, branding tokens, feature flags, SEO metadata and storefront copy.
+It is served by `StoreSettingsService` like any other data, and is also readable
+synchronously via `getStoreProfile()` for the three callers that cannot await —
+Next's `metadata` export, the OG image, and module-level constants.
+
+A deployment serves exactly one store, chosen when its data is generated
+(`STORE_SLUG`). In the database every content row carries a `store_id`, and RLS
+scopes each admin to the store they belong to. See
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#9-adding-another-store) for how to add one.
 
 ## Run locally
 
 ```bash
 npm install
-npm run dev
+npm run dev        # http://localhost:3000
 ```
 
-Then open `http://localhost:3000`.
+The site runs with no environment variables at all: content comes from the
+committed JSON in `src/data`, the contact form no-ops, the Instagram strip shows
+placeholders, and `/admin` reports that it is not configured. Copy
+`.env.example` to `.env.local` and fill in the Supabase values to work on
+`/admin`.
 
-## Current phase
+### Checks
 
-Product/category/collection/content data still comes from mock providers (`src/data/mock.ts`). Phone, WhatsApp, Instagram, and Google Maps links use the supplied business information.
+```bash
+npm run typecheck  # tsc --noEmit
+npm run lint       # eslint
+npm run build      # next build
+npm run validate   # all three, in that order
+```
 
-Contact and Instagram now switch between mock and live behavior automatically based on **environment variables set on the host** — no code change or redeploy needed to go live:
+## Integrations
+
+Collections, homepage copy, testimonials and FAQs still come from mock providers
+(`src/data/mock.ts`); products, categories and store details come from the
+committed JSON that the admin's Publish flow regenerates.
+
+Contact and Instagram switch between mock and live behavior automatically based on **environment variables set on the host** — no code change or redeploy needed to go live:
 
 - **Contact form** (`src/app/api/contact/route.ts`): forwards to a Telegram bot when `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` are set; otherwise behaves like the mock provider. Create a bot via `@BotFather`, then read `https://api.telegram.org/bot<token>/getUpdates` after messaging it once to find your chat id.
 - **Instagram feed** (`src/app/api/instagram/route.ts`): pulls from the Instagram Graph API when `INSTAGRAM_ACCESS_TOKEN` is set; otherwise falls back to mock posts.
@@ -70,15 +104,19 @@ Admin (Supabase, live CRUD + RLS)
 
 The generator validates before writing and exits non-zero on problems that
 would break the storefront — a product with no slug, a duplicate slug, a
-product pointing at an inactive category, no active categories, or a missing
-store-settings row. Missing product photos are warnings, not failures.
+product pointing at an inactive category, no active categories, or a store slug
+that does not exist. It also refuses to publish an **empty catalogue**, or one
+that loses more than half its products, unless `ALLOW_EMPTY_CATALOGUE=1` or
+`ALLOW_CATALOGUE_SHRINK=1` says so explicitly: Publish is a one-click action and
+the storefront is whatever it writes. Missing product photos are warnings, not
+failures.
 
 Admin sections: **Overview** (what needs attention), **Products** (CRUD,
 reorder, visibility, image upload), **Categories** (rename/describe/reorder/
-hide the five fixed categories — ids and slugs are locked because products
-reference them and they appear in live URLs), and **Settings** (store contact
-details and branch addresses, which drive every Call/WhatsApp/Directions CTA
-on the public site).
+hide — ids and slugs are locked because products reference them and they appear
+in live URLs), and **Settings** (identity, contact details, social handles,
+storefront copy, SEO, which sections render, and branch addresses — these drive
+every Call/WhatsApp/Directions CTA on the public site).
 
 ### Authorization model
 
@@ -92,9 +130,10 @@ Being signed in grants **nothing**. Access is granted only by membership in
 2. **Server-side re-check** — `requireAdmin()` in `src/lib/supabase/server.ts`,
    called inside the publish route itself, so the endpoint is safe even if
    middleware matching ever changes.
-3. **RLS** — every policy calls `private.is_admin()`. This is the last line of
-   defense and holds even if the app is bypassed entirely and the REST API is
-   called directly with the anon key.
+3. **RLS** — every policy calls `private.can_manage_store(store_id)`. This is the
+   last line of defense and holds even if the app is bypassed entirely and the
+   REST API is called directly with the anon key. An admin of one store cannot
+   read or write another store's rows.
 
 Sessions are cookie-based (`@supabase/ssr`), not `localStorage` — that is what
 makes server-side checks possible at all.
@@ -103,14 +142,16 @@ Adding an admin is deliberately a SQL/dashboard operation, so the web host never
 needs a privileged key:
 
 ```sql
-insert into public.admin_users (user_id, email)
-select id, email from auth.users where email = 'owner@example.com';
+-- store_id null = platform admin (every store); pass a store's id to scope them.
+insert into public.admin_users (user_id, email, store_id)
+select id, email, null from auth.users where email = 'owner@example.com';
 ```
 
 Setup:
-1. Create a free Supabase project, then run `supabase/schema.sql` in its SQL
-   editor (creates `products`, `admin_users`, `private.is_admin()`, RLS
-   policies, and the `product-images` storage bucket + policies).
+1. Create a free Supabase project, then apply `supabase/migrations/` in filename
+   order (`0001_baseline.sql` then `0002_multi_store.sql`). Together they create
+   `stores`, `products`, `categories`, `store_locations`, `admin_users`, the
+   store-scoped RLS policies, and the `product-images` bucket.
 2. In Authentication > Providers, turn off public sign-ups, manually add the
    owner account under Authentication > Users, then grant it admin rights with
    the SQL above.
