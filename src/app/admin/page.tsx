@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { CATEGORY_OPTIONS } from "@/providers/live/supabaseProducts";
 import publishedData from "@/data/products.json";
@@ -16,6 +17,16 @@ function categoryName(id: string) {
   return CATEGORY_OPTIONS.find((c) => c.id === id)?.name ?? id;
 }
 
+function when(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.round(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.round(hours / 24)}d ago`;
+}
+
 export default async function AdminOverviewPage() {
   const supabase = await getServerSupabase();
   const { data, error } = supabase
@@ -25,7 +36,8 @@ export default async function AdminOverviewPage() {
   if (error) {
     return (
       <div className="admin-page">
-        <h1 className="admin-title">Overview</h1>
+        <p className="admin-eyebrow">Overview</p>
+        <h1 className="admin-title">Store overview</h1>
         <p className="admin-error" role="alert">Couldn&rsquo;t load store data: {error.message}</p>
       </div>
     );
@@ -36,29 +48,30 @@ export default async function AdminOverviewPage() {
   const hidden = products.filter((p) => !p.is_visible);
   const missingPhoto = products.filter((p) => !p.image_url);
 
-  // "Unpublished changes" measured against the committed products.json the live
-  // site actually serves — not a local flag that can drift per browser.
+  // Measured against the committed products.json the live site actually serves,
+  // not a per-browser flag.
   const publishedAt = publishedData.generatedAt ? new Date(publishedData.generatedAt) : null;
   const latestEdit = products.length ? new Date(products[0].updated_at) : null;
   const unpublished = Boolean(latestEdit && publishedAt && latestEdit > publishedAt);
   const publishedCount = publishedData.products?.length ?? 0;
 
-  const byCategory = CATEGORY_OPTIONS.map((c) => ({
-    ...c,
-    count: products.filter((p) => p.category_id === c.id).length,
-  }));
+  const byCategory = CATEGORY_OPTIONS.map((c) => ({ ...c, count: products.filter((p) => p.category_id === c.id).length }));
+  const emptyCategories = byCategory.filter((c) => c.count === 0);
 
   return (
     <div className="admin-page">
       <div className="admin-page-head">
-        <h1 className="admin-title">Overview</h1>
+        <div>
+          <p className="admin-eyebrow">Overview</p>
+          <h1 className="admin-title">Store overview</h1>
+        </div>
         <Link className="admin-btn admin-btn-dark" href="/admin/products/new">Add product</Link>
       </div>
 
       {products.length === 0 ? (
         <div className="admin-empty-state">
           <h2>No products yet</h2>
-          <p className="admin-muted">
+          <p>
             Add your first product, then hit Publish to push it to the live site.
             The public site keeps showing its last published copy until you do.
           </p>
@@ -67,27 +80,58 @@ export default async function AdminOverviewPage() {
       ) : (
         <>
           <div className="admin-stat-grid">
-            <div className="admin-stat"><span className="admin-stat-value">{products.length}</span><span className="admin-stat-label">Total products</span></div>
-            <div className="admin-stat"><span className="admin-stat-value">{visible.length}</span><span className="admin-stat-label">Visible on site</span></div>
+            <div className="admin-stat"><span className="admin-stat-value">{products.length}</span><span className="admin-stat-label">Products</span></div>
+            <div className="admin-stat"><span className="admin-stat-value">{visible.length}</span><span className="admin-stat-label">Live on site</span></div>
             <div className="admin-stat"><span className="admin-stat-value">{hidden.length}</span><span className="admin-stat-label">Hidden</span></div>
             <div className={missingPhoto.length ? "admin-stat admin-stat-warn" : "admin-stat"}>
-              <span className="admin-stat-value">{missingPhoto.length}</span><span className="admin-stat-label">Missing a photo</span>
+              <span className="admin-stat-value">{missingPhoto.length}</span><span className="admin-stat-label">No photo</span>
             </div>
           </div>
+
+          {/* What needs attention, before anything else. */}
+          {(unpublished || missingPhoto.length > 0 || emptyCategories.length > 0) && (
+            <section className="admin-section">
+              <h2 className="admin-section-title">Needs your attention</h2>
+              <ul className="admin-attention-list">
+                {unpublished && (
+                  <li>
+                    <Link href="/admin/products">Unpublished changes</Link>
+                    <span className="admin-row-meta">
+                      edited {latestEdit ? when(latestEdit.toISOString()) : ""} · live site still shows {publishedCount}
+                    </span>
+                  </li>
+                )}
+                {missingPhoto.slice(0, 4).map((p) => (
+                  <li key={p.id}>
+                    <Link href={`/admin/products/${p.id}`}>{p.name}</Link>
+                    <span className="admin-row-meta">no photo · {categoryName(p.category_id)}</span>
+                  </li>
+                ))}
+                {emptyCategories.length > 0 && (
+                  <li>
+                    <Link href="/admin/categories">
+                      {emptyCategories.length} empty categor{emptyCategories.length === 1 ? "y" : "ies"}
+                    </Link>
+                    <span className="admin-row-meta">{emptyCategories.map((c) => c.name).join(", ")}</span>
+                  </li>
+                )}
+              </ul>
+            </section>
+          )}
 
           <section className="admin-section">
             <h2 className="admin-section-title">Publish status</h2>
             <div className={unpublished ? "admin-publish-row admin-publish-dirty" : "admin-publish-row"}>
-              <div>
-                <p className="admin-publish-headline">
-                  {unpublished ? "You have unpublished changes" : "Live site is up to date"}
-                </p>
-                <p className="admin-muted">
-                  {publishedCount} product{publishedCount === 1 ? "" : "s"} currently published
-                  {publishedAt ? ` · last published ${publishedAt.toLocaleString()}` : ""}
-                </p>
+              <div className="admin-publish-copy">
+                <p className="admin-publish-headline">{unpublished ? "Unpublished changes" : "Live site is up to date"}</p>
+                <span className="admin-publish-sub">
+                  {publishedCount} product{publishedCount === 1 ? "" : "s"} published
+                  {publishedAt ? ` · ${publishedAt.toLocaleString()}` : ""}
+                </span>
               </div>
-              <Link className="admin-btn admin-btn-light" href="/admin/products">Go to products</Link>
+              <Link className="admin-btn admin-btn-light" href="/admin/products">
+                Go to products <ArrowUpRight size={13} />
+              </Link>
             </div>
           </section>
 
@@ -103,28 +147,14 @@ export default async function AdminOverviewPage() {
             </div>
           </section>
 
-          {missingPhoto.length > 0 && (
-            <section className="admin-section">
-              <h2 className="admin-section-title">Needs attention</h2>
-              <ul className="admin-attention-list">
-                {missingPhoto.slice(0, 5).map((p) => (
-                  <li key={p.id}>
-                    <Link href={`/admin/products/${p.id}`}>{p.name}</Link>
-                    <span className="admin-muted"> — no photo · {categoryName(p.category_id)}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
           <section className="admin-section">
-            <h2 className="admin-section-title">Recent activity</h2>
+            <h2 className="admin-section-title">Recently edited</h2>
             <ul className="admin-activity-list">
               {products.slice(0, 6).map((p) => (
                 <li key={p.id}>
                   <Link href={`/admin/products/${p.id}`}>{p.name}</Link>
-                  <span className="admin-muted">
-                    {" "}— {p.is_visible ? "visible" : "hidden"} · edited {new Date(p.updated_at).toLocaleString()}
+                  <span className="admin-row-meta">
+                    {p.is_visible ? "live" : "hidden"} · {categoryName(p.category_id)} · {when(p.updated_at)}
                   </span>
                 </li>
               ))}

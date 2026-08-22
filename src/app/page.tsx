@@ -187,7 +187,7 @@ export default function HomePage() {
     <section className="section band-wash">
       <div className="container">
         <Reveal>
-          <StyleQuiz categories={categories} whatsappNumber={store?.whatsappNumber} />
+          <StyleQuiz categories={categories} products={products} whatsappNumber={store?.whatsappNumber} />
         </Reveal>
       </div>
     </section>

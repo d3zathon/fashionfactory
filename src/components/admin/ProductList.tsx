@@ -75,7 +75,10 @@ export function ProductList() {
   return (
     <div className="admin-page">
       <div className="admin-page-head">
-        <h1 className="admin-title">Products</h1>
+        <div>
+          <p className="admin-eyebrow">Catalogue · {products.length} item{products.length === 1 ? "" : "s"}</p>
+          <h1 className="admin-title">Products</h1>
+        </div>
         <Link className="admin-btn admin-btn-dark" href="/admin/products/new">Add product</Link>
       </div>
 
@@ -84,9 +87,18 @@ export function ProductList() {
       {error && <p className="admin-error" role="alert">{error}</p>}
 
       {loading ? (
-        <p className="admin-muted" role="status">Loading products…</p>
+        <>
+          <p className="admin-progress" role="status">Loading products…</p>
+          <div className="admin-skeleton" aria-hidden="true" style={{ marginTop: 14 }}>
+            {Array.from({ length: 4 }).map((_, i) => <div className="admin-skeleton-row" key={i} />)}
+          </div>
+        </>
       ) : products.length === 0 ? (
-        <p className="admin-empty">No products yet. Add your first one.</p>
+        <div className="admin-empty-state">
+          <h2>No products yet</h2>
+          <p>Add your first piece, then publish to push it to the live site.</p>
+          <Link className="admin-btn admin-btn-dark" href="/admin/products/new">Add your first product</Link>
+        </div>
       ) : (
         <div className="admin-product-list">
           {products.map((product, index) => (
@@ -97,17 +109,20 @@ export function ProductList() {
                 <div className="admin-product-thumb-empty">No photo</div>
               )}
               <div className="admin-product-info">
-                <p>{product.name}</p>
-                <span>{categoryName(product.categoryId)}</span>
-                <label className="admin-toggle">
+                <p>
+                  {product.name}
+                  {!product.isVisible && <span className="admin-badge">Hidden</span>}
+                </p>
+                <span>{String(index + 1).padStart(2, "0")} · {categoryName(product.categoryId)}</span>
+                <label className="admin-toggle" style={{ marginTop: 6 }}>
                   <input type="checkbox" checked={product.isVisible} disabled={busyId === product.id} onChange={() => handleToggleVisible(product)} />
                   Visible on site
                 </label>
               </div>
               <div className="admin-product-actions">
                 <div className="admin-product-row-actions">
-                  <button className="admin-btn admin-btn-light admin-btn-sm" type="button" disabled={busyId === product.id || index === 0} onClick={() => handleMove(product, "up")} aria-label="Move up">↑</button>
-                  <button className="admin-btn admin-btn-light admin-btn-sm" type="button" disabled={busyId === product.id || index === products.length - 1} onClick={() => handleMove(product, "down")} aria-label="Move down">↓</button>
+                  <button className="admin-btn admin-btn-light admin-btn-sm admin-btn-icon" type="button" disabled={busyId === product.id || index === 0} onClick={() => handleMove(product, "up")} aria-label={`Move ${product.name} up`}>↑</button>
+                  <button className="admin-btn admin-btn-light admin-btn-sm admin-btn-icon" type="button" disabled={busyId === product.id || index === products.length - 1} onClick={() => handleMove(product, "down")} aria-label={`Move ${product.name} down`}>↓</button>
                 </div>
                 <Link className="admin-btn admin-btn-light admin-btn-sm" href={`/admin/products/${product.id}`}>Edit</Link>
                 <button className="admin-btn admin-btn-danger admin-btn-sm" type="button" onClick={() => setConfirmDeleteId(product.id)}>Delete</button>
