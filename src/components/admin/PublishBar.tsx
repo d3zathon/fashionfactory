@@ -11,7 +11,7 @@ export function PublishBar({ latestUpdatedAt }: { latestUpdatedAt: string | null
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [queued, setQueued] = useState(false);
+  const [queued, setQueued] = useState<{ runsUrl?: string } | null>(null);
 
   const publishedAt = publishedData.generatedAt ? new Date(publishedData.generatedAt) : null;
   const dirty = Boolean(latestUpdatedAt && publishedAt && new Date(latestUpdatedAt) > publishedAt);
@@ -24,7 +24,7 @@ export function PublishBar({ latestUpdatedAt }: { latestUpdatedAt: string | null
       const response = await fetch("/api/admin/publish", { method: "POST" });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.success) throw new Error(result.error ?? "Publish failed.");
-      setQueued(true);
+      setQueued({ runsUrl: typeof result.runsUrl === "string" ? result.runsUrl : undefined });
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Publish failed.");
@@ -36,7 +36,7 @@ export function PublishBar({ latestUpdatedAt }: { latestUpdatedAt: string | null
   return (
     <div className={dirty ? "admin-publish-row admin-publish-dirty" : "admin-publish-row"}>
       <button className="admin-btn admin-btn-dark" type="button" onClick={handlePublish} disabled={loading}>
-        {loading ? "Publishing…" : "Publish to site"}
+        {loading ? "Starting publish…" : "Publish to site"}
       </button>
       <div className="admin-publish-copy">
         <span className={dirty ? "admin-publish-status admin-dirty" : "admin-publish-status"}>
@@ -46,8 +46,33 @@ export function PublishBar({ latestUpdatedAt }: { latestUpdatedAt: string | null
           {publishedAt ? `Last published ${publishedAt.toLocaleString()}` : "Never published"}
         </span>
       </div>
-      {queued && <span className="admin-success" role="status">Publish started — the site updates in a few minutes.</span>}
-      {error && <span className="admin-error" role="alert">{error}</span>}
+
+      {/* Publishing is not a save. It starts a build, and the shop owner needs
+          to know that before they refresh the storefront and think it failed. */}
+      {queued ? (
+        <div className="admin-publish-note admin-success" role="status">
+          <strong>Publish started.</strong> This does not update the website directly — it starts a
+          GitHub Actions run that rebuilds the site data and redeploys. The live site usually catches
+          up within a few minutes, and this page will keep saying &ldquo;unpublished changes&rdquo;
+          until it does.
+          {queued.runsUrl && (
+            <>
+              {" "}
+              <a href={queued.runsUrl} target="_blank" rel="noreferrer">Watch the run on GitHub</a>.
+            </>
+          )}
+        </div>
+      ) : (
+        <span className="admin-muted admin-publish-sub admin-publish-note">
+          Publishing rebuilds and redeploys the site; changes appear a few minutes later, not instantly.
+        </span>
+      )}
+
+      {error && (
+        <div className="admin-publish-note admin-error" role="alert">
+          {error}
+        </div>
+      )}
     </div>
   );
 }

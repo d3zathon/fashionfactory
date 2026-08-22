@@ -124,6 +124,10 @@
 .admin-publish-status { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .admin-publish-status.admin-dirty { color: var(--accent); }
 .admin-publish-sub { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.08em; color: var(--muted); }
+/* The publish note explains an asynchronous pipeline, so it needs room to be a
+   sentence rather than a chip — it takes the full row width below the button. */
+.admin-publish-note { flex-basis: 100%; margin: 0; line-height: 1.5; text-transform: none; letter-spacing: 0; font-family: var(--font-body); font-size: 0.82rem; }
+.admin-publish-note a { text-decoration: underline; text-underline-offset: 3px; }
 
 /* --------------------------------------------------------------------------
    Rows / tables — dense list, hairline separated

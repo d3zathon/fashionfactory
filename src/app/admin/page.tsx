@@ -43,18 +43,35 @@ export default async function AdminOverviewPage() {
 
   const { data, error } = supabase && storeId
     ? await supabase.from("products").select("id,name,category_id,image_url,is_visible,updated_at").eq("store_id", storeId).order("updated_at", { ascending: false })
-    : { data: null, error: { message: supabase ? `No store found with slug "${ACTIVE_STORE_SLUG}". Run the migrations in supabase/migrations.` : "Supabase is not configured on this host." } };
+    : { data: null, error: { message: "" } };
 
   const { data: categoryData } = supabase && storeId
     ? await supabase.from("categories").select("id,name").eq("store_id", storeId).eq("active", true).order("sort_order", { ascending: true })
     : { data: null };
 
-  if (error) {
+  // Three failures look identical from the outside and have completely
+  // different fixes, so each says which one it is and what to do about it.
+  if (!supabase || !storeId || error) {
+    const { heading, body } = !supabase
+      ? {
+          heading: "Admin is not configured",
+          body: "This host is missing NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY. They are inlined at build time, so redeploy after setting them.",
+        }
+      : !storeId
+        ? {
+            heading: "No store to manage",
+            body: `Nothing in the database has the slug "${ACTIVE_STORE_SLUG}". Apply the migrations in supabase/migrations, or set NEXT_PUBLIC_STORE_SLUG to a store that exists.`,
+          }
+        : {
+            heading: "Couldn't load store data",
+            body: error?.message ?? "The database refused the request.",
+          };
+
     return (
       <div className="admin-page">
         <p className="admin-eyebrow">Overview</p>
-        <h1 className="admin-title">Store overview</h1>
-        <p className="admin-error" role="alert">Couldn&rsquo;t load store data: {error.message}</p>
+        <h1 className="admin-title">{heading}</h1>
+        <p className="admin-error" role="alert">{body}</p>
       </div>
     );
   }
