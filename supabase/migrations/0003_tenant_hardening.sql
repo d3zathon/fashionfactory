@@ -18,6 +18,12 @@
 --      matched no store still returned true for a platform admin, letting the
 --      storage policies accept uploads into arbitrary folders.
 --
+-- Verified against a disposable staging project with two stores, a platform
+-- admin, a store-scoped admin for each, and an ordinary signed-in account. That
+-- run found two further defects, fixed here and marked "caught in staging"
+-- below: anonymous reads of public.stores failed outright, and the column guard
+-- also blocked the platform's own service_role and SQL-editor connections.
+--
 -- Reversible: every statement here has a stated inverse in the "Rollback"
 -- section at the bottom of this file.
 
@@ -29,13 +35,24 @@
 -- admins out too — they authenticate exactly like everyone else. A trigger can
 -- ask *who* is updating.
 
+-- SECURITY INVOKER on purpose, so current_user is the role that actually issued
+-- the UPDATE. A SECURITY DEFINER trigger reports its own owner instead, which
+-- makes the platform's own credentials indistinguishable from a shopkeeper's.
 create or replace function private.guard_protected_store_columns()
 returns trigger
 language plpgsql
-security definer
 set search_path = ''
 as $$
 begin
+  -- The platform's own administrative channels. service_role bypasses RLS
+  -- entirely and belongs to the publish pipeline; postgres/supabase_admin is
+  -- the SQL editor and migrations. Without this the guard also blocks the
+  -- operator running the documented setup and rollback SQL by hand — caught in
+  -- staging, where deactivating a store from the SQL editor was refused.
+  if current_user in ('postgres', 'supabase_admin', 'service_role') then
+    return new;
+  end if;
+
   -- Platform admins may change anything.
   if private.is_platform_admin() then
     return new;
@@ -104,6 +121,18 @@ $$;
 revoke all on function private.store_is_active(uuid) from public;
 grant execute on function private.store_is_active(uuid) to anon, authenticated;
 
+-- 0002's "public can read active stores" policy is `is_active or
+-- private.can_manage_store(id)`, but only granted that function to
+-- `authenticated`. Postgres checks EXECUTE when the expression is evaluated, so
+-- every anonymous SELECT on public.stores failed outright with
+-- "42501: permission denied for function can_manage_store" — a policy named
+-- "public can read" that the public could not use. Caught in staging.
+--
+-- Safe to grant: the function is SECURITY DEFINER, reports only on the caller's
+-- own membership, and auth.uid() is null for anon, so it can only ever answer
+-- false. Granting it is what makes the policy's first branch reachable.
+grant execute on function private.can_manage_store(uuid) to anon;
+
 drop policy if exists "public can read active categories" on public.categories;
 create policy "public can read active categories" on public.categories
   for select to anon, authenticated
@@ -159,10 +188,16 @@ grant execute on function private.can_manage_store_slug(text) to authenticated;
 --
 -- It only ever reports on the caller's own rights, so it leaks nothing.
 
+-- SECURITY INVOKER, not DEFINER: the privilege it needs already lives in
+-- private.can_manage_store_slug(), which authenticated may execute, so this
+-- wrapper does not need elevation of its own. Supabase's linter flags every
+-- signed-in-callable SECURITY DEFINER function in an exposed schema, and it is
+-- right to — keeping this one INVOKER means there is no elevated entry point on
+-- the public API at all.
 create or replace function public.admin_manages_store(store_slug text)
 returns boolean
 language sql
-security definer
+security invoker
 stable
 set search_path = ''
 as $$
@@ -191,5 +226,6 @@ grant execute on function public.admin_manages_store(text) to authenticated;
 --   using (is_visible = true and exists (select 1 from public.stores s where s.id = store_id and s.is_active));
 --
 -- drop function if exists private.store_is_active(uuid);
+-- revoke execute on function private.can_manage_store(uuid) from anon;
 --
 -- -- restores 0002's LEFT JOIN form of private.can_manage_store_slug(text)

@@ -287,6 +287,10 @@ admin** has that store's id.
 Two of these are worth being explicit about, because they are enforced somewhere
 other than where you would look first:
 
+- **Platform channels** — `service_role`, `postgres` and `supabase_admin` are
+  exempt from the column guard. They bypass RLS anyway and are the platform
+  operator's own channel (migrations, the SQL editor, the publish pipeline);
+  blocking them would stop legitimate administration, not an attacker.
 - **Protected columns** are guarded by a `BEFORE UPDATE` trigger, not by a
   policy. RLS decides which *rows* you may write, never which *columns*, so the
   "store admins update their store" policy would otherwise have allowed a store
@@ -312,22 +316,33 @@ Run these after applying the migrations. They are the checks that would have
 caught each gap `0003` closes, so they are worth re-running after any future
 policy change.
 
-```sql
--- 1. Protected columns are refused for a store admin and allowed for a platform
---    admin. Run as the store admin's role by impersonating their JWT in the SQL
---    editor, or from the app with that account signed in.
---    Expected: ERROR 42501 "Only a platform administrator can change ...".
-update public.stores set slug = 'hijacked' where slug = 'fashion-factory-nepal';
+**These checks must impersonate a real user.** The SQL editor connects as
+`postgres`, which is one of the platform's own administrative channels and is
+deliberately exempt from the column guard — running the `update` below directly
+in the editor will *succeed*, which is correct and proves nothing. Set the role
+and the JWT claim first, as below, or run the equivalent from the app with that
+account signed in.
 
--- 2. Public reads follow the store's active flag. Expected: the second count is
---    0 for every table once the store is deactivated.
+```sql
+-- 1. Protected columns are refused for a store admin.
+--    Expected: ERROR 42501 "Only a platform administrator can change ...".
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"<store-admin-user-id>","role":"authenticated"}';
+  update public.stores set slug = 'hijacked' where slug = 'fashion-factory-nepal';
+rollback;
+
+-- 2. Public reads follow the store's active flag. Expected: every count drops to
+--    0 while the store is inactive, including public.stores itself.
 update public.stores set is_active = false where slug = 'fashion-factory-nepal';
-set local role anon;
-select
-  (select count(*) from public.products)        as products,
-  (select count(*) from public.categories)      as categories,
-  (select count(*) from public.store_locations) as locations;
-reset role;
+begin;
+  set local role anon;
+  select
+    (select count(*) from public.products)        as products,
+    (select count(*) from public.categories)      as categories,
+    (select count(*) from public.store_locations) as locations,
+    (select count(*) from public.stores)          as stores;
+rollback;
 update public.stores set is_active = true where slug = 'fashion-factory-nepal';
 
 -- 3. Membership is not writable through the API. Expected: 0 rows.
@@ -335,9 +350,29 @@ select policyname, cmd from pg_policies
 where schemaname = 'public' and tablename = 'admin_users' and cmd <> 'SELECT';
 
 -- 4. Publish authorization answers per store. Expected: true for a store the
---    signed-in account manages, false for any other.
-select public.admin_manages_store('fashion-factory-nepal');
+--    impersonated account manages, false for any other.
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"<store-admin-user-id>","role":"authenticated"}';
+  select public.admin_manages_store('fashion-factory-nepal') as manages_a,
+         public.admin_manages_store('some-other-store')      as manages_other;
+rollback;
+
+-- 5. Cross-tenant writes affect nothing. Expected: UPDATE 0.
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"<store-a-admin-user-id>","role":"authenticated"}';
+  update public.products set name = 'should not happen'
+  where store_id = (select id from public.stores where slug = 'some-other-store');
+rollback;
 ```
+
+This whole set was executed against a disposable staging project with two
+stores, a platform admin, a store-scoped admin for each store, and an ordinary
+signed-in account. It found two defects, both fixed in `0003`: anonymous reads
+of `public.stores` failed outright because `anon` lacked EXECUTE on
+`private.can_manage_store`, and the column guard also blocked `service_role` and
+the SQL editor, which would have prevented legitimate platform administration.
 
 ### Contact form abuse protection
 
