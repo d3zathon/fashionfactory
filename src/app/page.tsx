@@ -6,9 +6,14 @@ import { ContactForm } from "@/components/ContactForm";
 import { Footer } from "@/components/Footer";
 import { MobileActionBar } from "@/components/MobileActionBar";
 import { Navbar } from "@/components/Navbar";
+import { Ticker } from "@/components/Ticker";
+import { Reveal } from "@/components/Reveal";
+import { ProductCard } from "@/components/ProductCard";
+import { CategoryIndex } from "@/components/CategoryIndex";
+import { StyleQuiz } from "@/components/StyleQuiz";
 import { useCategories, useFAQs, useFeaturedProducts, useHomepageContent, useInstagram, useStoreSettings, useTestimonials } from "@/hooks";
 import { AnalyticsService } from "@/services";
-import { GENERAL_WHATSAPP_MESSAGE, productWhatsappMessage, telHref, whatsappHref } from "@/lib/links";
+import { GENERAL_WHATSAPP_MESSAGE, telHref, whatsappHref } from "@/lib/links";
 
 const fallbackHero = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2200&q=88";
 
@@ -20,131 +25,220 @@ export default function HomePage() {
   const { data: instagram } = useInstagram();
   const { data: testimonials } = useTestimonials();
   const { data: faqs } = useFAQs();
-  const track = (event: string, properties?: Record<string, string | number | boolean>) => AnalyticsService.track(event, properties);
-  const wa = whatsappHref(store?.whatsappNumber, GENERAL_WHATSAPP_MESSAGE);
 
+  const track = (event: string, properties?: Record<string, string | number | boolean>) =>
+    AnalyticsService.track(event, properties);
+  const wa = whatsappHref(store?.whatsappNumber, GENERAL_WHATSAPP_MESSAGE);
   const heroSrc = home?.heroImage?.src ?? fallbackHero;
+
+  // Headline is split so the second line can indent and shift to rust.
+  const headline = home?.headline ?? "Define Your Style.";
+  const [headOne, ...headRest] = headline.split(" ");
+
+  const tickerItems = [
+    "New arrivals in store",
+    store?.locationLabel ?? "Kathmandu Valley, Nepal",
+    store?.openingHours ?? "9:00 AM – 5:00 PM daily",
+    "Ask us on WhatsApp",
+    store?.instagramHandle ?? "@fashion.factory_2022",
+  ];
 
   return <main id="main">
     {/* The hero is the LCP element but is a CSS background image, which the
-        browser cannot discover until stylesheets and JS have run. Preloading it
-        starts the fetch immediately. React hoists this link into <head>. */}
+        browser cannot discover until stylesheets and JS have run. */}
     <link rel="preload" as="image" href={heroSrc} fetchPriority="high" />
     <Navbar />
 
+    {/* 01 — HERO -------------------------------------------------------- */}
     <section id="top" className="hero">
-      <div className="hero-image" style={{ backgroundImage: `url(${heroSrc})` }} aria-hidden="true"><div className="hero-overlay" /></div>
+      <div className="hero-image" style={{ backgroundImage: `url(${heroSrc})` }} aria-hidden="true" />
       <div className="container hero-content">
-        <p className="eyebrow">{home?.eyebrow}</p>
-        <h1 className="serif">{home?.headline}</h1>
-        <p>{home?.description}</p>
-        <div className="hero-actions">
-          <Link className="btn btn-dark" href="#collection" onClick={() => track("collection_click")}>Explore Collection <ArrowUpRight size={17} /></Link>
-          <Link className="btn btn-light" href="#visit-us">Visit Store</Link>
-        </div>
-      </div>
-    </section>
-
-    <section className="quick" aria-label="Quick contact actions">
-      <div className="container quick-grid">
-        <a href={telHref(store?.phone)} onClick={() => track("phone_click")}><Phone size={19} /><span>Call</span></a>
-        <a href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click")}><MessageCircle size={19} /><span>WhatsApp</span></a>
-        <Link href="#visit-us" onClick={() => track("maps_click")}><MapPin size={19} /><span>Directions</span></Link>
-        <a href={store?.instagramUrl} target="_blank" rel="noreferrer" onClick={() => track("instagram_click")}><Instagram size={19} /><span>Instagram</span></a>
-      </div>
-    </section>
-
-    <section id="about" className="section intro">
-      <div className="container intro-grid">
-        <p className="eyebrow">Fashion Factory Nepal</p>
-        <div><h2 className="section-title">{home?.introductionTitle}</h2><p className="intro-copy">{home?.introductionBody}</p></div>
-      </div>
-    </section>
-
-    <section id="collection" className="section collection">
-      <div className="container">
-        <div className="section-head">
-          <div><p className="eyebrow">Curated for discovery</p><h2 className="section-title">Explore the Collection</h2></div>
-          <Link className="btn btn-light" href="/collection">View Collection <ArrowUpRight size={16} /></Link>
-        </div>
-        <div className="category-grid">
-          {categories.map((category, i) => (
-            <Link href={`/collection#${category.slug}`} className={`category category-${i + 1}`} key={category.id} onClick={() => track("collection_click", { category: category.id })}>
-              <div className="category-photo" style={{ backgroundImage: `url(${category.image?.src ?? products[i % Math.max(products.length, 1)]?.images[0]?.src ?? fallbackHero})` }} aria-hidden="true" />
-              <div className="category-copy"><span>{category.name}</span><ArrowUpRight size={18} /></div>
+        <p className="eyebrow hero-eyebrow">{home?.eyebrow ?? "Kathmandu, Nepal"}</p>
+        <h1 className="hero-title">
+          {headOne} <em>{headRest.join(" ")}</em>
+        </h1>
+        <div className="hero-row">
+          <p className="hero-blurb">{home?.description}</p>
+          <div className="hero-actions">
+            <Link className="btn btn-accent" href="/collection" onClick={() => track("collection_click")}>
+              Browse the collection <ArrowUpRight size={15} />
             </Link>
-          ))}
+            <Link className="btn" href="#visit-us">Visit the store</Link>
+          </div>
         </div>
       </div>
     </section>
 
-    <section id="lookbook" className="section lookbook">
+    <Ticker items={tickerItems} />
+
+    {/* 02 — MANIFESTO --------------------------------------------------- */}
+    <section id="about" className="section">
+      <div className="container">
+        <Reveal>
+          <div className="intro-grid">
+            <div className="head-meta">
+              <span className="idx">02</span>
+              <p className="eyebrow">The store</p>
+            </div>
+            <div>
+              <h2 className="intro-copy">{home?.introductionTitle}</h2>
+              <p className="intro-body">{home?.introductionBody}</p>
+              <div className="intro-stats">
+                <div className="intro-stat">
+                  <strong>{store?.locations?.length ?? 2}</strong>
+                  <span>Branches</span>
+                </div>
+                <div className="intro-stat">
+                  <strong>{categories.length || 5}</strong>
+                  <span>Categories</span>
+                </div>
+                <div className="intro-stat">
+                  <strong>Daily</strong>
+                  <span>{store?.openingHours ?? "9–5"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+
+    {/* 03 — CATEGORY INDEX ---------------------------------------------- */}
+    <section id="collection" className="section band-wash rule-top">
       <div className="container">
         <div className="section-head">
-          <div><p className="eyebrow">Featured lookbook</p><h2 className="section-title">Pieces worth a closer look.</h2></div>
-          <p className="muted lookbook-note">Ask the store about current product availability.</p>
+          <div>
+            <div className="head-meta">
+              <span className="idx">03</span>
+              <p className="eyebrow">The index</p>
+            </div>
+            <h2 className="section-title">Find your category.</h2>
+          </div>
+          <Link className="link-rule" href="/collection">
+            View everything <ArrowUpRight size={14} />
+          </Link>
         </div>
-        <div className="product-masonry">
+        <Reveal>
+          <CategoryIndex categories={categories} products={products} fallbackImage={fallbackHero} />
+        </Reveal>
+      </div>
+    </section>
+
+    {/* 04 — FEATURED ---------------------------------------------------- */}
+    <section id="lookbook" className="section rule-top">
+      <div className="container">
+        <div className="section-head">
+          <div>
+            <div className="head-meta">
+              <span className="idx">04</span>
+              <p className="eyebrow">Selected pieces</p>
+            </div>
+            <h2 className="section-title">Worth a closer look.</h2>
+          </div>
+          <p className="muted" style={{ maxWidth: "30ch", margin: 0 }}>
+            Ask the store about availability — every piece is answered on WhatsApp.
+          </p>
+        </div>
+        <div className="product-grid">
           {products.map((product, i) => (
-            <article className={`product product-${i + 1}`} key={product.id}>
-              <div className="product-image">
-                <Link href={`/products/${product.slug}`} onClick={() => track("product_click", { product: product.id })} aria-label={`View ${product.name}`}>
-                  <img src={product.images[0]?.src} alt={product.images[0]?.alt ?? product.name} loading={i < 2 ? "eager" : "lazy"} />
-                </Link>
-                <a href={whatsappHref(store?.whatsappNumber, productWhatsappMessage(product.name))} target="_blank" rel="noreferrer" className="product-action" onClick={() => track("whatsapp_click", { product: product.id })}>Ask for Availability <ArrowUpRight size={15} /></a>
-              </div>
-              <div className="product-meta">
-                <div><p><Link href={`/products/${product.slug}`}>{product.name}</Link></p><small>{categories.find(c => c.id === product.categoryId)?.name}</small></div>
-                {product.price !== undefined ? <span>{product.currency ?? "NPR"} {product.price.toLocaleString()}</span> : null}
-              </div>
-            </article>
+            <Reveal key={product.id} delay={(i % 4) * 70}>
+              <ProductCard
+                product={product}
+                index={i}
+                categoryName={categories.find((c) => c.id === product.categoryId)?.name}
+                whatsappNumber={store?.whatsappNumber}
+                priority={i < 2}
+              />
+            </Reveal>
           ))}
         </div>
       </div>
     </section>
 
-    <section className="statement">
-      <div className="container statement-inner">
-        <p className="eyebrow">The store experience</p>
-        <h2 className="serif">See It. Try It.<br />Find Your Style.</h2>
-        <div className="statement-points">
-          <span><b>01</b> Discover<br /><small>Explore different styles and collections.</small></span>
-          <span><b>02</b> Experience<br /><small>Visit the physical store and see products in person.</small></span>
-          <span><b>03</b> Connect<br /><small>Contact the store with product questions.</small></span>
+    {/* 05 — EDITORIAL --------------------------------------------------- */}
+    <section className="editorial">
+      <div className="editorial-media">
+        <img src={products[1]?.images[0]?.src ?? fallbackHero} alt="" loading="lazy" />
+      </div>
+      <div className="editorial-body">
+        <div className="head-meta">
+          <span className="idx" style={{ color: "#9c9384" }}>05</span>
+          <p className="eyebrow">How it works</p>
+        </div>
+        <h2 className="editorial-quote">See it. Try it.<br />Take it home.</h2>
+        <div className="editorial-steps">
+          <div className="editorial-step">
+            <b>01</b>
+            <div><p>Discover</p><small>Browse the collection here or on Instagram.</small></div>
+          </div>
+          <div className="editorial-step">
+            <b>02</b>
+            <div><p>Ask</p><small>Message the store on WhatsApp to check what&rsquo;s in stock.</small></div>
+          </div>
+          <div className="editorial-step">
+            <b>03</b>
+            <div><p>Visit</p><small>Come to Kirtipur or Budhanilkantha and try it on.</small></div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section id="instagram" className="section instagram">
+    {/* 06 — STYLE QUIZ -------------------------------------------------- */}
+    <section className="section band-wash">
+      <div className="container">
+        <Reveal>
+          <StyleQuiz categories={categories} whatsappNumber={store?.whatsappNumber} />
+        </Reveal>
+      </div>
+    </section>
+
+    {/* 07 — INSTAGRAM --------------------------------------------------- */}
+    <section id="instagram" className="section rule-top">
       <div className="container">
         <div className="section-head">
-          <div><p className="eyebrow">Social edit</p><h2 className="section-title">What&rsquo;s New at Fashion Factory</h2><p className="muted">Follow {store?.instagramHandle} for new styles and updates.</p></div>
-          <a className="btn btn-light" href={store?.instagramUrl} target="_blank" rel="noreferrer" onClick={() => track("instagram_click")}>Follow on Instagram <Instagram size={16} /></a>
+          <div>
+            <div className="head-meta">
+              <span className="idx">07</span>
+              <p className="eyebrow">Social edit</p>
+            </div>
+            <h2 className="section-title">What&rsquo;s new in store.</h2>
+          </div>
+          <a className="link-rule" href={store?.instagramUrl} target="_blank" rel="noreferrer" onClick={() => track("instagram_click")}>
+            {store?.instagramHandle} <Instagram size={14} />
+          </a>
         </div>
-        <div className="ig-grid">{instagram.map(post => <a href={post.permalink} target="_blank" rel="noreferrer" key={post.id}><img src={post.image.src} alt={post.image.alt} loading="lazy" /></a>)}</div>
+        <div className="ig-grid">
+          {instagram.map((post) => (
+            <a className="ig-tile" href={post.permalink} target="_blank" rel="noreferrer" key={post.id} onClick={() => track("instagram_click")}>
+              <img src={post.image.src} alt={post.image.alt} loading="lazy" />
+            </a>
+          ))}
+        </div>
       </div>
     </section>
 
-    <section className="section social-proof">
-      <div className="container">
-        <div className="section-head"><div><p className="eyebrow">Social proof</p><h2 className="section-title">What customers say.</h2></div></div>
-        {testimonials.length ? <div className="testimonial-grid">{testimonials.map(testimonial => <article key={testimonial.id} className="testimonial-card"><p>“{testimonial.quote}”</p><span>{testimonial.name}</span></article>)}</div> : <div className="state-block">Verified customer reviews will appear here when connected to the store&rsquo;s review or testimonial source.</div>}
-      </div>
-    </section>
-
-    <section id="visit-us" className="section visit">
+    {/* 08 — VISIT ------------------------------------------------------- */}
+    <section id="visit-us" className="section band-wash rule-top">
       <div className="container visit-grid">
         <div>
-          <p className="eyebrow">Visit Fashion Factory</p><h2 className="section-title">Kathmandu,<br />Nepal.</h2><p className="muted">{store?.locationLabel}</p>
+          <div className="head-meta">
+            <span className="idx">08</span>
+            <p className="eyebrow">Visit us</p>
+          </div>
+          <h2 className="section-title">Two doors in the<br />Kathmandu Valley.</h2>
           <div className="location-list">
             {store?.locations?.map((location) => (
               <div className="location-card" key={location.id}>
                 <h3>{location.name}</h3>
-                <p className="muted">{location.address}</p>
+                <p className="muted" style={{ margin: 0 }}>{location.address}</p>
                 <p className="hours">{store?.openingHours}</p>
                 <div className="visit-actions">
-                  <a className="btn btn-dark" href={location.mapsUrl} target="_blank" rel="noreferrer" onClick={() => track("maps_click", { location: location.id })}>Get Directions <MapPin size={16} /></a>
-                  <a className="btn btn-light" href={telHref(store?.phone)} onClick={() => track("phone_click")}>Call Store</a>
+                  <a className="btn btn-dark" href={location.mapsUrl} target="_blank" rel="noreferrer" onClick={() => track("maps_click", { location: location.id })}>
+                    Directions <MapPin size={15} />
+                  </a>
+                  <a className="btn" href={telHref(store?.phone)} onClick={() => track("phone_click")}>
+                    <Phone size={15} /> Call
+                  </a>
                 </div>
               </div>
             ))}
@@ -160,24 +254,78 @@ export default function HomePage() {
       </div>
     </section>
 
-    <section className="section faq">
+    {/* 09 — FAQ + CONTACT ----------------------------------------------- */}
+    <section className="section faq rule-top">
       <div className="container faq-grid">
-        <div><p className="eyebrow">Need to know</p><h2 className="section-title">Questions,<br />answered.</h2></div>
-        <div>{faqs.map(faq => <details key={faq.id}><summary>{faq.question}<ChevronDown size={18} /></summary><p>{faq.answer}</p></details>)}</div>
+        <div>
+          <div className="head-meta">
+            <span className="idx">09</span>
+            <p className="eyebrow">Need to know</p>
+          </div>
+          <h2 className="section-title">Questions,<br />answered.</h2>
+        </div>
+        <div>
+          {faqs.map((faq) => (
+            <details key={faq.id}>
+              <summary>{faq.question}<ChevronDown size={18} /></summary>
+              <p>{faq.answer}</p>
+            </details>
+          ))}
+        </div>
       </div>
     </section>
 
-    <section id="contact" className="section contact">
+    {testimonials.length > 0 && (
+      <section className="section rule-top">
+        <div className="container">
+          <div className="section-head">
+            <div>
+              <div className="head-meta"><span className="idx">10</span><p className="eyebrow">Social proof</p></div>
+              <h2 className="section-title">What customers say.</h2>
+            </div>
+          </div>
+          <div className="product-grid">
+            {testimonials.map((testimonial) => (
+              <article key={testimonial.id} className="state-block state-compact">
+                <p>&ldquo;{testimonial.quote}&rdquo;</p>
+                <span className="eyebrow">{testimonial.name}</span>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <section id="contact" className="section band-wash rule-top">
       <div className="container contact-grid">
-        <div><p className="eyebrow">Talk to the store</p><h2 className="section-title">Have a question about a look?</h2><p className="muted">Send an inquiry and the store can follow up using the contact information you provide.</p></div>
+        <div>
+          <div className="head-meta">
+            <span className="idx">11</span>
+            <p className="eyebrow">Talk to the store</p>
+          </div>
+          <h2 className="section-title">Have a question<br />about a look?</h2>
+          <p className="muted" style={{ marginTop: 18, maxWidth: "42ch", lineHeight: 1.7 }}>
+            Send an inquiry and the store will follow up using the contact details you provide.
+            For the fastest reply, message us on WhatsApp.
+          </p>
+          <a className="btn btn-dark" style={{ marginTop: 22 }} href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click")}>
+            <MessageCircle size={15} /> WhatsApp the store
+          </a>
+        </div>
         <ContactForm />
       </div>
     </section>
 
     <section className="final">
       <div className="container final-inner">
-        <p className="eyebrow">Fashion Factory Nepal</p><h2 className="serif">{home?.finalCtaTitle}</h2><p>{home?.finalCtaBody}</p>
-        <div className="final-actions"><Link className="btn btn-dark" href="#visit-us">Get Directions</Link><a className="btn btn-light" href={wa} target="_blank" rel="noreferrer">WhatsApp Us</a><a className="btn btn-light" href={store?.instagramUrl} target="_blank" rel="noreferrer">Follow Instagram</a></div>
+        <p className="eyebrow">Fashion Factory Nepal</p>
+        <h2>{home?.finalCtaTitle}</h2>
+        <p>{home?.finalCtaBody}</p>
+        <div className="final-actions">
+          <Link className="btn btn-dark" href="/collection">Browse the collection</Link>
+          <a className="btn" href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click")}>WhatsApp us</a>
+          <Link className="btn" href="#visit-us">Get directions</Link>
+        </div>
       </div>
     </section>
 

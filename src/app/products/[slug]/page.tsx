@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, MapPin } from "lucide-react";
+import { ArrowUpRight, MapPin } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/Footer";
 import { MobileActionBar } from "@/components/MobileActionBar";
@@ -110,7 +110,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
       )}
       <Navbar tone="light" />
       <div className="container">
-        <Link href="/collection" className={styles.back}><ArrowLeft size={16} /> Back to collection</Link>
+        {/* Visible breadcrumb mirroring the BreadcrumbList schema above. */}
+        <nav className={styles.crumbs} aria-label="Breadcrumb">
+          <Link href="/">Home</Link>
+          <span aria-hidden="true">/</span>
+          <Link href="/collection">Collection</Link>
+          {category && (
+            <>
+              <span aria-hidden="true">/</span>
+              <Link href={`/collection?c=${category.slug}`}>{category.name}</Link>
+            </>
+          )}
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{product.name}</span>
+        </nav>
 
         <div className={styles.detail}>
           <div className={styles.gallery}>

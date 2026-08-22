@@ -1,93 +1,146 @@
 "use client";
 
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { MobileActionBar } from "@/components/MobileActionBar";
 import { Navbar } from "@/components/Navbar";
+import { ProductCard } from "@/components/ProductCard";
 import { useCategories, useProducts, useStoreSettings } from "@/hooks";
-import { AnalyticsService } from "@/services";
-import { productWhatsappMessage, whatsappHref } from "@/lib/links";
 
-export default function CollectionPage() {
+const ALL = "all";
+
+function CollectionView() {
   const { data: products, loading: productsLoading, error: productsError } = useProducts();
   const { data: categories, loading: categoriesLoading, error: categoriesError } = useCategories();
   const { data: store } = useStoreSettings();
+  const params = useSearchParams();
+
+  // Deep-linkable: /collection?c=mens arrives pre-filtered from the homepage
+  // category index and from the style quiz result.
+  const [active, setActive] = useState<string>(params.get("c") ?? ALL);
 
   const loading = productsLoading || categoriesLoading;
   const error = productsError || categoriesError;
-  const whatsappBase = store?.whatsappNumber;
+
+  const activeCategory = categories.find((category) => category.slug === active);
+  const visible = useMemo(
+    () => (active === ALL || !activeCategory ? products : products.filter((p) => p.categoryId === activeCategory.id)),
+    [products, active, activeCategory]
+  );
+
+  const countFor = (slug: string) => {
+    if (slug === ALL) return products.length;
+    const category = categories.find((c) => c.slug === slug);
+    return category ? products.filter((p) => p.categoryId === category.id).length : 0;
+  };
 
   return (
     <main id="main" className="collection-page">
       <Navbar tone="light" />
-      <section className="collection-hero">
-        <div className="container collection-top">
-          <Link href="/" className="back"><ArrowLeft size={16} /> Home</Link>
-          <p className="eyebrow">Fashion Factory Nepal</p>
-          <h1 className="serif">Explore the Collection.</h1>
-          <p className="muted">Discover featured styles and categories, then ask the store about current availability before you visit.</p>
+
+      <header className="collection-hero">
+        <div className="container">
+          <Link href="/" className="back"><ArrowLeft size={14} /> Home</Link>
+          <div className="head-meta" style={{ marginTop: 26 }}>
+            <span className="idx">{String(products.length).padStart(2, "0")}</span>
+            <p className="eyebrow">The collection</p>
+          </div>
+          <h1>{activeCategory ? activeCategory.name : "Everything in store."}</h1>
+          <p className="collection-intro">
+            {activeCategory?.description ??
+              "Browse the full catalogue, then message the store to check what's on the rail today."}
+          </p>
         </div>
-      </section>
+      </header>
 
-      {loading ? (
-        <div className="container state-block" role="status">Loading the collection…</div>
-      ) : error ? (
-        <div className="container state-block state-error" role="alert">We couldn&rsquo;t load the collection right now. Please try again.</div>
-      ) : (
-        <>
-          <div className="container filter-row" aria-label="Collection categories">
-            {categories.map((category) => <a key={category.id} href={`#${category.slug}`}>{category.name}</a>)}
+      {/* Sticky filter rail — real filtering, replacing the old anchor jumps. */}
+      <div className="filter-bar">
+        <div className="container">
+          <div className="filter-row" role="group" aria-label="Filter by category">
+            <button className="filter-chip" type="button" aria-pressed={active === ALL} onClick={() => setActive(ALL)}>
+              All <span className="idx">{countFor(ALL)}</span>
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                className="filter-chip"
+                type="button"
+                aria-pressed={active === category.slug}
+                onClick={() => setActive(category.slug)}
+              >
+                {category.name} <span className="idx">{countFor(category.slug)}</span>
+              </button>
+            ))}
           </div>
+        </div>
+      </div>
 
-          <div className="container collection-list">
-            {categories.map((category) => {
-              const categoryProducts = products.filter((product) => product.categoryId === category.id);
-              return (
-                <section id={category.slug} key={category.id}>
-                  <div className="section-head">
-                    <div>
-                      <p className="eyebrow">Collection</p>
-                      <h2 className="section-title">{category.name}</h2>
-                      {category.description && <p className="muted category-description">{category.description}</p>}
-                    </div>
-                    <span className="category-count">{categoryProducts.length} {categoryProducts.length === 1 ? "piece" : "pieces"}</span>
-                  </div>
-
-                  {categoryProducts.length ? (
-                    <div className="collection-products">
-                      {categoryProducts.map((product) => {
-                        const message = productWhatsappMessage(product.name);
-                        return (
-                          <article key={product.id} className="collection-product-card">
-                            <Link href={`/products/${product.slug}`} className="collection-product-image" onClick={() => AnalyticsService.track("product_click", { product: product.id })}>
-                              <img src={product.images[0]?.src} alt={product.images[0]?.alt ?? product.name} loading="lazy" />
-                            </Link>
-                            <div className="collection-product-copy">
-                              <div>
-                                <p>{product.name}</p>
-                                <span>{product.description}</span>
-                              </div>
-                              <div className="collection-product-actions">
-                                <Link href={`/products/${product.slug}`} onClick={() => AnalyticsService.track("product_click", { product: product.id })}>View product <ArrowUpRight size={14} /></Link>
-                                <a href={whatsappHref(whatsappBase, message)} target="_blank" rel="noreferrer" onClick={() => AnalyticsService.track("whatsapp_click", { product: product.id })}>Ask availability <ArrowUpRight size={14} /></a>
-                              </div>
-                            </div>
-                          </article>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="state-block state-compact">More pieces will appear here as the catalogue grows.</div>
-                  )}
-                </section>
-              );
-            })}
+      <div className="container">
+        {loading ? (
+          <>
+            <p className="filter-count" role="status">Loading the collection…</p>
+            <div className="skeleton-grid" aria-hidden="true">
+              {Array.from({ length: 6 }).map((_, i) => <div className="skeleton-card" key={i} />)}
+            </div>
+          </>
+        ) : error ? (
+          <div className="state-block state-error" role="alert">
+            We couldn&rsquo;t load the collection right now. Please refresh, or message the store on WhatsApp.
           </div>
-        </>
-      )}
+        ) : (
+          <>
+            <p className="filter-count" role="status" aria-live="polite">
+              {visible.length} {visible.length === 1 ? "piece" : "pieces"}
+              {activeCategory ? ` in ${activeCategory.name}` : ""}
+            </p>
+
+            {visible.length > 0 ? (
+              <div className="product-grid">
+                {visible.map((product, i) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    index={i}
+                    categoryName={categories.find((c) => c.id === product.categoryId)?.name}
+                    whatsappNumber={store?.whatsappNumber}
+                    priority={i < 4}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="state-block">
+                Nothing in this category yet.{" "}
+                <button className="link-inline" type="button" onClick={() => setActive(ALL)}>
+                  View everything instead
+                </button>.
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
       <Footer />
       <MobileActionBar />
     </main>
+  );
+}
+
+// useSearchParams needs a Suspense boundary during prerender.
+export default function CollectionPage() {
+  return (
+    <Suspense
+      fallback={
+        <main id="main" className="collection-page">
+          <div className="container" style={{ paddingTop: 160 }}>
+            <p className="eyebrow" role="status">Loading the collection…</p>
+          </div>
+        </main>
+      }
+    >
+      <CollectionView />
+    </Suspense>
   );
 }
