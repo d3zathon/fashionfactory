@@ -546,6 +546,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .footer-grid > div:first-child { grid-column: 1 / -1; }
   .cat-index { grid-template-columns: 1fr; }
   .cat-preview { display: none; }
+  /* No hover on touch, so the row arrow must stay visible — otherwise the rows
+     read as a plain list with no sign they are tappable. */
+  .cat-row-arrow { opacity: 1; transform: none; color: var(--muted); }
   .visit-grid, .faq-grid, .contact-grid, .intro-grid { grid-template-columns: 1fr; }
   .editorial { grid-template-columns: 1fr; }
   .editorial-media { min-height: 420px; }
