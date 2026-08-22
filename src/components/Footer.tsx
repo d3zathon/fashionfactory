@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { TikTokIcon } from "@/components/TikTokIcon";
 import { useStoreSettings } from "@/hooks";
-import { GENERAL_WHATSAPP_MESSAGE, telHref, whatsappHref } from "@/lib/links";
+import { AnalyticsService } from "@/services";
+import { GENERAL_WHATSAPP_MESSAGE, TIKTOK_HANDLE, telHref, tiktokHref, whatsappHref } from "@/lib/links";
 
 export function Footer() {
   const { data: store } = useStoreSettings();
@@ -28,6 +30,15 @@ export function Footer() {
           <a href={telHref(store?.phone)}>{store?.phone}</a>
           <a href={whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
           <a href={store?.instagramUrl} target="_blank" rel="noreferrer">{store?.instagramHandle}</a>
+          <a
+            className="social-link"
+            href={tiktokHref()}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => AnalyticsService.track("tiktok_click", { placement: "footer" })}
+          >
+            <TikTokIcon size={14} /> {TIKTOK_HANDLE}
+          </a>
         </div>
         <div>
           <p className="eyebrow">Locations</p>

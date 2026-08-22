@@ -11,9 +11,10 @@ import { Reveal } from "@/components/Reveal";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryIndex } from "@/components/CategoryIndex";
 import { StyleQuiz } from "@/components/StyleQuiz";
+import { TikTokIcon } from "@/components/TikTokIcon";
 import { useCategories, useFAQs, useFeaturedProducts, useHomepageContent, useInstagram, useStoreSettings, useTestimonials } from "@/hooks";
 import { AnalyticsService } from "@/services";
-import { GENERAL_WHATSAPP_MESSAGE, telHref, whatsappHref } from "@/lib/links";
+import { GENERAL_WHATSAPP_MESSAGE, TIKTOK_HANDLE, telHref, tiktokHref, whatsappHref } from "@/lib/links";
 
 const fallbackHero = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2200&q=88";
 
@@ -35,12 +36,22 @@ export default function HomePage() {
   const headline = home?.headline ?? "Define Your Style.";
   const [headOne, ...headRest] = headline.split(" ");
 
+  // The Index numbering is the spine of the design language, so it cannot show
+  // gaps. Testimonials only render when the store actually has any, which used
+  // to leave the sequence reading 02, 03, 04, 05, 07, 08, 09, 11 — both 06 (the
+  // quiz, which was never labelled) and 10 missing. Consuming a counter in
+  // source order keeps it contiguous whether or not testimonials are present.
+  // Starts at 1 because the hero is entry 01 and carries no visible label.
+  let entry = 1;
+  const idx = () => String(++entry).padStart(2, "0");
+
   const tickerItems = [
     "New arrivals in store",
     store?.locationLabel ?? "Kathmandu Valley, Nepal",
     store?.openingHours ?? "9:00 AM – 5:00 PM daily",
     "Ask us on WhatsApp",
     store?.instagramHandle ?? "@fashion.factory_2022",
+    `Follow us on TikTok — ${TIKTOK_HANDLE}`,
   ];
 
   return <main id="main">
@@ -58,7 +69,7 @@ export default function HomePage() {
           {headOne} <em>{headRest.join(" ")}</em>
         </h1>
         <div className="hero-row">
-          <p className="hero-blurb">{home?.description}</p>
+          <p className="hero-blurb">{home?.description ?? "Discover fashion at Fashion Factory Nepal, Kathmandu."}</p>
           <div className="hero-actions">
             <Link className="btn btn-accent" href="/collection" onClick={() => track("collection_click")}>
               Browse the collection <ArrowUpRight size={15} />
@@ -77,12 +88,12 @@ export default function HomePage() {
         <Reveal>
           <div className="intro-grid">
             <div className="head-meta">
-              <span className="idx">02</span>
+              <span className="idx">{idx()}</span>
               <p className="eyebrow">The store</p>
             </div>
             <div>
-              <h2 className="intro-copy">{home?.introductionTitle}</h2>
-              <p className="intro-body">{home?.introductionBody}</p>
+              <h2 className="intro-copy">{home?.introductionTitle ?? "Fashion Made Easy to Discover."}</h2>
+              <p className="intro-body">{home?.introductionBody ?? "Fashion Factory is a Kathmandu-based fashion and clothing retail destination. Browse the collection, connect with the store, and visit in person to find your next look."}</p>
               <div className="intro-stats">
                 <div className="intro-stat">
                   <strong>{store?.locations?.length ?? 2}</strong>
@@ -109,7 +120,7 @@ export default function HomePage() {
         <div className="section-head">
           <div>
             <div className="head-meta">
-              <span className="idx">03</span>
+              <span className="idx">{idx()}</span>
               <p className="eyebrow">The index</p>
             </div>
             <h2 className="section-title">Find your category.</h2>
@@ -130,7 +141,7 @@ export default function HomePage() {
         <div className="section-head">
           <div>
             <div className="head-meta">
-              <span className="idx">04</span>
+              <span className="idx">{idx()}</span>
               <p className="eyebrow">Selected pieces</p>
             </div>
             <h2 className="section-title">Worth a closer look.</h2>
@@ -141,7 +152,7 @@ export default function HomePage() {
         </div>
         <div className="product-grid">
           {products.map((product, i) => (
-            <Reveal key={product.id} delay={(i % 4) * 70}>
+            <Reveal key={product.id} delay={(i % 3) * 70}>
               <ProductCard
                 product={product}
                 index={i}
@@ -162,7 +173,7 @@ export default function HomePage() {
       </div>
       <div className="editorial-body">
         <div className="head-meta">
-          <span className="idx" style={{ color: "#9c9384" }}>05</span>
+          <span className="idx">{idx()}</span>
           <p className="eyebrow">How it works</p>
         </div>
         <h2 className="editorial-quote">See it. Try it.<br />Take it home.</h2>
@@ -186,6 +197,17 @@ export default function HomePage() {
     {/* 06 — STYLE QUIZ -------------------------------------------------- */}
     <section className="section band-wash">
       <div className="container">
+        {/* The quiz was the one section carrying no entry label, which is what
+            left a hole at 06. The eyebrow names the section rather than
+            repeating the card's own "Find your edit" heading. */}
+        <div className="section-head">
+          <div>
+            <div className="head-meta">
+              <span className="idx">{idx()}</span>
+              <p className="eyebrow">The styling quiz</p>
+            </div>
+          </div>
+        </div>
         <Reveal>
           <StyleQuiz categories={categories} products={products} whatsappNumber={store?.whatsappNumber} />
         </Reveal>
@@ -198,14 +220,38 @@ export default function HomePage() {
         <div className="section-head">
           <div>
             <div className="head-meta">
-              <span className="idx">07</span>
+              <span className="idx">{idx()}</span>
               <p className="eyebrow">Social edit</p>
             </div>
             <h2 className="section-title">What&rsquo;s new in store.</h2>
           </div>
-          <a className="link-rule" href={store?.instagramUrl} target="_blank" rel="noreferrer" onClick={() => track("instagram_click")}>
-            {store?.instagramHandle} <Instagram size={14} />
-          </a>
+          {/* Both handles sit in the existing section header rather than in a
+              section of their own — the social edit is already the place a
+              visitor looks for where to follow the store. */}
+          <div className="social-rail">
+            {/* Falls back for the same reason the ticker does: store settings
+                load client-side, so before hydration this rendered as an empty
+                anchor with no href — conspicuous now that a fully-populated
+                TikTok handle sits next to it. */}
+            <a
+              className="link-rule"
+              href={store?.instagramUrl ?? "https://www.instagram.com/fashion.factory_2022/"}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => track("instagram_click")}
+            >
+              {store?.instagramHandle ?? "@fashion.factory_2022"} <Instagram size={14} />
+            </a>
+            <a
+              className="link-rule"
+              href={tiktokHref()}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => track("tiktok_click", { placement: "social_edit" })}
+            >
+              {TIKTOK_HANDLE} <TikTokIcon size={13} />
+            </a>
+          </div>
         </div>
         <div className="ig-grid">
           {instagram.map((post) => (
@@ -222,7 +268,7 @@ export default function HomePage() {
       <div className="container visit-grid">
         <div>
           <div className="head-meta">
-            <span className="idx">08</span>
+            <span className="idx">{idx()}</span>
             <p className="eyebrow">Visit us</p>
           </div>
           <h2 className="section-title">Two doors in the<br />Kathmandu Valley.</h2>
@@ -259,7 +305,7 @@ export default function HomePage() {
       <div className="container faq-grid">
         <div>
           <div className="head-meta">
-            <span className="idx">09</span>
+            <span className="idx">{idx()}</span>
             <p className="eyebrow">Need to know</p>
           </div>
           <h2 className="section-title">Questions,<br />answered.</h2>
@@ -280,14 +326,14 @@ export default function HomePage() {
         <div className="container">
           <div className="section-head">
             <div>
-              <div className="head-meta"><span className="idx">10</span><p className="eyebrow">Social proof</p></div>
+              <div className="head-meta"><span className="idx">{idx()}</span><p className="eyebrow">Social proof</p></div>
               <h2 className="section-title">What customers say.</h2>
             </div>
           </div>
-          <div className="product-grid">
+          <div className="quote-grid">
             {testimonials.map((testimonial) => (
-              <article key={testimonial.id} className="state-block state-compact">
-                <p>&ldquo;{testimonial.quote}&rdquo;</p>
+              <article key={testimonial.id} className="quote-card">
+                <p className="quote-body">&ldquo;{testimonial.quote}&rdquo;</p>
                 <span className="eyebrow">{testimonial.name}</span>
               </article>
             ))}
@@ -300,7 +346,7 @@ export default function HomePage() {
       <div className="container contact-grid">
         <div>
           <div className="head-meta">
-            <span className="idx">11</span>
+            <span className="idx">{idx()}</span>
             <p className="eyebrow">Talk to the store</p>
           </div>
           <h2 className="section-title">Have a question<br />about a look?</h2>
@@ -319,8 +365,8 @@ export default function HomePage() {
     <section className="final">
       <div className="container final-inner">
         <p className="eyebrow">Fashion Factory Nepal</p>
-        <h2>{home?.finalCtaTitle}</h2>
-        <p>{home?.finalCtaBody}</p>
+        <h2>{home?.finalCtaTitle ?? "Your Next Look Starts Here."}</h2>
+        <p>{home?.finalCtaBody ?? "Visit Fashion Factory in the Kathmandu Valley, or message the store to ask about a piece."}</p>
         <div className="final-actions">
           <Link className="btn btn-dark" href="/collection">Browse the collection</Link>
           <a className="btn" href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click")}>WhatsApp us</a>
