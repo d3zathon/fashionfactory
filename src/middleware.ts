@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { ACTIVE_STORE_SLUG } from "@/lib/activeStore";
 
 const LOGIN_PATH = "/admin/login";
 
@@ -45,16 +46,31 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Signed in, but membership in admin_users is what grants access.
-  const { data: adminRow } = await supabase
+  // Signed in, but membership in admin_users is what grants access — and it
+  // has to be membership for *this* deployment's store. An admin of another
+  // store has no business in this one's panel: every query would come back
+  // empty under RLS anyway, which reads as a broken page rather than a refusal.
+  const { data: scopedRows, error: scopedError } = await supabase
     .from("admin_users")
-    .select("user_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
+    .select("user_id, store_id")
+    .eq("user_id", user.id);
 
-  if (!adminRow) {
+  // Selecting store_id on a project that has not run 0002 is an error, not an
+  // empty result — falling straight through would lock the owner out of their
+  // own panel. Fall back to the pre-tenancy question: are they an admin at all?
+  const membership = scopedError
+    ? await supabase.from("admin_users").select("user_id").eq("user_id", user.id)
+    : { data: scopedRows, error: null };
+
+  const isAdmin = Boolean(membership.data?.length);
+  const manages = scopedError ? true : await managesActiveStore(supabase, scopedRows ?? null);
+
+  if (!isAdmin || !manages) {
     if (isApiRoute) {
-      return NextResponse.json({ success: false, error: "Not authorized." }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: `This account does not manage ${ACTIVE_STORE_SLUG}.` },
+        { status: 403 }
+      );
     }
     if (isLoginRoute) return response;
     const redirectUrl = request.nextUrl.clone();
@@ -77,3 +93,37 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ["/admin/:path*", "/api/admin/:path*"],
 };
+
+type AdminRow = { user_id: string; store_id: string | null };
+
+/**
+ * Does this admin manage the store this deployment serves?
+ *
+ * A row with store_id null is a platform admin and manages every store.
+ *
+ * Deliberately permissive when the question cannot be answered — a project that
+ * has not run 0002 yet has no store_id column and no stores table, and there
+ * every admin is by definition an admin of the only store there is. Failing
+ * closed here would lock the owner out of their own panel for the window
+ * between deploying the code and applying the migration, to protect against a
+ * second store that does not exist yet. The publish route, whose blast radius
+ * crosses tenants, fails closed instead.
+ */
+async function managesActiveStore(
+  supabase: ReturnType<typeof createServerClient>,
+  adminRows: AdminRow[] | null
+): Promise<boolean> {
+  if (!adminRows?.length) return false;
+  if (adminRows.some((row) => row.store_id === null)) return true;
+
+  const { data: store, error } = await supabase
+    .from("stores")
+    .select("id")
+    .eq("slug", ACTIVE_STORE_SLUG)
+    .maybeSingle();
+
+  if (error) return true; // stores table not there yet — see above.
+  if (!store) return false;
+
+  return adminRows.some((row) => row.store_id === store.id);
+}

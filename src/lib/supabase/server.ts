@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { ACTIVE_STORE_SLUG } from "@/lib/activeStore";
 
 export function isSupabaseConfigured(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -56,4 +57,40 @@ export async function getAdminIdentity(): Promise<AdminIdentity | null> {
 export async function requireAdmin(): Promise<AdminIdentity | null> {
   const identity = await getAdminIdentity();
   return identity?.isAdmin ? identity : null;
+}
+
+/** Why a store-scoped authorization check failed, so callers can say something useful. */
+export type StoreAdminDenial = "unconfigured" | "unauthenticated" | "not-store-admin" | "check-unavailable";
+
+export type StoreAdminResult =
+  | { ok: true; user: User }
+  | { ok: false; reason: StoreAdminDenial; detail?: string };
+
+/**
+ * Authorization for actions that belong to one specific store.
+ *
+ * requireAdmin() only answers "is this person an admin of *something*", which is
+ * not enough for anything that acts on a named store: an admin of store B would
+ * otherwise be able to trigger store A's publish. The decision is delegated to
+ * public.admin_manages_store() so the rule has exactly one definition — the
+ * same private.can_manage_store_slug() the RLS policies call — instead of a
+ * second copy here that can drift.
+ *
+ * Fails closed. If the function is missing (migrations not applied yet) the
+ * answer is "no", with a distinguishable reason so the UI can say why.
+ */
+export async function requireStoreAdmin(storeSlug: string = ACTIVE_STORE_SLUG): Promise<StoreAdminResult> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { ok: false, reason: "unconfigured" };
+
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) return { ok: false, reason: "unauthenticated" };
+
+  const { data, error } = await supabase.rpc("admin_manages_store", { store_slug: storeSlug });
+  if (error) {
+    return { ok: false, reason: "check-unavailable", detail: error.message };
+  }
+  if (data !== true) return { ok: false, reason: "not-store-admin" };
+
+  return { ok: true, user: userData.user };
 }

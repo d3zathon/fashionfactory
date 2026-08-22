@@ -64,6 +64,7 @@ are the whole schema.
 | --- | --- |
 | `0001_baseline.sql` | Products, categories, store settings, branches, `admin_users`, `private.is_admin()`, RLS, the `product-images` bucket. Every statement is re-runnable. |
 | `0002_multi_store.sql` | Adds `stores`, attaches every content row to a store, narrows RLS from "is an admin" to "is an admin of this store", moves product images into per-store folders, and migrates the old singleton `store_settings` into `stores` before dropping it. |
+| `0003_tenant_hardening.sql` | Closes the gaps RLS alone cannot: protects platform-only columns on `stores` with a trigger, makes public reads require an *active store* as well as an active row, and adds `public.admin_manages_store()` for per-store publish authorization. Reversible — the inverse of every statement is at the bottom of the file. |
 
 Either paste each file into **Database → SQL Editor** and run it, or use the
 Supabase CLI:
@@ -251,6 +252,9 @@ Run through these on the live domain, on a phone as well as a desktop:
 **Security**
 - [ ] Supabase → Advisors → Security shows nothing unexpected.
 - [ ] Public sign-ups are off.
+- [ ] A store admin cannot change their store's `slug` (see the SQL check below).
+- [ ] Deactivating a store (`is_active = false`) hides its products, categories
+      **and** branch addresses from anonymous reads.
 - [ ] `curl -sI https://<domain> | grep -i x-content-type-options` returns the header.
 - [ ] The anon key is the only Supabase key present in the browser bundle.
 
@@ -258,6 +262,108 @@ Run through these on the live domain, on a phone as well as a desktop:
 the repository ships nine placeholder products. The generator now refuses to
 publish an empty catalogue for exactly this reason — add the real products in
 `/admin` before pressing Publish.
+
+---
+
+## 8a. The permission model
+
+Three roles, and what each may do.
+
+| | Anonymous visitor | Store admin | Platform admin |
+| --- | --- | --- | --- |
+| Read visible products / active categories / active locations **of an active store** | yes | yes | yes |
+| Read anything belonging to an **inactive** store | no | own store only | yes |
+| Create / edit / delete products, categories, locations | no | own store only | any store |
+| Edit store profile: name, contact, social, hours, copy, SEO, branding, features | no | own store only | any store |
+| Change `id`, `slug`, `is_active`, `is_default`, `created_at`, `site_url` | no | **no** | yes |
+| Create or delete a store | no | no | yes |
+| Grant or revoke admin rights | no | no | SQL / service_role only |
+| Trigger Publish | no | own store only | any store |
+| Upload product images | no | own store's folder only | any folder |
+
+A **platform admin** is a row in `admin_users` with `store_id` null; a **store
+admin** has that store's id.
+
+Two of these are worth being explicit about, because they are enforced somewhere
+other than where you would look first:
+
+- **Protected columns** are guarded by a `BEFORE UPDATE` trigger, not by a
+  policy. RLS decides which *rows* you may write, never which *columns*, so the
+  "store admins update their store" policy would otherwise have allowed a store
+  admin to rename their own slug — repointing the publish pipeline — or flip
+  `is_default`. The admin UI never offers these fields, but the UI is not the
+  boundary: a store admin holds a valid session and can call PostgREST directly.
+- **Admin membership** has a SELECT policy and deliberately no write policy, so
+  every write through the API is denied and granting rights stays a SQL /
+  service_role operation. `0003` asserts this at migration time, so a future
+  migration that adds a write policy to `admin_users` fails loudly instead of
+  quietly enabling self-promotion.
+
+Publish authorization is checked twice: middleware refuses a session that does
+not manage this deployment's store, and `/api/admin/publish` re-checks through
+`public.admin_manages_store()` before dispatching, so an admin of store B cannot
+trigger store A's workflow even if the middleware matcher changes. The route also
+names the store in the dispatch `inputs` rather than letting the generator fall
+back to whatever `src/data/store.json` holds on that branch.
+
+### Verifying the model
+
+Run these after applying the migrations. They are the checks that would have
+caught each gap `0003` closes, so they are worth re-running after any future
+policy change.
+
+```sql
+-- 1. Protected columns are refused for a store admin and allowed for a platform
+--    admin. Run as the store admin's role by impersonating their JWT in the SQL
+--    editor, or from the app with that account signed in.
+--    Expected: ERROR 42501 "Only a platform administrator can change ...".
+update public.stores set slug = 'hijacked' where slug = 'fashion-factory-nepal';
+
+-- 2. Public reads follow the store's active flag. Expected: the second count is
+--    0 for every table once the store is deactivated.
+update public.stores set is_active = false where slug = 'fashion-factory-nepal';
+set local role anon;
+select
+  (select count(*) from public.products)        as products,
+  (select count(*) from public.categories)      as categories,
+  (select count(*) from public.store_locations) as locations;
+reset role;
+update public.stores set is_active = true where slug = 'fashion-factory-nepal';
+
+-- 3. Membership is not writable through the API. Expected: 0 rows.
+select policyname, cmd from pg_policies
+where schemaname = 'public' and tablename = 'admin_users' and cmd <> 'SELECT';
+
+-- 4. Publish authorization answers per store. Expected: true for a store the
+--    signed-in account manages, false for any other.
+select public.admin_manages_store('fashion-factory-nepal');
+```
+
+### Contact form abuse protection
+
+`/api/contact` has three layers, none of which need an external service or a
+secret:
+
+1. **Honeypot** — a `contact_reference` field, off-screen and `aria-hidden`, that no human
+   fills in. A submission carrying it is answered with the normal success
+   response and silently dropped, so a script gets no signal to adapt to.
+2. **Rate limit** — 5 submissions per client address per 10 minutes, returning
+   `429` with `Retry-After`.
+3. **Length caps** — names, phones and messages are bounded so the endpoint
+   cannot be used to post a megabyte of text.
+
+**Known limitation.** The rate limiter holds its counters in the memory of a
+single serverless instance. On Vercel that means a flood spread across many cold
+starts gets more than 5 through, and counters reset when an instance recycles. It
+stops the realistic case — one script hammering one endpoint — at zero cost.
+
+If you later need a limit that holds across instances, add
+[Upstash Redis](https://upstash.com) (it has a free tier) and swap the body of
+`src/lib/rateLimit.ts` for a `@upstash/ratelimit` call. That is the only step
+that would introduce new secrets: `UPSTASH_REDIS_REST_URL` and
+`UPSTASH_REDIS_REST_TOKEN`, set as **server-only** host environment variables —
+never `NEXT_PUBLIC_`, never committed. Nothing in the repository needs that
+today.
 
 ---
 

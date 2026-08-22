@@ -135,6 +135,19 @@ Being signed in grants **nothing**. Access is granted only by membership in
    REST API is called directly with the anon key. An admin of one store cannot
    read or write another store's rows.
 
+Two things RLS alone cannot express, added in `0003`:
+
+- **Column-level protection.** Policies decide which *rows* you may write, never
+  which *columns*, so a `BEFORE UPDATE` trigger refuses changes to `id`, `slug`,
+  `is_active`, `is_default`, `created_at` and `site_url` unless the caller is a
+  platform admin. Hiding the fields in the admin UI is not protection: a store
+  admin holds a valid session and can call PostgREST directly.
+- **Per-store publish.** `/api/admin/publish` calls
+  `public.admin_manages_store()` before dispatching, so an admin of store B
+  cannot trigger store A's workflow. See
+  [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#8a-the-permission-model) for the full
+  matrix.
+
 Sessions are cookie-based (`@supabase/ssr`), not `localStorage` — that is what
 makes server-side checks possible at all.
 

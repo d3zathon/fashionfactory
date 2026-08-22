@@ -1,16 +1,10 @@
 import { getSupabaseClient } from "@/lib/supabase/client";
-import { getStoreProfile } from "@/providers/static";
+import { ACTIVE_STORE_SLUG } from "@/lib/activeStore";
 import type { BusinessHours, StoreBranding, StoreFeatures, StoreSeo } from "@/models";
 
-/**
- * Which store this admin panel administers.
- *
- * One deployment serves one store, so the panel's scope is fixed at build time
- * rather than chosen per session. NEXT_PUBLIC_STORE_SLUG overrides it (useful
- * when pointing a preview deployment at a different tenant); otherwise it is
- * whichever store the committed data was generated for.
- */
-export const ACTIVE_STORE_SLUG = process.env.NEXT_PUBLIC_STORE_SLUG || getStoreProfile().slug;
+// Re-exported so existing importers keep working; defined in @/lib/activeStore
+// so server code can read it without pulling in the browser Supabase client.
+export { ACTIVE_STORE_SLUG };
 
 export interface AdminCategory {
   id: string;
