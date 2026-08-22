@@ -14,9 +14,15 @@ import { StyleQuiz } from "@/components/StyleQuiz";
 import { TikTokIcon } from "@/components/TikTokIcon";
 import { useCategories, useFAQs, useFeaturedProducts, useHomepageContent, useInstagram, useStoreSettings, useTestimonials } from "@/hooks";
 import { AnalyticsService } from "@/services";
-import { GENERAL_WHATSAPP_MESSAGE, TIKTOK_HANDLE, telHref, tiktokHref, whatsappHref } from "@/lib/links";
+import { generalWhatsappMessage, telHref, tiktokLink, whatsappHref } from "@/lib/links";
+import { getStoreProfile } from "@/providers/static";
 
 const fallbackHero = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2200&q=88";
+
+// The store this deployment was built for. useStoreSettings resolves to the
+// same data, but only after the first render, so this stands in for it wherever
+// a fallback used to be a Fashion Factory literal.
+const built = getStoreProfile();
 
 export default function HomePage() {
   const { data: home } = useHomepageContent();
@@ -29,11 +35,17 @@ export default function HomePage() {
 
   const track = (event: string, properties?: Record<string, string | number | boolean>) =>
     AnalyticsService.track(event, properties);
-  const wa = whatsappHref(store?.whatsappNumber, GENERAL_WHATSAPP_MESSAGE);
+  const wa = whatsappHref(store?.whatsappNumber, generalWhatsappMessage(store?.name));
+  // Field-by-field rather than `store ?? built`: useStoreSettings seeds an empty
+  // object, which is truthy, so a whole-object fallback would never fire.
+  const tiktok = tiktokLink({
+    tiktokUrl: store?.tiktokUrl ?? built.tiktokUrl,
+    tiktokHandle: store?.tiktokHandle ?? built.tiktokHandle,
+  });
   const heroSrc = home?.heroImage?.src ?? fallbackHero;
 
   // Headline is split so the second line can indent and shift to rust.
-  const headline = home?.headline ?? "Define Your Style.";
+  const headline = home?.headline ?? built.tagline ?? built.name;
   const [headOne, ...headRest] = headline.split(" ");
 
   // The Index numbering is the spine of the design language, so it cannot show
@@ -45,13 +57,20 @@ export default function HomePage() {
   let entry = 1;
   const idx = () => String(++entry).padStart(2, "0");
 
+  // Sections a store has switched off in its settings never render. Unset
+  // counts as on, so a store that has never touched these keeps everything.
+  const feature = (key: keyof NonNullable<typeof built.features>) => built.features?.[key] !== false;
+
+  // Falls back to the built store's own profile rather than to literals: the
+  // JSON is a build-time constant, so these read as stably as hardcoded strings
+  // while staying correct on a storefront that isn't Fashion Factory's.
   const tickerItems = [
     "New arrivals in store",
-    store?.locationLabel ?? "Kathmandu Valley, Nepal",
-    store?.openingHours ?? "9:00 AM – 5:00 PM daily",
+    store?.locationLabel ?? built.locationLabel,
+    store?.openingHours ?? built.openingHours,
     "Ask us on WhatsApp",
-    store?.instagramHandle ?? "@fashion.factory_2022",
-    `Follow us on TikTok — ${TIKTOK_HANDLE}`,
+    store?.instagramHandle ?? built.instagramHandle,
+    ...(built.tiktokHandle ? [`Follow us on TikTok — ${store?.tiktokHandle ?? built.tiktokHandle}`] : []),
   ];
 
   return <main id="main">
@@ -64,12 +83,12 @@ export default function HomePage() {
     <section id="top" className="hero">
       <div className="hero-image" style={{ backgroundImage: `url(${heroSrc})` }} aria-hidden="true" />
       <div className="container hero-content">
-        <p className="eyebrow hero-eyebrow">{home?.eyebrow ?? "Kathmandu, Nepal"}</p>
+        <p className="eyebrow hero-eyebrow">{home?.eyebrow ?? built.locationLabel}</p>
         <h1 className="hero-title">
           {headOne} <em>{headRest.join(" ")}</em>
         </h1>
         <div className="hero-row">
-          <p className="hero-blurb">{home?.description ?? "Discover fashion at Fashion Factory Nepal, Kathmandu."}</p>
+          <p className="hero-blurb">{home?.description ?? built.description}</p>
           <div className="hero-actions">
             <Link className="btn btn-accent" href="/collection" onClick={() => track("collection_click")}>
               Browse the collection <ArrowUpRight size={15} />
@@ -92,8 +111,8 @@ export default function HomePage() {
               <p className="eyebrow">The store</p>
             </div>
             <div>
-              <h2 className="intro-copy">{home?.introductionTitle ?? "Fashion Made Easy to Discover."}</h2>
-              <p className="intro-body">{home?.introductionBody ?? "Fashion Factory is a Kathmandu-based fashion and clothing retail destination. Browse the collection, connect with the store, and visit in person to find your next look."}</p>
+              <h2 className="intro-copy">{home?.introductionTitle ?? built.tagline}</h2>
+              <p className="intro-body">{home?.introductionBody ?? built.description}</p>
               <div className="intro-stats">
                 <div className="intro-stat">
                   <strong>{store?.locations?.length ?? 2}</strong>
@@ -105,7 +124,7 @@ export default function HomePage() {
                 </div>
                 <div className="intro-stat">
                   <strong>Daily</strong>
-                  <span>{store?.openingHours ?? "9–5"}</span>
+                  <span>{store?.openingHours ?? built.openingHours}</span>
                 </div>
               </div>
             </div>
@@ -188,12 +207,13 @@ export default function HomePage() {
           </div>
           <div className="editorial-step">
             <b>03</b>
-            <div><p>Visit</p><small>Come to Kirtipur or Budhanilkantha and try it on.</small></div>
+            <div><p>Visit</p><small>{built.visitStepBody ?? "Come and try it on."}</small></div>
           </div>
         </div>
       </div>
     </section>
 
+    {feature("styleQuiz") && (<>
     {/* 06 — STYLE QUIZ -------------------------------------------------- */}
     <section className="section band-wash">
       <div className="container">
@@ -213,7 +233,9 @@ export default function HomePage() {
         </Reveal>
       </div>
     </section>
+    </>)}
 
+    {feature("instagramFeed") && (<>
     {/* 07 — INSTAGRAM --------------------------------------------------- */}
     <section id="instagram" className="section rule-top">
       <div className="container">
@@ -235,22 +257,24 @@ export default function HomePage() {
                 TikTok handle sits next to it. */}
             <a
               className="link-rule"
-              href={store?.instagramUrl ?? "https://www.instagram.com/fashion.factory_2022/"}
+              href={store?.instagramUrl ?? built.instagramUrl}
               target="_blank"
               rel="noreferrer"
               onClick={() => track("instagram_click")}
             >
-              {store?.instagramHandle ?? "@fashion.factory_2022"} <Instagram size={14} />
+              {store?.instagramHandle ?? built.instagramHandle} <Instagram size={14} />
             </a>
-            <a
-              className="link-rule"
-              href={tiktokHref()}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => track("tiktok_click", { placement: "social_edit" })}
-            >
-              {TIKTOK_HANDLE} <TikTokIcon size={13} />
-            </a>
+            {tiktok && (
+              <a
+                className="link-rule"
+                href={tiktok}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => track("tiktok_click", { placement: "social_edit" })}
+              >
+                {store?.tiktokHandle ?? built.tiktokHandle} <TikTokIcon size={13} />
+              </a>
+            )}
           </div>
         </div>
         <div className="ig-grid">
@@ -262,7 +286,9 @@ export default function HomePage() {
         </div>
       </div>
     </section>
+    </>)}
 
+    {feature("locations") && (<>
     {/* 08 — VISIT ------------------------------------------------------- */}
     <section id="visit-us" className="section band-wash rule-top">
       <div className="container visit-grid">
@@ -271,7 +297,12 @@ export default function HomePage() {
             <span className="idx">{idx()}</span>
             <p className="eyebrow">Visit us</p>
           </div>
-          <h2 className="section-title">Two doors in the<br />Kathmandu Valley.</h2>
+          {/* Split on newlines so a store's own two-line heading keeps its break. */}
+          <h2 className="section-title">
+            {(built.visitTitle ?? "Where to find us.").split("\n").map((line, i) => (
+              <span key={line}>{i > 0 && <br />}{line}</span>
+            ))}
+          </h2>
           <div className="location-list">
             {store?.locations?.map((location) => (
               <div className="location-card" key={location.id}>
@@ -299,7 +330,9 @@ export default function HomePage() {
         </div>
       </div>
     </section>
+    </>)}
 
+    {feature("faqs") && (<>
     {/* 09 — FAQ + CONTACT ----------------------------------------------- */}
     <section className="section faq rule-top">
       <div className="container faq-grid">
@@ -320,8 +353,9 @@ export default function HomePage() {
         </div>
       </div>
     </section>
+    </>)}
 
-    {testimonials.length > 0 && (
+    {feature("testimonials") && testimonials.length > 0 && (
       <section className="section rule-top">
         <div className="container">
           <div className="section-head">
@@ -342,6 +376,7 @@ export default function HomePage() {
       </section>
     )}
 
+    {feature("contactForm") && (<>
     <section id="contact" className="section band-wash rule-top">
       <div className="container contact-grid">
         <div>
@@ -361,12 +396,13 @@ export default function HomePage() {
         <ContactForm />
       </div>
     </section>
+    </>)}
 
     <section className="final">
       <div className="container final-inner">
-        <p className="eyebrow">Fashion Factory Nepal</p>
+        <p className="eyebrow">{store?.name ?? built.name}</p>
         <h2>{home?.finalCtaTitle ?? "Your Next Look Starts Here."}</h2>
-        <p>{home?.finalCtaBody ?? "Visit Fashion Factory in the Kathmandu Valley, or message the store to ask about a piece."}</p>
+        <p>{home?.finalCtaBody ?? `Visit ${store?.name ?? built.name}, or message the store to ask about a piece.`}</p>
         <div className="final-actions">
           <Link className="btn btn-dark" href="/collection">Browse the collection</Link>
           <a className="btn" href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click")}>WhatsApp us</a>

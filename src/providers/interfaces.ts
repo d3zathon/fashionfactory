@@ -1,4 +1,4 @@
-import type { Category, Collection, FAQ, HomepageContent, InstagramPost, MediaAsset, Product, StoreSettings, Testimonial, ContactInquiry } from "@/models";
+import type { Category, Collection, FAQ, HomepageContent, InstagramPost, MediaAsset, Product, StoreProfile, Testimonial, ContactInquiry } from "@/models";
 
 export interface ProductProvider {
   getProducts(): Promise<Product[]>;
@@ -32,7 +32,9 @@ export interface ContactProvider {
   submitInquiry(data: ContactInquiry): Promise<{ success: boolean; id?: string; error?: string }>;
 }
 
-export interface StoreSettingsProvider { getStoreSettings(): Promise<StoreSettings>; }
+// Returns the full tenant profile. StoreProfile extends StoreSettings, so every
+// pre-tenancy consumer keeps working unchanged.
+export interface StoreSettingsProvider { getStoreSettings(): Promise<StoreProfile>; }
 export interface TestimonialProvider { getTestimonials(): Promise<Testimonial[]>; }
 export interface MediaProvider { getMedia(): Promise<MediaAsset[]>; }
 export interface AnalyticsProvider { track(event: string, properties?: Record<string, string | number | boolean>): void; }

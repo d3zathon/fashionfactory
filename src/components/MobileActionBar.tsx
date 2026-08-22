@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { MapPin, MessageCircle, Phone } from "lucide-react";
 import { useStoreSettings } from "@/hooks";
-import { GENERAL_WHATSAPP_MESSAGE, telHref, whatsappHref } from "@/lib/links";
+import { generalWhatsappMessage, telHref, whatsappHref } from "@/lib/links";
 
 export function MobileActionBar() {
   const { data: store } = useStoreSettings();
-  const whatsapp = whatsappHref(store?.whatsappNumber, GENERAL_WHATSAPP_MESSAGE);
+  const whatsapp = whatsappHref(store?.whatsappNumber, generalWhatsappMessage(store?.name));
 
   return (
     <div className="mobile-actions" aria-label="Quick contact actions">

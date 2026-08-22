@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { ContactInquiry } from "@/models";
 import { mockContactProvider } from "@/providers/mock";
+import { getStoreProfile } from "@/providers/static";
 
 function validate(data: Partial<ContactInquiry>): string | null {
   if (!data.name || data.name.trim().length < 2) return "Please enter your name.";
@@ -11,7 +12,7 @@ function validate(data: Partial<ContactInquiry>): string | null {
 
 function formatMessage(data: ContactInquiry): string {
   const lines = [
-    "New inquiry from Fashion Factory website",
+    `New inquiry from the ${getStoreProfile().name} website`,
     `Name: ${data.name}`,
     `Phone: ${data.phone}`,
   ];

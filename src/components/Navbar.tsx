@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 import styles from "./Navbar.module.css";
+import { getStoreProfile } from "@/providers/static";
+import { Wordmark } from "@/components/Wordmark";
+
+const built = getStoreProfile();
 
 interface NavbarProps {
   tone?: "dark" | "light";
@@ -65,8 +69,8 @@ export function Navbar({ tone = "dark" }: NavbarProps) {
   return (
     <header className={className}>
       <div className="container nav-inner">
-        <Link href="/" className="brand" aria-label="Fashion Factory Nepal home" onClick={close}>
-          <span>FASHION</span><strong>FACTORY</strong><small>NEPAL</small>
+        <Link href="/" className="brand" aria-label={`${built.name} home`} onClick={close}>
+          <Wordmark store={built} />
         </Link>
         <nav
           id="primary-navigation"

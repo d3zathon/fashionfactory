@@ -8,6 +8,7 @@ import { Navbar } from "@/components/Navbar";
 import { CategoryService, ProductService, StoreSettingsService } from "@/services";
 import { productWhatsappMessage, whatsappHref } from "@/lib/links";
 import styles from "./product.module.css";
+import { getStoreProfile } from "@/providers/static";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -31,18 +32,19 @@ async function getProduct(slug: string) {
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProduct(slug);
-  if (!product) return { title: "Product | Fashion Factory Nepal" };
+  const storeName = getStoreProfile().name;
+  if (!product) return { title: `Product | ${storeName}` };
 
-  const description = product.description ?? `Ask Fashion Factory Nepal about ${product.name}.`;
+  const description = product.description ?? `Ask ${storeName} about ${product.name}.`;
   const image = product.images[0]?.src;
 
   return {
-    title: `${product.name} | Fashion Factory Nepal`,
+    title: `${product.name} | ${storeName}`,
     description,
     // Relative canonical resolves against metadataBase (NEXT_PUBLIC_SITE_URL).
     alternates: { canonical: `/products/${product.slug}` },
     openGraph: {
-      title: `${product.name} | Fashion Factory Nepal`,
+      title: `${product.name} | ${storeName}`,
       description,
       type: "website",
       url: `/products/${product.slug}`,

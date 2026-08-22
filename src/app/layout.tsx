@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { DM_Sans, Playfair_Display } from "next/font/google";
 import { StoreSettingsService } from "@/services";
+import { getStoreProfile } from "@/providers/static";
 import "./globals.css";
 import "./route-state.css";
 
@@ -22,36 +23,77 @@ const serif = Playfair_Display({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+// NEXT_PUBLIC_SITE_URL wins over the store's recorded siteUrl, so a preview
+// deployment resolves its own absolute URLs instead of the production domain's.
+const built = getStoreProfile();
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? built.siteUrl;
 
 export const metadata: Metadata = {
   ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
-  title: "Fashion Factory Nepal | Fashion Store in Kathmandu",
-  description: "Discover fashion at Fashion Factory Nepal. Browse the collection, contact the store, and get directions to our Kirtipur and Budhanilkantha branches.",
-  keywords: ["Fashion Factory Nepal", "fashion store Kathmandu", "clothing store Kathmandu", "fashion shop Kathmandu", "Fashion Factory Kirtipur", "Fashion Factory Budhanilkantha"],
-  openGraph: { title: "Fashion Factory Nepal", description: "Define Your Style.", type: "website" },
+  title: built.seo?.title ?? built.name,
+  description: built.seo?.description ?? built.description,
+  ...(built.seo?.keywords ? { keywords: built.seo.keywords } : {}),
+  openGraph: { title: built.name, description: built.tagline ?? built.description, type: "website" },
+  // Only set when the store supplies one — otherwise Next's file-based
+  // src/app/icon.jpg keeps serving the favicon.
+  ...(built.faviconUrl ? { icons: { icon: built.faviconUrl } } : {}),
 };
+
+/**
+ * The store's palette, as an override of the design system's tokens.
+ *
+ * Only the five tokens a store is allowed to restyle, and only when the value
+ * is a plain hex colour — the string is interpolated into a <style> tag, so
+ * anything else is dropped rather than trusted. Tokens the store leaves unset
+ * keep their values from globals.css.
+ */
+const BRANDING_TOKENS: [keyof NonNullable<typeof built.branding>, string][] = [
+  ["accent", "--accent"],
+  ["accentDeep", "--accent-deep"],
+  ["accentLight", "--accent-light"],
+  ["ink", "--ink"],
+  ["paper", "--paper"],
+];
+
+function brandingStyle(branding: typeof built.branding): string | null {
+  const declarations = BRANDING_TOKENS.flatMap(([key, token]) => {
+    const value = branding?.[key];
+    return typeof value === "string" && /^#[0-9a-fA-F]{3,8}$/.test(value) ? [`${token}: ${value};`] : [];
+  });
+  return declarations.length ? `:root { ${declarations.join(" ")} }` : null;
+}
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const store = await StoreSettingsService.getStoreSettings();
+
+  // schema.org wants "Mo-Su 09:00-17:00"; the store records the structured form
+  // and a human string ("9:00 AM - 5:00 PM daily") that crawlers cannot parse.
+  const schemaOpeningHours = (store.businessHours ?? []).map(
+    (slot) => `${slot.days.join(",")} ${slot.opens}-${slot.closes}`
+  );
+  const socialProfiles = [store.instagramUrl, store.tiktokUrl, store.facebookUrl].filter(Boolean);
+
   const localBusinesses = store.locations.map((location) => ({
     "@context": "https://schema.org",
     "@type": "ClothingStore",
     name: location.name,
     telephone: store.phone,
+    ...(store.logoUrl ? { image: store.logoUrl, logo: store.logoUrl } : {}),
     address: { "@type": "PostalAddress", streetAddress: location.address, addressCountry: "NP" },
     geo: { "@type": "GeoCoordinates", latitude: location.lat, longitude: location.lng },
-    openingHours: "Mo-Su 09:00-17:00",
-    sameAs: [store.instagramUrl],
+    openingHours: schemaOpeningHours,
+    sameAs: socialProfiles,
     url: location.mapsUrl,
   }));
 
+  const theme = brandingStyle(store.branding);
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <body>
+        {theme && <style>{theme}</style>}
         {/* First focusable element on every page: lets keyboard and screen-reader
             users jump past the navigation instead of tabbing through it each time. */}
         <a className="skip-link" href="#main">Skip to content</a>

@@ -1,13 +1,70 @@
 {
   "generatedAt": "2026-08-22T00:00:00.000Z",
+  "storeSlug": "fashion-factory-nepal",
   "settings": {
+    "slug": "fashion-factory-nepal",
     "name": "Fashion Factory Nepal",
+    "tagline": "Define Your Style.",
+    "description": "Fashion Factory is a Kathmandu-based fashion and clothing retail destination. Browse the collection, connect with the store, and visit in person to find your next look.",
     "locationLabel": "Kathmandu Valley, Nepal · Kirtipur & Budhanilkantha",
     "phone": "+977 9840260456",
+    "whatsappNumber": "9779840260456",
     "instagramHandle": "@fashion.factory_2022",
     "instagramUrl": "https://www.instagram.com/fashion.factory_2022/",
+    "tiktokHandle": "Fashionfactory@99",
+    "tiktokUrl": "https://www.tiktok.com/@fashionfactory99",
     "openingHours": "9:00 AM – 5:00 PM daily",
-    "whatsappNumber": "9779840260456"
+    "businessHours": [
+      {
+        "days": [
+          "Mo",
+          "Tu",
+          "We",
+          "Th",
+          "Fr",
+          "Sa",
+          "Su"
+        ],
+        "opens": "09:00",
+        "closes": "17:00"
+      }
+    ],
+    "countryCode": "NP",
+    "currency": "NPR",
+    "branding": {
+      "accent": "#8b3f35",
+      "accentDeep": "#6d2f27",
+      "accentLight": "#d98a76",
+      "ink": "#14120f",
+      "paper": "#f2ede3",
+      "wordmark": [
+        "FASHION",
+        "FACTORY",
+        "NEPAL"
+      ]
+    },
+    "features": {
+      "styleQuiz": true,
+      "instagramFeed": true,
+      "testimonials": true,
+      "faqs": true,
+      "contactForm": true,
+      "locations": true
+    },
+    "seo": {
+      "title": "Fashion Factory Nepal | Fashion Store in Kathmandu",
+      "description": "Discover fashion at Fashion Factory Nepal. Browse the collection, contact the store, and get directions to our Kirtipur and Budhanilkantha branches.",
+      "keywords": [
+        "Fashion Factory Nepal",
+        "fashion store Kathmandu",
+        "clothing store Kathmandu",
+        "fashion shop Kathmandu",
+        "Fashion Factory Kirtipur",
+        "Fashion Factory Budhanilkantha"
+      ]
+    },
+    "visitTitle": "Two doors in the\nKathmandu Valley.",
+    "visitStepBody": "Come to Kirtipur or Budhanilkantha and try it on."
   },
   "locations": [
     {

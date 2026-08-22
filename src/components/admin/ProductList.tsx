@@ -2,25 +2,28 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { CATEGORY_OPTIONS, deleteProduct, listProducts, moveProduct, setVisible, type AdminProduct } from "@/providers/live/supabaseProducts";
+import { deleteProduct, listProducts, listCategoryOptions, moveProduct, setVisible, type AdminProduct } from "@/providers/live/supabaseProducts";
 import { PublishBar } from "./PublishBar";
-
-function categoryName(categoryId: string): string {
-  return CATEGORY_OPTIONS.find((option) => option.id === categoryId)?.name ?? categoryId;
-}
 
 export function ProductList() {
   const [products, setProducts] = useState<AdminProduct[]>([]);
+  // Loaded rather than hardcoded, so a renamed category shows its current name.
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
+  const categoryName = (categoryId: string) =>
+    categories.find((option) => option.id === categoryId)?.name ?? categoryId;
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      setProducts(await listProducts());
+      const [nextProducts, nextCategories] = await Promise.all([listProducts(), listCategoryOptions()]);
+      setProducts(nextProducts);
+      setCategories(nextCategories);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load products.");
     } finally {

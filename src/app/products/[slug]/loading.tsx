@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/Navbar";
+import { getStoreProfile } from "@/providers/static";
 
 export default function ProductLoading() {
   return (
@@ -6,7 +7,7 @@ export default function ProductLoading() {
       <Navbar tone="light" />
       <section className="route-state route-state-loading">
         <div className="container">
-          <p className="eyebrow">Fashion Factory Nepal</p>
+          <p className="eyebrow">{getStoreProfile().name}</p>
           <p>Loading the piece…</p>
           <div className="route-state-bar" aria-hidden="true"><span /></div>
         </div>

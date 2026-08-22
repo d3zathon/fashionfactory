@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { InstagramPost } from "@/models";
 import { mockInstagramProvider } from "@/providers/mock";
+import { getStoreProfile } from "@/providers/static";
 
 interface GraphMediaItem {
   id: string;
@@ -19,7 +20,7 @@ async function fetchLivePosts(token: string): Promise<InstagramPost[]> {
   const { data } = (await response.json()) as { data: GraphMediaItem[] };
   return data.map((item) => ({
     id: item.id,
-    image: { id: item.id, src: item.media_url, alt: item.caption ?? "Fashion Factory Instagram post" },
+    image: { id: item.id, src: item.media_url, alt: item.caption ?? `${getStoreProfile().name} Instagram post` },
     caption: item.caption,
     permalink: item.permalink,
     publishedAt: item.timestamp,

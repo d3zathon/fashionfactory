@@ -2,6 +2,16 @@ name: Publish products
 
 on:
   workflow_dispatch:
+    inputs:
+      store_slug:
+        description: "Store to publish (defaults to the one src/data/store.json was generated for)"
+        required: false
+        type: string
+      allow_catalogue_shrink:
+        description: "Allow a publish that removes most of the catalogue"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   publish:
@@ -21,6 +31,13 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          STORE_SLUG: ${{ inputs.store_slug }}
+          ALLOW_CATALOGUE_SHRINK: ${{ inputs.allow_catalogue_shrink && '1' || '' }}
+
+      # The generated data is what the site is built from, so a publish that
+      # cannot build must not be committed.
+      - run: npx tsc --noEmit
+      - run: npm run build
       - name: Commit updated products.json
         run: |
           git config user.name "github-actions[bot]"

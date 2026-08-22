@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { signOut } from "@/lib/adminAuth";
+import { getStoreProfile } from "@/providers/static";
 
 const NAV = [
   { href: "/admin", label: "Overview" },
@@ -26,7 +27,7 @@ export function AdminChrome({ email }: { email: string }) {
     <header className="admin-chrome">
       <div className="admin-topbar">
         <span className="admin-brand">
-          <span>Fashion Factory</span>
+          <span>{getStoreProfile().name}</span>
           <strong>ADMIN</strong>
         </span>
         <div className="admin-topbar-right">

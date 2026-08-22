@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { getAdminIdentity } from "@/lib/supabase/server";
+import { getStoreProfile } from "@/providers/static";
 import { AdminChrome } from "@/components/admin/AdminChrome";
 import "./admin.css";
 
 export const metadata: Metadata = {
-  title: "Fashion Factory Admin",
+  title: `${getStoreProfile().name} Admin`,
   robots: { index: false, follow: false },
 };
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "@/lib/adminAuth";
+import { getStoreProfile } from "@/providers/static";
 
 export function LoginForm() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export function LoginForm() {
   return (
     <div className="admin-auth-screen">
       <form className="admin-card admin-login-form" onSubmit={handleSubmit}>
-        <h1 className="admin-title">Fashion Factory Admin</h1>
+        <h1 className="admin-title">{getStoreProfile().name} Admin</h1>
         <p className="admin-muted">Sign in to manage the collection.</p>
 
         {denied && (

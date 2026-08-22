@@ -9,7 +9,7 @@ import { MobileActionBar } from "@/components/MobileActionBar";
 
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
-    console.error("Fashion Factory frontend error", error);
+    console.error("Storefront error", error);
   }, [error]);
 
   return (

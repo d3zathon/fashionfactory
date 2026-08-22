@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  CATEGORY_OPTIONS,
+  listCategoryOptions,
   createProduct,
   deleteProductImage,
   getProduct,
@@ -22,11 +22,26 @@ export function ProductForm({ productId }: { productId?: string }) {
   const [error, setError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
-  const [categoryId, setCategoryId] = useState(CATEGORY_OPTIONS[0].id);
+  const [categoryOptions, setCategoryOptions] = useState<{ id: string; name: string }[]>([]);
+  const [categoryId, setCategoryId] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isVisible, setIsVisibleState] = useState(true);
   const existingProductRef = useRef<AdminProduct | null>(null);
+
+  // Categories are a table, not a constant, so the choices load with the form.
+  // A new product defaults to the first category once they arrive.
+  useEffect(() => {
+    let active = true;
+    listCategoryOptions()
+      .then((options) => {
+        if (!active) return;
+        setCategoryOptions(options);
+        setCategoryId((current) => current || options[0]?.id || "");
+      })
+      .catch((err) => active && setError(err instanceof Error ? err.message : "Unable to load categories."));
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     if (!productId) return;
@@ -121,7 +136,7 @@ export function ProductForm({ productId }: { productId?: string }) {
         <label className="admin-field">
           <span>Category</span>
           <select value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
-            {CATEGORY_OPTIONS.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
+            {categoryOptions.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
           </select>
         </label>
 

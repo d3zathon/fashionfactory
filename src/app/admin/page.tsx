@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { getServerSupabase } from "@/lib/supabase/server";
-import { CATEGORY_OPTIONS } from "@/providers/live/supabaseProducts";
 import publishedData from "@/data/products.json";
+import { ACTIVE_STORE_SLUG } from "@/providers/live/supabaseStore";
+
+interface CategoryRow {
+  id: string;
+  name: string;
+}
 
 interface ProductRow {
   id: string;
@@ -13,8 +18,8 @@ interface ProductRow {
   updated_at: string;
 }
 
-function categoryName(id: string) {
-  return CATEGORY_OPTIONS.find((c) => c.id === id)?.name ?? id;
+function categoryNamer(categories: CategoryRow[]) {
+  return (id: string) => categories.find((c) => c.id === id)?.name ?? id;
 }
 
 function when(iso: string) {
@@ -29,9 +34,20 @@ function when(iso: string) {
 
 export default async function AdminOverviewPage() {
   const supabase = await getServerSupabase();
-  const { data, error } = supabase
-    ? await supabase.from("products").select("id,name,category_id,image_url,is_visible,updated_at").order("updated_at", { ascending: false })
-    : { data: null, error: { message: "Supabase is not configured on this host." } };
+
+  // Everything on this page is scoped to the store this deployment serves, so
+  // the store id is resolved first and every query filters on it.
+  const storeId = supabase
+    ? (await supabase.from("stores").select("id").eq("slug", ACTIVE_STORE_SLUG).maybeSingle()).data?.id
+    : null;
+
+  const { data, error } = supabase && storeId
+    ? await supabase.from("products").select("id,name,category_id,image_url,is_visible,updated_at").eq("store_id", storeId).order("updated_at", { ascending: false })
+    : { data: null, error: { message: supabase ? `No store found with slug "${ACTIVE_STORE_SLUG}". Run the migrations in supabase/migrations.` : "Supabase is not configured on this host." } };
+
+  const { data: categoryData } = supabase && storeId
+    ? await supabase.from("categories").select("id,name").eq("store_id", storeId).eq("active", true).order("sort_order", { ascending: true })
+    : { data: null };
 
   if (error) {
     return (
@@ -44,6 +60,8 @@ export default async function AdminOverviewPage() {
   }
 
   const products = (data ?? []) as ProductRow[];
+  const categories = (categoryData ?? []) as CategoryRow[];
+  const categoryName = categoryNamer(categories);
   const visible = products.filter((p) => p.is_visible);
   const hidden = products.filter((p) => !p.is_visible);
   const missingPhoto = products.filter((p) => !p.image_url);
@@ -55,7 +73,7 @@ export default async function AdminOverviewPage() {
   const unpublished = Boolean(latestEdit && publishedAt && latestEdit > publishedAt);
   const publishedCount = publishedData.products?.length ?? 0;
 
-  const byCategory = CATEGORY_OPTIONS.map((c) => ({ ...c, count: products.filter((p) => p.category_id === c.id).length }));
+  const byCategory = categories.map((c) => ({ ...c, count: products.filter((p) => p.category_id === c.id).length }));
   const emptyCategories = byCategory.filter((c) => c.count === 0);
 
   return (

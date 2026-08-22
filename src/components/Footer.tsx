@@ -2,19 +2,21 @@
 
 import Link from "next/link";
 import { TikTokIcon } from "@/components/TikTokIcon";
+import { Wordmark } from "@/components/Wordmark";
 import { useStoreSettings } from "@/hooks";
 import { AnalyticsService } from "@/services";
-import { GENERAL_WHATSAPP_MESSAGE, TIKTOK_HANDLE, telHref, tiktokHref, whatsappHref } from "@/lib/links";
+import { generalWhatsappMessage, telHref, tiktokLink, whatsappHref } from "@/lib/links";
 
 export function Footer() {
   const { data: store } = useStoreSettings();
-  const whatsapp = whatsappHref(store?.whatsappNumber, GENERAL_WHATSAPP_MESSAGE);
+  const whatsapp = whatsappHref(store?.whatsappNumber, generalWhatsappMessage(store?.name));
+  const tiktok = tiktokLink(store);
 
   return (
     <footer>
       <div className="container footer-grid">
         <div>
-          <Link className="brand footer-brand" href="/" aria-label="Fashion Factory Nepal home"><span>FASHION</span><strong>FACTORY</strong><small>NEPAL</small></Link>
+          <Link className="brand footer-brand" href="/" aria-label={`${store?.name ?? "Store"} home`}><Wordmark store={store} /></Link>
           <p className="muted">{store?.locationLabel}</p>
         </div>
         <div>
@@ -30,15 +32,17 @@ export function Footer() {
           <a href={telHref(store?.phone)}>{store?.phone}</a>
           <a href={whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
           <a href={store?.instagramUrl} target="_blank" rel="noreferrer">{store?.instagramHandle}</a>
-          <a
-            className="social-link"
-            href={tiktokHref()}
-            target="_blank"
-            rel="noreferrer"
-            onClick={() => AnalyticsService.track("tiktok_click", { placement: "footer" })}
-          >
-            <TikTokIcon size={14} /> {TIKTOK_HANDLE}
-          </a>
+          {tiktok && (
+            <a
+              className="social-link"
+              href={tiktok}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => AnalyticsService.track("tiktok_click", { placement: "footer" })}
+            >
+              <TikTokIcon size={14} /> {store?.tiktokHandle}
+            </a>
+          )}
         </div>
         <div>
           <p className="eyebrow">Locations</p>
@@ -48,7 +52,7 @@ export function Footer() {
         </div>
       </div>
       <div className="container footer-bottom">
-        <span>© {new Date().getFullYear()} Fashion Factory Nepal</span>
+        <span>© {new Date().getFullYear()} {store?.name}</span>
         <span>{store?.openingHours}</span>
       </div>
     </footer>

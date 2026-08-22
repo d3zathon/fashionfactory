@@ -1,4 +1,4 @@
-import type { Category, Product, StoreSettings } from "@/models";
+import type { Category, Product, StoreProfile } from "@/models";
 import type { CategoryProvider, ProductProvider, StoreSettingsProvider } from "../interfaces";
 import productsData from "@/data/products.json";
 import categoriesData from "@/data/categories.json";
@@ -34,7 +34,11 @@ export const staticCategoryProvider: CategoryProvider = {
   },
 };
 
-const storeSettings: StoreSettings = {
+// The tenant profile for whichever store this deployment was built for. Which
+// store that is was decided at publish time (STORE_SLUG in
+// scripts/generate-site-data.mjs), not at request time — the storefront is
+// static, so there is exactly one store per build.
+const storeProfile: StoreProfile = {
   ...storeData.settings,
   locations: [...storeData.locations]
     .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -42,5 +46,17 @@ const storeSettings: StoreSettings = {
 };
 
 export const staticStoreSettingsProvider: StoreSettingsProvider = {
-  async getStoreSettings() { return storeSettings; },
+  async getStoreSettings() { return storeProfile; },
 };
+
+/**
+ * Synchronous access to the same profile.
+ *
+ * Everything else goes through the async provider chain, but three callers
+ * cannot: Next's `metadata` export, the OG image, and module-level constants.
+ * Reading the committed JSON is a pure import with no I/O, so exposing it
+ * directly costs nothing and keeps those call sites from hardcoding a store.
+ */
+export function getStoreProfile(): StoreProfile {
+  return storeProfile;
+}

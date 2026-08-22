@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { CategoryService, CollectionService, ContactService, ContentService, InstagramService, MediaService, ProductService, StoreSettingsService, TestimonialService } from "@/services";
-import type { Category, Collection, ContactInquiry, FAQ, HomepageContent, InstagramPost, MediaAsset, Product, StoreSettings, Testimonial } from "@/models";
+import type { Category, Collection, ContactInquiry, FAQ, HomepageContent, InstagramPost, MediaAsset, Product, StoreProfile, Testimonial } from "@/models";
 
 function useAsync<T>(loader: () => Promise<T>, initial: T) {
   const [data, setData] = useState<T>(initial);
@@ -27,7 +27,7 @@ export const useProducts = () => useAsync<Product[]>(ProductService.getProducts,
 export const useFeaturedProducts = () => useAsync<Product[]>(ProductService.getFeaturedProducts, []);
 export const useCategories = () => useAsync<Category[]>(CategoryService.getCategories, []);
 export const useCollections = () => useAsync<Collection[]>(CollectionService.getCollections, []);
-export const useStoreSettings = () => useAsync<StoreSettings>(StoreSettingsService.getStoreSettings, {} as StoreSettings);
+export const useStoreSettings = () => useAsync<StoreProfile>(StoreSettingsService.getStoreSettings, {} as StoreProfile);
 export const useInstagram = () => {
   const loadInstagram = useCallback(() => InstagramService.getLatestPosts(4), []);
   return useAsync<InstagramPost[]>(loadInstagram, []);

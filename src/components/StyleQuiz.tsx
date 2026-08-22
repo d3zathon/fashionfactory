@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowUpRight, MessageCircle, RotateCcw } from "lucide-react"
 import type { Category, Product } from "@/models";
 import { whatsappHref } from "@/lib/links";
 import { AnalyticsService } from "@/services";
+import { getStoreProfile } from "@/providers/static";
 
 /**
  * "Find Your Edit" — a three-question styling quiz.
@@ -184,7 +185,7 @@ export function StyleQuiz({
               className="btn"
               href={whatsappHref(
                 whatsappNumber,
-                `Hi Fashion Factory, I'm looking for ${result?.name}. What do you have in store right now?`
+                `Hi ${getStoreProfile().name}, I'm looking for ${result?.name}. What do you have in store right now?`
               )}
               target="_blank"
               rel="noreferrer"
