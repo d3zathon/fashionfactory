@@ -1,4 +1,4 @@
-import type { Category, Collection, FAQ, HomepageContent, InstagramPost, MediaAsset, Product, StoreProfile, Testimonial, ContactInquiry } from "@/models";
+import type { Category, Collection, FAQ, HomepageContent, InstagramPost, MediaAsset, Product, StoreProfile, Testimonial, ContactInquiry, ContactMeta } from "@/models";
 
 export interface ProductProvider {
   getProducts(): Promise<Product[]>;
@@ -29,7 +29,7 @@ export interface InstagramProvider {
 }
 
 export interface ContactProvider {
-  submitInquiry(data: ContactInquiry): Promise<{ success: boolean; id?: string; error?: string }>;
+  submitInquiry(data: ContactInquiry, meta?: ContactMeta): Promise<{ success: boolean; id?: string; error?: string }>;
 }
 
 // Returns the full tenant profile. StoreProfile extends StoreSettings, so every

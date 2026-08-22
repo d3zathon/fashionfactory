@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { CategoryService, CollectionService, ContactService, ContentService, InstagramService, MediaService, ProductService, StoreSettingsService, TestimonialService } from "@/services";
-import type { Category, Collection, ContactInquiry, FAQ, HomepageContent, InstagramPost, MediaAsset, Product, StoreProfile, Testimonial } from "@/models";
+import type { Category, Collection, ContactInquiry, ContactMeta, FAQ, HomepageContent, InstagramPost, MediaAsset, Product, StoreProfile, Testimonial } from "@/models";
 
 function useAsync<T>(loader: () => Promise<T>, initial: T) {
   const [data, setData] = useState<T>(initial);
@@ -41,12 +41,12 @@ export function useContact() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [success, setSuccess] = useState(false);
-  const submit = useCallback(async (data: ContactInquiry) => {
+  const submit = useCallback(async (data: ContactInquiry, meta?: ContactMeta) => {
     setLoading(true);
     setError(null);
     setSuccess(false);
     try {
-      const result = await ContactService.submitInquiry(data);
+      const result = await ContactService.submitInquiry(data, meta);
       if (!result.success) throw new Error(result.error ?? "Unable to submit inquiry");
       setSuccess(true);
       return result;

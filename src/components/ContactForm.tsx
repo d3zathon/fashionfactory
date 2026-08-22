@@ -21,6 +21,8 @@ export function ContactForm() {
     const phone = String(data.get("phone") ?? "").trim();
     const message = String(data.get("message") ?? "").trim();
     const category = String(data.get("category") ?? "").trim();
+    // Decoy field: empty for every human, filled by bots that autofill inputs.
+    const honeypot = String(data.get("contact_reference") ?? "");
     const nextErrors: FieldErrors = {};
 
     if (name.length < 2) nextErrors.name = "Please enter your name.";
@@ -35,12 +37,10 @@ export function ContactForm() {
 
     setState("loading");
     try {
-      const result = await ContactService.submitInquiry({
-        name,
-        phone,
-        message,
-        categoryId: category || undefined,
-      });
+      const result = await ContactService.submitInquiry(
+        { name, phone, message, categoryId: category || undefined },
+        { honeypot }
+      );
       if (!result.success) throw new Error(result.error ?? "Submission failed");
       AnalyticsService.track("contact_form_submission");
       form.reset();
@@ -56,6 +56,18 @@ export function ContactForm() {
       <label>Name<input name="name" required autoComplete="name" placeholder="Your name" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "contact-name-error" : undefined} />{errors.name && <span id="contact-name-error" className="field-error">{errors.name}</span>}</label>
       <label>Phone / WhatsApp<input name="phone" required inputMode="tel" autoComplete="tel" placeholder="+977 ..." aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? "contact-phone-error" : undefined} />{errors.phone && <span id="contact-phone-error" className="field-error">{errors.phone}</span>}</label>
       <label>Product / category (optional)<input name="category" placeholder="What are you looking for?" /></label>
+      {/* Decoy. Hidden from sight, from assistive technology and from the tab
+          order — positioned off-screen rather than display:none, which some bots
+          skip. Named "contact_reference" rather than something like "company":
+          bots fill every input they find, but browser autofill matches known
+          field types, and an autofilled organisation name would silently
+          discard a real customer's inquiry. */}
+      <div className="hp-field" aria-hidden="true">
+        <label>
+          Reference
+          <input name="contact_reference" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+        </label>
+      </div>
       <label>Message<textarea name="message" required rows={5} placeholder="Tell us what you'd like to know..." aria-invalid={Boolean(errors.message)} aria-describedby={errors.message ? "contact-message-error" : undefined} />{errors.message && <span id="contact-message-error" className="field-error">{errors.message}</span>}</label>
       <button className="btn btn-dark" disabled={state === "loading"}>{state === "loading" ? "Sending…" : "Send Inquiry"}</button>
       {state === "success" && <p className="form-success" role="status">Thanks — your inquiry was received.</p>}

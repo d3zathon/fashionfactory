@@ -78,6 +78,18 @@ export interface ContactInquiry {
   categoryId?: string;
 }
 
+/**
+ * Submission metadata that is not part of the inquiry itself.
+ *
+ * `honeypot` carries the decoy field's value. It is deliberately not a field on
+ * ContactInquiry: it describes the submission, not the customer, and a domain
+ * model claiming to hold a "company" would mislead whoever later adds a real
+ * one.
+ */
+export interface ContactMeta {
+  honeypot?: string;
+}
+
 export interface Testimonial {
   id: string;
   name: string;
