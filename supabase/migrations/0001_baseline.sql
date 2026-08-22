@@ -1,14 +1,16 @@
--- Fashion Factory Nepal — admin panel schema.
--- Run this once in the Supabase project's SQL editor (Database > SQL Editor).
+-- 0001 — baseline schema (single store).
+--
+-- Apply migrations in filename order; together they are the whole schema. This
+-- file is the original single-store shape, kept as history: 0002 layers the
+-- store/tenant model on top of it. On a fresh project run both, in order.
 --
 -- Authorization model: being *authenticated* grants nothing. Access is granted
 -- only by membership in public.admin_users, checked via private.is_admin() from
 -- every policy. This closes the privilege-escalation path where any user who
 -- signed up (sign-ups are public unless disabled) would have had full CRUD.
+-- 0002 narrows this further, from "is an admin" to "is an admin of this store".
 --
--- Categories are intentionally NOT a table: the admin only offers the 5 fixed
--- categories already hardcoded in src/data/mock.ts, so category_id is a plain
--- checked text column, not a foreign key into a categories table.
+-- Every statement here is re-runnable.
 
 create extension if not exists pgcrypto;
 
@@ -72,6 +74,7 @@ grant execute on function private.is_admin() to authenticated;
 -- changes go through SQL / service_role only, so the web host never needs a
 -- privileged key to manage admins.
 drop policy if exists "admins can read admin list" on public.admin_users;
+drop policy if exists "admins can read admin list" on public.admin_users;
 create policy "admins can read admin list" on public.admin_users
   for select to authenticated using (private.is_admin());
 
@@ -79,6 +82,7 @@ create policy "admins can read admin list" on public.admin_users
 -- Product policies
 -- ---------------------------------------------------------------------------
 
+drop policy if exists "anon can read visible products" on public.products;
 create policy "anon can read visible products"
   on public.products for select
   to anon
@@ -86,12 +90,16 @@ create policy "anon can read visible products"
 
 drop policy if exists "authenticated has full access" on public.products;
 
+drop policy if exists "admins can read all products" on public.products;
 create policy "admins can read all products" on public.products
   for select to authenticated using (private.is_admin());
+drop policy if exists "admins can insert products" on public.products;
 create policy "admins can insert products" on public.products
   for insert to authenticated with check (private.is_admin());
+drop policy if exists "admins can update products" on public.products;
 create policy "admins can update products" on public.products
   for update to authenticated using (private.is_admin()) with check (private.is_admin());
+drop policy if exists "admins can delete products" on public.products;
 create policy "admins can delete products" on public.products
   for delete to authenticated using (private.is_admin());
 
@@ -164,18 +172,24 @@ alter table public.products
   add constraint products_category_id_fkey
   foreign key (category_id) references public.categories(id) on update cascade on delete restrict;
 
+drop policy if exists "anon can read active categories" on public.categories;
 create policy "anon can read active categories" on public.categories
   for select to anon using (active = true);
+drop policy if exists "admins manage categories" on public.categories;
 create policy "admins manage categories" on public.categories
   for all to authenticated using (private.is_admin()) with check (private.is_admin());
 
+drop policy if exists "anon can read store settings" on public.store_settings;
 create policy "anon can read store settings" on public.store_settings
   for select to anon using (true);
+drop policy if exists "admins manage store settings" on public.store_settings;
 create policy "admins manage store settings" on public.store_settings
   for all to authenticated using (private.is_admin()) with check (private.is_admin());
 
+drop policy if exists "anon can read active locations" on public.store_locations;
 create policy "anon can read active locations" on public.store_locations
   for select to anon using (active = true);
+drop policy if exists "admins manage locations" on public.store_locations;
 create policy "admins manage locations" on public.store_locations
   for all to authenticated using (private.is_admin()) with check (private.is_admin());
 
@@ -218,38 +232,31 @@ on conflict (id) do update
   set file_size_limit = excluded.file_size_limit,
       allowed_mime_types = excluded.allowed_mime_types;
 
+drop policy if exists "public can read product images" on storage.objects;
 create policy "public can read product images"
   on storage.objects for select
   to anon, authenticated
   using (bucket_id = 'product-images');
 
+drop policy if exists "admins can upload product images" on storage.objects;
 create policy "admins can upload product images"
   on storage.objects for insert
   to authenticated
   with check (bucket_id = 'product-images' and private.is_admin());
 
+drop policy if exists "admins can update product images" on storage.objects;
 create policy "admins can update product images"
   on storage.objects for update
   to authenticated
   using (bucket_id = 'product-images' and private.is_admin())
   with check (bucket_id = 'product-images' and private.is_admin());
 
+drop policy if exists "admins can delete product images" on storage.objects;
 create policy "admins can delete product images"
   on storage.objects for delete
   to authenticated
   using (bucket_id = 'product-images' and private.is_admin());
 
--- ---------------------------------------------------------------------------
--- After running this file
--- ---------------------------------------------------------------------------
--- 1. Authentication > Providers > Email — turn OFF "Allow new users to sign up".
---    Until this is off, anyone can create an account with the public anon key.
---    They still get nothing (admin_users is the gate), but keep it off anyway.
--- 2. Authentication > Users — manually add the owner account.
--- 3. Grant that account admin rights (SQL Editor):
---      insert into public.admin_users (user_id, email)
---      select id, email from auth.users where email = 'owner@example.com';
--- 4. Project Settings > API — copy the Project URL and the anon public key into
---    NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY on the host, and
---    the service_role key into the SUPABASE_SERVICE_ROLE_KEY GitHub Actions
---    secret only (never on the host, never in client code).
+-- Next: apply 0002_multi_store.sql, then follow docs/DEPLOYMENT.md for the
+-- steps that must be done by hand (disabling public sign-ups, creating the
+-- owner account, granting it admin rights, and copying the API keys).
