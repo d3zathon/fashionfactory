@@ -3,11 +3,12 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Search, X } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { MobileActionBar } from "@/components/MobileActionBar";
 import { Navbar } from "@/components/Navbar";
 import { ProductCard } from "@/components/ProductCard";
+import { SearchField } from "@/components/SearchField";
 import { useCategories, useProducts, useStoreSettings } from "@/hooks";
 import { matchesAllTerms, searchTerms } from "@/lib/productSearch";
 
@@ -29,18 +30,57 @@ function CollectionView() {
   const [active, setActive] = useState<string>(params.get("c") ?? ALL);
   const [query, setQuery] = useState<string>(params.get("q") ?? "");
 
+  // Anything in the URL that is not ours — campaign tags, most commonly — is
+  // captured once and carried through every rewrite below, so filtering does
+  // not quietly strip the attribution a visitor arrived with. Read during the
+  // first render, before any effect, so it is never lost to our own writes.
+  const [carriedParams] = useState(() => {
+    const extras = new URLSearchParams();
+    params.forEach((value, key) => {
+      if (key !== "c" && key !== "q") extras.append(key, value);
+    });
+    return extras.toString();
+  });
+
+  const urlFor = useCallback(
+    (category: string, search: string) => {
+      const next = new URLSearchParams(carriedParams);
+      if (category !== ALL) next.set("c", category);
+      if (search.trim()) next.set("q", search.trim());
+      const queryString = next.toString();
+      return queryString ? `${pathname}?${queryString}` : pathname;
+    },
+    [carriedParams, pathname]
+  );
+
+  // The last URL this component wrote, so its own writes echoing back through
+  // useSearchParams are not mistaken for someone else changing the URL.
+  const lastWrittenUrl = useRef<string | null>(null);
+
   // Mirror the controls back into the URL so the address bar is always a link
   // to what is on screen. replace(), not push(), because typing would otherwise
   // put one history entry behind every keystroke; scroll:false because this is
   // a filter, not a navigation.
   useEffect(() => {
-    const next = new URLSearchParams();
-    if (active !== ALL) next.set("c", active);
-    if (query.trim()) next.set("q", query.trim());
-    const search = next.toString();
-    const url = search ? `${pathname}?${search}` : pathname;
+    const url = urlFor(active, query);
+    lastWrittenUrl.current = url;
     router.replace(url, { scroll: false });
-  }, [active, query, pathname, router]);
+  }, [active, query, urlFor, router]);
+
+  // ...and adopt the URL when something else changes it. Next keeps this
+  // component mounted when only the query string changes, so without this the
+  // controls would keep their old values on Back/Forward, or when a link to
+  // /collection?q=... is followed from the collection page itself — the screen
+  // would then disagree with its own address bar.
+  useEffect(() => {
+    const incomingCategory = params.get("c") ?? ALL;
+    const incomingQuery = params.get("q") ?? "";
+    const incomingUrl = urlFor(incomingCategory, incomingQuery);
+    if (incomingUrl === lastWrittenUrl.current) return;
+    lastWrittenUrl.current = incomingUrl;
+    setActive(incomingCategory);
+    setQuery(incomingQuery);
+  }, [params, urlFor]);
 
   const loading = productsLoading || categoriesLoading;
   const error = productsError || categoriesError;
@@ -132,26 +172,15 @@ function CollectionView() {
       {/* Sticky filter rail — real filtering, replacing the old anchor jumps. */}
       <div className="filter-bar">
         <div className="container">
-          {/* A real <label>, not a placeholder: placeholders vanish on focus and
-              are not reliably announced. type="search" gives the platform's own
-              clear affordance on top of the explicit button. */}
-          <div className="collection-search">
-            <label className="collection-search-label" htmlFor="collection-search">
-              Search the collection
-            </label>
-            <div className="collection-search-field">
-              <Search size={15} aria-hidden="true" />
-              <input
-                id="collection-search"
-                ref={searchInputRef}
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Try a name, colour or category"
-                autoComplete="off"
-                enterKeyHint="search"
-              />
-              {query && (
+          <SearchField
+            id="collection-search"
+            label="Search the collection"
+            placeholder="Try a name, colour or category"
+            value={query}
+            onChange={setQuery}
+            inputRef={searchInputRef}
+            trailing={
+              query ? (
                 <button
                   className="collection-search-clear"
                   type="button"
@@ -160,9 +189,9 @@ function CollectionView() {
                 >
                   <X size={14} aria-hidden="true" />
                 </button>
-              )}
-            </div>
-          </div>
+              ) : null
+            }
+          />
 
           <div className="filter-row" role="group" aria-label="Filter by category">
             <button className="filter-chip" type="button" aria-pressed={active === ALL} onClick={() => setActive(ALL)}>

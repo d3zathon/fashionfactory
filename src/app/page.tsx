@@ -11,6 +11,7 @@ import { Reveal } from "@/components/Reveal";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryIndex } from "@/components/CategoryIndex";
 import { StyleQuiz } from "@/components/StyleQuiz";
+import { HomeSearch } from "@/components/HomeSearch";
 import { TikTokIcon } from "@/components/TikTokIcon";
 import { useCategories, useFAQs, useFeaturedProducts, useHomepageContent, useInstagram, useStoreSettings, useTestimonials } from "@/hooks";
 import { AnalyticsService } from "@/services";
@@ -148,6 +149,11 @@ export default function HomePage() {
             View everything <ArrowUpRight size={14} />
           </Link>
         </div>
+        {/* Search sits with the category index rather than in the hero: this is
+            the section that already promises "find", and pairing a query with
+            the categories mirrors how /collection itself is laid out. The hero
+            keeps its two CTAs and nothing else. */}
+        <HomeSearch />
         <Reveal>
           <CategoryIndex categories={categories} products={products} fallbackImage={fallbackHero} />
         </Reveal>
