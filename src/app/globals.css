@@ -536,6 +536,34 @@ footer { background: var(--ink); color: var(--paper); padding: clamp(56px, 8vw, 
 .filter-chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 .filter-count { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); padding: 26px 0 22px; }
 
+/* Collection search. Sits above the chips in the sticky rail, using the same
+   mono/uppercase label vocabulary as every other field on the site. */
+.collection-search { padding: 16px 0 2px; }
+.collection-search-label { display: block; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.collection-search-field { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: var(--white); padding: 0 12px; max-width: 460px; transition: border-color var(--speed) var(--ease); }
+.collection-search-field:focus-within { border-color: var(--accent); }
+.collection-search-field > svg { flex-shrink: 0; color: var(--muted); }
+.collection-search-field input { flex: 1; min-width: 0; border: 0; background: none; padding: 13px 0; font: inherit; font-size: 0.95rem; color: var(--ink); }
+.collection-search-field input:focus { outline: none; }
+/* The platform clear button would sit beside our own; ours is labelled. */
+.collection-search-field input::-webkit-search-cancel-button { display: none; }
+.collection-search-clear { display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; color: var(--muted); cursor: pointer; padding: 8px; margin-right: -8px; }
+.collection-search-clear:hover { color: var(--ink); }
+
+/* Empty state carries the search context and the way out of it. */
+.collection-empty { display: grid; gap: 10px; justify-items: start; }
+.collection-empty-title { margin: 0; font-family: var(--font-display); font-size: clamp(1.3rem, 2.6vw, 1.75rem); line-height: 1.2; letter-spacing: -0.02em; color: var(--ink); }
+.collection-empty-body { margin: 0; max-width: 46ch; line-height: 1.6; }
+.collection-empty-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+
+@media (max-width: 600px) {
+  .collection-search { padding-top: 12px; }
+  .collection-search-field { max-width: none; }
+  /* 16px prevents iOS Safari zooming the page on focus. */
+  .collection-search-field input { font-size: 16px; }
+  .collection-empty-actions .btn { width: 100%; }
+}
+
 /* --------------------------------------------------------------------------
    20. States
    -------------------------------------------------------------------------- */
