@@ -9,6 +9,10 @@ export interface AdminProduct {
   categoryId: string;
   description: string | null;
   imageUrl: string | null;
+  /** Empty array means the column is NULL — the owner never specified any. */
+  sizes: string[];
+  colors: string[];
+  featured: boolean;
   sortOrder: number;
   isVisible: boolean;
   updatedAt: string;
@@ -43,10 +47,26 @@ function fromRow(row: Record<string, unknown>): AdminProduct {
     categoryId: row.category_id as string,
     description: (row.description as string) ?? null,
     imageUrl: (row.image_url as string) ?? null,
+    // NULL and [] both surface as an empty array here; the difference only
+    // matters to the database, and toColumn() below restores it on write.
+    sizes: (row.sizes as string[]) ?? [],
+    colors: (row.colors as string[]) ?? [],
+    featured: (row.featured as boolean) ?? false,
     sortOrder: row.sort_order as number,
     isVisible: row.is_visible as boolean,
     updatedAt: row.updated_at as string,
   };
+}
+
+/**
+ * An empty list is stored as NULL, not as an empty array.
+ *
+ * "Never specified" and "specified as nothing" are the same thing for a shop,
+ * and collapsing them keeps one representation in the column rather than two
+ * that render identically.
+ */
+function toColumn(values: string[] | undefined): string[] | null {
+  return values && values.length > 0 ? values : null;
 }
 
 function requireClient() {
@@ -92,6 +112,9 @@ export interface ProductInput {
   categoryId: string;
   description?: string | null;
   imageUrl?: string | null;
+  sizes?: string[];
+  colors?: string[];
+  featured: boolean;
   isVisible: boolean;
 }
 
@@ -114,6 +137,9 @@ export async function createProduct(input: ProductInput): Promise<AdminProduct> 
       category_id: input.categoryId,
       description: input.description ?? null,
       image_url: input.imageUrl ?? null,
+      sizes: toColumn(input.sizes),
+      colors: toColumn(input.colors),
+      featured: input.featured,
       is_visible: input.isVisible,
       sort_order: nextSortOrder,
       updated_at: new Date().toISOString(),
@@ -136,6 +162,9 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Ad
       category_id: input.categoryId,
       description: input.description ?? null,
       image_url: input.imageUrl ?? null,
+      sizes: toColumn(input.sizes),
+      colors: toColumn(input.colors),
+      featured: input.featured,
       is_visible: input.isVisible,
       updated_at: new Date().toISOString(),
     })

@@ -53,11 +53,12 @@
      block once this row turns into a column. Reset it. */
   .admin-search-field { flex: 0 0 auto; max-width: none; }
   .admin-search-count { margin-bottom: 0; }
-  /* 16px prevents iOS Safari zooming the page on focus. */
-  .admin-search-field input { font-size: 16px; }
 }
 .admin-title { font-family: var(--font-display); font-size: clamp(1.7rem, 3.4vw, 2.5rem); line-height: 1; letter-spacing: -0.035em; margin: 6px 0 0; }
 .admin-muted { color: var(--muted); font-size: 0.88rem; margin: 0 0 16px; line-height: 1.65; max-width: 68ch; }
+/* Explanatory line under a toggle: sits with the control it describes rather
+   than carrying .admin-muted's full paragraph spacing. */
+.admin-field-hint { margin: -6px 0 4px; font-size: 0.82rem; }
 .admin-eyebrow { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0; }
 .admin-section { margin-top: 34px; }
 .admin-section-title { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
@@ -207,4 +208,17 @@
 @media (prefers-reduced-motion: reduce) {
   .admin-skeleton-row::after { animation: none; }
   .admin-btn { transition: none; }
+}
+
+/* Form controls at 16px on small screens so iOS Safari does not zoom the page
+   when a field is focused — the product form gets filled in on a phone, in the
+   shop. Deliberately at the end of the file: these selectors have the same
+   specificity as the base .admin-field rules above, so only source order can
+   win. A media query adds no specificity of its own. */
+@media (max-width: 600px) {
+  .admin-field input,
+  .admin-field select,
+  .admin-field textarea { font-size: 16px; }
+  /* The file input keeps its smaller size; it opens a picker, not a keyboard. */
+  .admin-field input[type=file] { font-size: 0.78rem; }
 }

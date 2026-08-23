@@ -131,6 +131,15 @@ for (const p of productRows) {
   if (!p.image_url) warnings.push(`Product "${p.name}" has no photo.`);
 }
 
+// The homepage's "Selected pieces" section filters on this flag, so a catalogue
+// with none leaves that section blank. A warning rather than an error: a shop
+// is allowed to feature nothing, it just rarely means to.
+if (productRows.length > 0 && !productRows.some((p) => p.featured)) {
+  warnings.push(
+    `No product is marked featured, so the homepage "Selected pieces" section will be empty. Tick "Feature on the homepage" on the pieces that belong there.`
+  );
+}
+
 for (const w of warnings) console.warn(`warning: ${w}`);
 if (errors.length) {
   console.error("\nPublish aborted — fix these first:");
@@ -141,6 +150,10 @@ if (errors.length) {
 // ---------------------------------------------------------------------------
 // Write
 // ---------------------------------------------------------------------------
+// sizes/colors are omitted entirely when the column is null or empty, which is
+// what keeps them optional in the model rather than becoming empty arrays that
+// render as an empty Sizes group. featured is always written, so the generated
+// file states outright which pieces the homepage will show.
 const products = productRows.map((row, index) => ({
   id: row.id,
   name: row.name,
@@ -148,6 +161,9 @@ const products = productRows.map((row, index) => ({
   categoryId: row.category_id,
   description: row.description ?? undefined,
   images: row.image_url ? [{ id: row.id, src: row.image_url, alt: row.name }] : [],
+  ...(row.sizes?.length ? { sizes: row.sizes } : {}),
+  ...(row.colors?.length ? { colors: row.colors } : {}),
+  featured: row.featured === true,
   sortOrder: row.sort_order ?? index + 1,
 }));
 

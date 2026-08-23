@@ -12,6 +12,30 @@ import {
   type AdminProduct,
 } from "@/providers/live/supabaseProducts";
 
+/**
+ * "M, L , , m, XL" -> ["M", "L", "XL"]
+ *
+ * Blank entries are dropped so a trailing comma is harmless, and repeats are
+ * dropped case-insensitively because "M, m" would otherwise render as two
+ * identical chips on the product page. The first spelling wins, so the owner's
+ * capitalisation is what ships.
+ */
+function parseList(value: string): string[] {
+  const seen = new Set<string>();
+  return value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => {
+      if (!entry) return false;
+      const key = entry.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+const formatList = (values: string[]) => values.join(", ");
+
 export function ProductForm({ productId }: { productId?: string }) {
   const router = useRouter();
   const isEdit = Boolean(productId);
@@ -26,6 +50,11 @@ export function ProductForm({ productId }: { productId?: string }) {
   const [categoryId, setCategoryId] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  // Held as the raw text the owner typed, not as arrays, so a half-finished
+  // "S, M," never loses the comma while they are still typing.
+  const [sizesText, setSizesText] = useState("");
+  const [colorsText, setColorsText] = useState("");
+  const [featured, setFeatured] = useState(false);
   const [isVisible, setIsVisibleState] = useState(true);
   const existingProductRef = useRef<AdminProduct | null>(null);
 
@@ -54,6 +83,9 @@ export function ProductForm({ productId }: { productId?: string }) {
         setCategoryId(product.categoryId);
         setDescription(product.description ?? "");
         setImageUrl(product.imageUrl);
+        setSizesText(formatList(product.sizes));
+        setColorsText(formatList(product.colors));
+        setFeatured(product.featured);
         setIsVisibleState(product.isVisible);
       })
       .catch((err) => active && setError(err instanceof Error ? err.message : "Unable to load product."))
@@ -89,7 +121,16 @@ export function ProductForm({ productId }: { productId?: string }) {
     setSaving(true);
     setError(null);
     try {
-      const input = { name, categoryId, description: description || null, imageUrl, isVisible };
+      const input = {
+        name,
+        categoryId,
+        description: description || null,
+        imageUrl,
+        sizes: parseList(sizesText),
+        colors: parseList(colorsText),
+        featured,
+        isVisible,
+      };
       const previousImageUrl = existingProductRef.current?.imageUrl ?? null;
       if (productId) await updateProduct(productId, input);
       else await createProduct(input);
@@ -145,6 +186,26 @@ export function ProductForm({ productId }: { productId?: string }) {
           <textarea value={description} onChange={(event) => setDescription(event.target.value)} />
         </label>
 
+        <label className="admin-field">
+          <span>Sizes (optional, comma separated)</span>
+          <input
+            value={sizesText}
+            onChange={(event) => setSizesText(event.target.value)}
+            placeholder="S, M, L, XL"
+            autoComplete="off"
+          />
+        </label>
+
+        <label className="admin-field">
+          <span>Colours (optional, comma separated)</span>
+          <input
+            value={colorsText}
+            onChange={(event) => setColorsText(event.target.value)}
+            placeholder="Black, Stone, Rust"
+            autoComplete="off"
+          />
+        </label>
+
         <div className="admin-upload-row">
           {imageUrl && <img className="admin-image-preview" src={imageUrl} alt="Product preview" />}
           <label className="admin-field">
@@ -158,6 +219,15 @@ export function ProductForm({ productId }: { productId?: string }) {
           <input type="checkbox" checked={isVisible} onChange={(event) => setIsVisibleState(event.target.checked)} />
           Visible on site
         </label>
+
+        <label className="admin-toggle">
+          <input type="checkbox" checked={featured} onChange={(event) => setFeatured(event.target.checked)} />
+          Feature on the homepage
+        </label>
+        <p className="admin-muted admin-field-hint">
+          Featured pieces fill the homepage&rsquo;s &ldquo;Selected pieces&rdquo; section. A hidden
+          product never appears there, whether or not it is featured.
+        </p>
 
         {error && <p className="admin-error" role="alert">{error}</p>}
 
