@@ -69,6 +69,25 @@ function toColumn(values: string[] | undefined): string[] | null {
   return values && values.length > 0 ? values : null;
 }
 
+/**
+ * PostgREST answers PGRST204 — "Could not find the 'x' column of 'products' in
+ * the schema cache" — when a write names a column the database does not have.
+ * That is never a mistake in what the owner typed: it means a migration is
+ * committed but has not been applied to this project. The raw message names the
+ * column and stops there, which sends them hunting through the form; name the
+ * migration instead, the way the publish route names 0003 when
+ * admin_manages_store() is missing.
+ *
+ * Used only by the two writes that carry sizes, colours and featured — the
+ * columns 0004 adds. Everywhere else the raw message is already the whole story.
+ */
+function writeError(error: { code?: string; message: string }): Error {
+  if (error.code !== "PGRST204") return new Error(error.message);
+  return new Error(
+    `${error.message} This database has not had supabase/migrations/0004_product_variants.sql applied yet — apply it, then try again.`
+  );
+}
+
 function requireClient() {
   const client = getSupabaseClient();
   if (!client) throw new Error("Supabase is not configured on this host yet.");
@@ -146,7 +165,7 @@ export async function createProduct(input: ProductInput): Promise<AdminProduct> 
     })
     .select("*")
     .single();
-  if (error) throw new Error(error.message);
+  if (error) throw writeError(error);
   return fromRow(data);
 }
 
@@ -172,7 +191,7 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Ad
     .eq("store_id", storeId)
     .select("*")
     .single();
-  if (error) throw new Error(error.message);
+  if (error) throw writeError(error);
   return fromRow(data);
 }
 
