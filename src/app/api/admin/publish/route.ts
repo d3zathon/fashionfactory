@@ -92,7 +92,7 @@ export async function POST() {
       response.status === 401 || response.status === 403
         ? " Check that GITHUB_PUBLISH_TOKEN is valid and has Actions: write on this repository."
         : response.status === 404
-          ? ` Check that GITHUB_REPO, ${workflowFile} and the branch ${ref} all exist.`
+          ? ` Check that GITHUB_REPO and the branch ${ref} exist, and that ${workflowFile} is on the repository's *default* branch — GitHub resolves a workflow by filename there, so one that lives only on ${ref} dispatches as 404 however correct it looks.`
           : "";
     return NextResponse.json(
       { success: false, error: `GitHub refused the publish (${response.status}${reason ? `: ${reason}` : ""}).${suffix}` },

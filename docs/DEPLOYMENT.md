@@ -159,7 +159,8 @@ code.
 - **Node**: 20.x, matching `engines` in `package.json` and CI.
 - **Production branch**: must equal `GITHUB_PUBLISH_REF`. Today the repository's
   working branch is `feat/fashion-factory-foundation`; if you merge to `main`
-  before launch, change both together.
+  before launch, change both together. See §4a first — as the repository stands,
+  neither branch is ready to be pointed at without a decision.
 - **Region**: `vercel.json` pins functions to `sin1` (Singapore), matching the
   Supabase region. If your plan rejects a fixed region, remove the `regions` key.
 
@@ -168,20 +169,133 @@ standard Next.js serverless function — no extra runtime configuration.
 
 ---
 
+## 4a. Branch topology — settle this before importing to Vercel
+
+Two *different* branches matter, and conflating them is what breaks Publish:
+
+| Role | What GitHub/Vercel does with it | Must be |
+| --- | --- | --- |
+| **Default branch** (repo setting) | Where GitHub looks up a workflow **by filename** when `POST /actions/workflows/publish.yml/dispatches` is called | A branch that contains `.github/workflows/publish.yml` |
+| **Deploy branch** = `GITHUB_PUBLISH_REF` = Vercel production branch | Checked out by the workflow, receives the regenerated JSON commit, and is what Vercel builds | A branch that contains the application |
+
+`workflow_dispatch` resolves the workflow file on the **default branch only**.
+The `ref` you dispatch with decides which branch's *copy* of the workflow runs
+and which branch it pushes to — it does not affect the lookup. A workflow that
+exists only on a feature branch cannot be dispatched at all; the API answers
+`404` and the Publish button reports "GitHub refused the publish (404…)".
+
+**As this repository stands today, that lookup will fail.**
+
+- Default branch is `main`. `main` contains only `.gitattributes`, `index.html`,
+  a logo `.jpg` and a `.rar` — the original static landing page the repository
+  started as. It has **no `.github/workflows/` directory at all**.
+- `feat/fashion-factory-foundation` holds the entire application, all three
+  workflows, and every commit that matters.
+
+So Publish returns 404 no matter how correctly the three environment variables
+are set, and a Vercel import left on its default settings would build `main` and
+deploy that stray `index.html` as the storefront.
+
+**[HUMAN]** Pick one before deploying. Both are one-time decisions:
+
+- **Option A — merge to `main` (recommended).** Merge
+  `feat/fashion-factory-foundation` into `main`, keep `main` as the default
+  branch, set the Vercel production branch and `GITHUB_PUBLISH_REF` to `main`.
+  This is the conventional layout, and it makes the default branch and the
+  deploy branch the same branch, which removes the whole class of problem.
+  `main` is an **ancestor** of the app branch, so this is a clean fast-forward
+  with no conflicts to resolve. It removes `index.html` and the `.rar` from the
+  tip, because commit `d15fe88` deleted them deliberately when the static page
+  was replaced by the app; the logo lives on as `src/app/icon.jpg`, and both
+  removed files stay recoverable from history at `cb921fc`.
+- **Option B — change the default branch.** Repo → Settings → Branches → change
+  the default to `feat/fashion-factory-foundation`, and set the Vercel
+  production branch and `GITHUB_PUBLISH_REF` to the same. Nothing is merged and
+  `main` is left as-is. Faster, but the repository keeps shipping production
+  from a branch named `feat/…`.
+
+Verify afterwards, before wiring the Publish button:
+
+```
+gh api repos/d3zathon/fashionfactory --jq .default_branch
+gh api "repos/d3zathon/fashionfactory/contents/.github/workflows?ref=$(gh api repos/d3zathon/fashionfactory --jq .default_branch)" --jq '.[].name'
+```
+
+The second command must list `publish.yml`. If it 404s, Publish will 404 too.
+
+---
+
 ## 5. Domain and DNS
 
-**[HUMAN]** Add the domain in Vercel → Settings → Domains, then create the
-records it shows you at your registrar. Typically:
+**[HUMAN]** Every step here needs your registrar and Vercel accounts. Work
+through it in order — several steps depend on the one before.
 
-| Record | Name | Value |
-| --- | --- | --- |
-| `A` | `@` | `76.76.21.21` |
-| `CNAME` | `www` | `cname.vercel-dns.com` |
+**Step 1 — deploy on the Vercel subdomain first.** Get
+`<project>.vercel.app` building and working *before* attaching the domain. A
+broken build and a broken DNS record look identical from the browser, and
+debugging both at once wastes an afternoon.
 
-Use whatever Vercel displays — the values above are its usual defaults, not a
-promise. After the certificate is issued, set `NEXT_PUBLIC_SITE_URL` to the
-final origin and **redeploy** (it is a `NEXT_PUBLIC_` value, so a redeploy is
-required).
+**Step 2 — decide the canonical host.** Pick one and treat the other as a
+redirect. `www.example.com` is the safer default: an apex domain cannot be a
+CNAME, so it needs A records that break if Vercel ever changes IPs, whereas
+`www` follows a CNAME automatically. Whichever you pick is what
+`NEXT_PUBLIC_SITE_URL` must equal.
+
+**Step 3 — add both names in Vercel.** Project → Settings → Domains → Add.
+Enter the apex (`example.com`) and `www.example.com`. Vercel will mark one as
+the primary and offer to redirect the other; point the redirect at whichever you
+chose in Step 2.
+
+**Step 4 — create the DNS records your registrar needs.** Vercel shows the exact
+values on the Domains screen after Step 3 — **use what it shows you**, not the
+table below, which records only its usual defaults and is not a promise:
+
+| Record | Name / Host | Value | TTL |
+| --- | --- | --- | --- |
+| `A` | `@` (apex) | `76.76.21.21` | Automatic / 3600 |
+| `CNAME` | `www` | `cname.vercel-dns.com` | Automatic / 3600 |
+
+Notes that catch people out:
+- Some registrars want the host as `@`, others want it blank, others want the
+  full domain. All three mean the apex.
+- A trailing dot on the CNAME value (`cname.vercel-dns.com.`) is required by
+  some registrars and rejected by others. Follow the registrar's own examples.
+- Delete any pre-existing `A`, `AAAA` or `CNAME` record on the same name first —
+  parking pages left behind by the registrar are the usual cause of a domain
+  that resolves somewhere unexpected.
+- If the domain sits behind Cloudflare, set the records to **DNS only** (grey
+  cloud) until the certificate is issued. Proxied records stop Vercel's
+  validation.
+
+**Step 5 — wait for propagation and the certificate.** Vercel's Domains screen
+moves to "Valid Configuration" and issues a Let's Encrypt certificate on its
+own. Typically minutes; up to 48 hours if the previous TTL was long. Check with:
+
+```
+nslookup example.com
+nslookup www.example.com
+```
+
+**Step 6 — set `NEXT_PUBLIC_SITE_URL` and redeploy.** Set it to the final
+canonical origin, no trailing slash (e.g. `https://www.example.com`). This is a
+`NEXT_PUBLIC_` value, inlined at build time, so it does **not** take effect
+until you trigger a fresh deployment. Until then `sitemap.xml`, `robots.txt` and
+social preview images all carry the old origin.
+
+**Step 7 — update Supabase's auth URLs.** §6 below. Sign-in silently bounces
+back to `/admin/login` if the Site URL still says `localhost`.
+
+**Step 8 — verify on the live domain.**
+
+```
+curl -sI https://www.example.com | head -1                      # 200
+curl -sI https://example.com | grep -i location                 # redirect to canonical
+curl -s https://www.example.com/robots.txt | grep -i sitemap    # absolute, correct host
+curl -s https://www.example.com/sitemap.xml | head -5           # not empty
+```
+
+Then sign in at `/admin` on the real domain and confirm the session sticks
+across a refresh.
 
 ---
 
@@ -258,10 +372,27 @@ Run through these on the live domain, on a phone as well as a desktop:
 - [ ] `curl -sI https://<domain> | grep -i x-content-type-options` returns the header.
 - [ ] The anon key is the only Supabase key present in the browser bundle.
 
-**Careful with the first publish.** The live `products` table starts empty while
-the repository ships nine placeholder products. The generator now refuses to
-publish an empty catalogue for exactly this reason — add the real products in
-`/admin` before pressing Publish.
+**Careful with the first publish.** The repository ships nine placeholder
+products in `src/data/products.json`, and the live `products` table holds far
+fewer real ones. Two guards in `scripts/generate-site-data.mjs` stand between
+that mismatch and an emptied storefront, and **both are hard errors that abort
+the publish**:
+
+- **Empty catalogue** — no visible products at all. Overridable only with
+  `ALLOW_EMPTY_CATALOGUE=1`, which `publish.yml` does not expose as an input at
+  all, so the Publish button can never trigger it.
+- **Catalogue shrink** — fires when the site already shows 4 or more products
+  and the publish would cut that to less than half. Overridable only with
+  `ALLOW_CATALOGUE_SHRINK=1`, which is exposed as the workflow's
+  `allow_catalogue_shrink` input, defaults to `false`, and is **never sent by
+  `/api/admin/publish`** — the route dispatches `store_slug` and nothing else.
+  Enabling it therefore requires a deliberate manual run from the Actions tab.
+
+With nine committed products and only a couple live, the first Publish **will be
+refused by the shrink guard**, and that is the guard doing its job. The correct
+response is to enter the real catalogue in `/admin` first — never to switch the
+override on to get past it. Only tick `allow_catalogue_shrink` when you have
+looked at the product list and genuinely intend the site to shrink.
 
 ---
 
