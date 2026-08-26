@@ -127,13 +127,23 @@ The short version:
 | `NEXT_PUBLIC_META_PIXEL_ID` | no | Same. |
 | `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | no | Contact form forwards to Telegram when both are set; no-ops otherwise. |
 | `INSTAGRAM_ACCESS_TOKEN` | no | Live Instagram strip; placeholders otherwise. Expires every 60 days. |
-| `GITHUB_PUBLISH_TOKEN` | for Publish | Fine-grained PAT, this repo only, **Contents: write** + **Actions: write**. |
+| `GITHUB_PUBLISH_TOKEN` | for Publish | Fine-grained PAT, this repo only, **Actions: read and write** and nothing else. Not Contents — see below. |
 | `GITHUB_REPO` | for Publish | `owner/repo`. |
 | `GITHUB_PUBLISH_REF` | for Publish | **Must** be the branch Vercel deploys from. |
 
 > `NEXT_PUBLIC_*` values are inlined into the JavaScript bundle **at build time**.
 > Adding or changing one requires a redeploy before it takes effect. Server-only
 > secrets apply on the next request.
+
+**Least privilege on `GITHUB_PUBLISH_TOKEN`.** `POST /repos/{owner}/{repo}/actions/workflows/{id}/dispatches`
+requires the fine-grained **Actions: write** permission and nothing more
+([GitHub: permissions required for fine-grained PATs](https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens)).
+The commit and push are made *inside* the workflow by `GITHUB_TOKEN`, which
+`publish.yml` grants `contents: write` for that run only — so the PAT never
+needs repository write access. This matters because the PAT lives on the web
+host: scoped to Actions alone, a leak lets someone start a publish; with
+Contents write it would let them push code to the branch that redeploys itself.
+Set an expiry and re-issue on schedule.
 
 ### In GitHub Actions (Settings → Secrets and variables → Actions)
 

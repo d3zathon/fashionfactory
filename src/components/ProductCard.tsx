@@ -32,12 +32,21 @@ export function ProductCard({
       <div className="card-media">
         <span className="card-idx">{String(index + 1).padStart(2, "0")}</span>
         <Link href={`/products/${product.slug}`} onClick={() => track("product_click")} aria-label={`View ${product.name}`}>
-          <img
-            src={image?.src}
-            alt={image?.alt ?? product.name}
-            loading={priority ? "eager" : "lazy"}
-            fetchPriority={priority ? "high" : "auto"}
-          />
+          {/* A product saved before its photo was uploaded has no image at all.
+              Rendering <img> with an undefined src leaves an empty, sourceless
+              element in the grid; this keeps the card's shape and stays a link.
+              Decorative and aria-hidden on purpose — the Link above already
+              names the product, so announcing this too would only repeat it. */}
+          {image ? (
+            <img
+              src={image.src}
+              alt={image.alt ?? product.name}
+              loading={priority ? "eager" : "lazy"}
+              fetchPriority={priority ? "high" : "auto"}
+            />
+          ) : (
+            <span className="card-media-empty" aria-hidden="true">Photo coming soon</span>
+          )}
         </Link>
         <a
           className="card-cta"
