@@ -9,12 +9,37 @@ const LOGIN_PATH = "/admin/login";
 // RLS is still the last line of defense; this stops unauthorized requests earlier
 // and keeps admin URLs from rendering at all.
 export async function middleware(request: NextRequest) {
+  try {
+    return await authorize(request);
+  } catch {
+    // Nothing below is allowed to take the whole admin area down. An uncaught
+    // throw here is not a 500 on one page, it is MIDDLEWARE_INVOCATION_FAILED
+    // for every matched request. Fail closed: the pages behind this cannot be
+    // trusted to gate themselves, so an unanswerable check means "no".
+    if (request.nextUrl.pathname.startsWith("/api/admin")) {
+      return NextResponse.json(
+        { success: false, error: "Authorization is temporarily unavailable." },
+        { status: 503 }
+      );
+    }
+    if (request.nextUrl.pathname === LOGIN_PATH) return NextResponse.next({ request });
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = LOGIN_PATH;
+    redirectUrl.searchParams.set("next", request.nextUrl.pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+}
+
+async function authorize(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   // Not configured yet: let the page render its own "not configured" state.
-  if (!url || !anonKey) return response;
+  // A malformed URL counts as not configured rather than as a crash:
+  // createServerClient throws synchronously on anything that is not a valid
+  // http(s) URL, so checking only for a non-empty string is not enough.
+  if (!url || !anonKey || !isHttpUrl(url)) return response;
 
   const supabase = createServerClient(url, anonKey, {
     cookies: {
@@ -126,4 +151,14 @@ async function managesActiveStore(
   if (!store) return false;
 
   return adminRows.some((row) => row.store_id === store.id);
+}
+
+/** Is this a URL createServerClient will accept? It throws on anything else. */
+function isHttpUrl(value: string): boolean {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
 }
