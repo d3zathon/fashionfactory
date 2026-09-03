@@ -17,15 +17,16 @@
     "countryCode": "NP",
     "currency": "NPR",
     "returnsPolicy": "No refunds or returns. Exchanges are accepted within 2 days, subject to store policy and product condition.",
+    "logoUrl": "/images/jutta-nepal/logo.png",
     "branding": {
-      "accent": "#23375c",
-      "accentDeep": "#16233c",
-      "accentLight": "#93aad6",
-      "ink": "#12141a",
-      "paper": "#f3f2ef",
+      "accent": "#0d0d0d",
+      "accentDeep": "#000000",
+      "accentLight": "#b8b6b2",
+      "ink": "#0d0d0d",
+      "paper": "#f5f4f2",
       "wordmark": [
-        "JUTTA",
-        "NEPAL"
+        "Jutta",
+        "Nepal"
       ]
     },
     "features": {

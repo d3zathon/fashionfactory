@@ -88,6 +88,20 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   );
   const socialProfiles = [store.instagramUrl, store.tiktokUrl, store.facebookUrl].filter(Boolean);
 
+  // JSON-LD has no document base, so a relative logo path — which is what a
+  // logo committed to /public looks like — resolves against nothing and the
+  // property is worse than useless. Absolute or absent.
+  const absoluteLogo = (() => {
+    if (!store.logoUrl) return undefined;
+    if (/^https?:\/\//.test(store.logoUrl)) return store.logoUrl;
+    if (!siteUrl) return undefined;
+    try {
+      return new URL(store.logoUrl, siteUrl).toString();
+    } catch {
+      return undefined;
+    }
+  })();
+
   // Both schema.org subtypes, because the shop is both: ShoeStore and
   // ClothingStore are each a Store, and an array of types is how JSON-LD says
   // "this is genuinely both" rather than making us pick the half that is
@@ -100,7 +114,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     "@type": ["ShoeStore", "ClothingStore"],
     name: location.name,
     telephone: store.phone,
-    ...(store.logoUrl ? { image: store.logoUrl, logo: store.logoUrl } : {}),
+    ...(absoluteLogo ? { image: absoluteLogo, logo: absoluteLogo } : {}),
     address: {
       "@type": "PostalAddress",
       streetAddress: location.address,
