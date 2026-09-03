@@ -3,10 +3,11 @@
 How to take this repository from a fresh clone to a live storefront, and how to
 add another store to the same platform afterwards.
 
-**This deployment serves `jutta-nepal`** (Jutta Nepal, footwear, Bhaisepati,
-Lalitpur). `0005_jutta_nepal_store.sql` seeds that store, its categories and its
-branch, so after the migrations the only store-specific work left is the product
-catalogue. Where a step below needs a store slug, use `jutta-nepal`;
+**This deployment serves `jutta-nepal`** (Jutta Nepal, shoes and clothing,
+Bhaisepati, Lalitpur). `0005_jutta_nepal_store.sql` seeds that store, its
+categories and its branch, and `0006_shoes_and_clothing.sql` widens the rail
+list to cover clothing, so after the migrations the only store-specific work
+left is the product catalogue. Where a step below needs a store slug, use `jutta-nepal`;
 `fashion-factory-nepal` still exists as the platform's default tenant and is
 used in some examples as the "other store".
 

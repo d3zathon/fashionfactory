@@ -9,14 +9,19 @@ import { AnalyticsService } from "@/services";
 import { getStoreProfile } from "@/providers/static";
 
 /**
- * "Find Your Pair" — a three-question shoe finder.
+ * "Find what you're after" — a three-question shop finder.
  *
  * Deliberately NOT a rewards mechanic. This store has no cart, checkout or
  * order system, so a discount code would have nothing to redeem against and a
  * "you won X" flow would be fabricated. Instead the quiz does something the
  * store can actually honour: it narrows the catalogue to one category, shows
- * real pairs from it, and hands the visitor to WhatsApp with a message the
+ * real items from it, and hands the visitor to WhatsApp with a message the
  * shopkeeper can act on.
+ *
+ * A heuristic, not a recommender. Three questions cannot branch, so the
+ * weights are tuned to land somewhere plausible across both families the shop
+ * sells — shoes and clothing — and the result is framed as a starting point
+ * rather than an answer.
  *
  * The weights name category ids from the store's own catalogue. Nothing breaks
  * when a store uses different ids — an unmatched score falls through to the
@@ -31,30 +36,30 @@ type Question = { id: string; prompt: string; answers: Answer[] };
 
 const QUESTIONS: Question[] = [
   {
-    id: "wear",
-    prompt: "Where will you wear them?",
+    id: "family",
+    prompt: "What are you shopping for?",
     answers: [
-      { label: "Every day", hint: "College, errands, walking the city", weight: ["sneakers", "new"] },
-      { label: "Work or office", hint: "Something you can wear with trousers", weight: ["formal", "formal"] },
-      { label: "Around the house", hint: "Easy on, easy off", weight: ["sandals", "sandals"] },
+      { label: "Shoes", hint: "Sneakers, formal, boots, sandals", weight: ["sneakers", "boots"] },
+      { label: "Clothing", hint: "Shirts, trousers, dresses, outerwear", weight: ["mens-clothing", "womens-clothing"] },
+      { label: "Whatever's new", hint: "The latest things in the shop", weight: ["new", "new"] },
     ],
   },
   {
-    id: "style",
-    prompt: "What shape are you after?",
+    id: "occasion",
+    prompt: "Where will you wear it?",
     answers: [
-      { label: "Low-top and simple", hint: "Clean lines, easy colours", weight: ["sneakers", "formal"] },
-      { label: "Something taller", hint: "Boots, chukkas, high-tops", weight: ["boots", "boots"] },
-      { label: "Open and light", hint: "Sandals and slides", weight: ["sandals", "new"] },
+      { label: "Every day", hint: "College, errands, around the city", weight: ["sneakers", "mens-clothing"] },
+      { label: "Work or somewhere smarter", hint: "Office, an occasion", weight: ["formal", "womens-clothing"] },
+      { label: "Warm days and at home", hint: "Light and easy on", weight: ["sandals", "new"] },
     ],
   },
   {
-    id: "rail",
-    prompt: "Which rail should we look at?",
+    id: "who",
+    prompt: "Who is it for?",
     answers: [
-      { label: "Women's", hint: "", weight: ["womens", "womens"] },
-      { label: "Men's", hint: "", weight: ["sneakers", "formal"] },
-      { label: "Just show me what's new", hint: "The latest pairs in the shop", weight: ["new", "new"] },
+      { label: "Women's", hint: "", weight: ["womens-clothing", "womens-clothing"] },
+      { label: "Men's", hint: "", weight: ["mens-clothing", "formal"] },
+      { label: "Doesn't matter", hint: "Show me the best of it", weight: ["new", "boots"] },
     ],
   },
 ];
@@ -82,7 +87,7 @@ export function StyleQuiz({
   const result =
     categories.find((c) => c.id === Object.entries(scores).sort((a, b) => b[1] - a[1])[0]?.[0]) ?? categories[0];
 
-  // Real pairs from the recommended category, so the result is browsable
+  // Real items from the recommended category, so the result is browsable
   // rather than just a label.
   const picks = result
     ? products.filter((p) => p.categoryId === result.id).slice(0, 3)
@@ -103,7 +108,7 @@ export function StyleQuiz({
       <div className="quiz quiz-closed">
         <div>
           <p className="eyebrow">Not sure where to start?</p>
-          <h3 className="quiz-title">Find your pair in three questions.</h3>
+          <h3 className="quiz-title">Find what you&rsquo;re after in three questions.</h3>
           <p className="quiz-sub">No sign-up, no email, no discount codes. Just a starting point — and a message you can send the shop.</p>
         </div>
         <button
@@ -120,9 +125,9 @@ export function StyleQuiz({
   return (
     <div className="quiz">
       <div className="quiz-head">
-        <p className="eyebrow">Find your pair</p>
+        <p className="eyebrow">Find what you&rsquo;re after</p>
         <button className="quiz-dismiss" type="button" onClick={() => { setOpen(false); restart(); }}>
-          Close<span className="sr-only"> the shoe finder</span>
+          Close<span className="sr-only"> the shop finder</span>
         </button>
       </div>
 

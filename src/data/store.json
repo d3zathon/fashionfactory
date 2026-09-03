@@ -5,7 +5,7 @@
     "slug": "jutta-nepal",
     "name": "Jutta Nepal",
     "tagline": "Every Step Counts.",
-    "description": "Jutta Nepal is a footwear store in Bhaisepati, Lalitpur. Browse what's in the shop, ask about a pair on WhatsApp, and come in to try it on.",
+    "description": "Jutta Nepal is a shoe and clothing store in Bhaisepati, Lalitpur. Browse what's in the shop, ask about sizes on WhatsApp, and come in to try things on.",
     "locationLabel": "Bhaisepati, Lalitpur, Nepal",
     "phone": "+977 9702042301",
     "whatsappNumber": "9779702042301",
@@ -37,19 +37,20 @@
       "locations": true
     },
     "seo": {
-      "title": "Jutta Nepal | Footwear Store in Bhaisepati, Lalitpur",
-      "description": "Jutta Nepal is a footwear store in Bhaisepati, Lalitpur. Browse the shoes, message the store on WhatsApp to ask about a pair, and get directions.",
+      "title": "Jutta Nepal | Shoes & Clothing in Bhaisepati, Lalitpur",
+      "description": "Jutta Nepal is a shoe and clothing store in Bhaisepati, Lalitpur. Browse the shoes and clothing, message the store on WhatsApp about sizes, and get directions.",
       "keywords": [
         "Jutta Nepal",
         "shoe store Bhaisepati",
-        "footwear store Lalitpur",
+        "clothing store Lalitpur",
         "shoes Lalitpur",
         "sneakers Kathmandu",
+        "clothes shop Bhaisepati",
         "jutta Nepal Bhaisepati"
       ]
     },
     "visitTitle": "One shop in\nBhaisepati.",
-    "visitStepBody": "Come to Bhaisepati and try the pair on."
+    "visitStepBody": "Come to Bhaisepati and try it on."
   },
   "locations": [
     {

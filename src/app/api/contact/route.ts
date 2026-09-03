@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import type { ContactInquiry } from "@/models";
-import { mockContactProvider } from "@/providers/mock";
 import { getStoreProfile } from "@/providers/static";
 import { clientKey, rateLimit } from "@/lib/rateLimit";
 
@@ -87,8 +86,20 @@ export async function POST(request: Request) {
   const data = body as ContactInquiry;
 
   if (!botToken || !chatId) {
-    // Telegram forwarding isn't configured on this host yet.
-    return NextResponse.json(await mockContactProvider.submitInquiry(data));
+    // No delivery route configured on this host. This used to answer with the
+    // mock provider's success, so a customer filled in the form, read "your
+    // inquiry was received", and reached nobody — the worst possible failure
+    // for the one page element whose entire job is to reach the shop. Fail
+    // honestly and hand them the channel that does work. Setting
+    // TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID switches this off with no code
+    // change, exactly as before.
+    return NextResponse.json(
+      {
+        success: false,
+        error: `The inquiry form isn't connected yet — your message was not sent. Please message ${getStoreProfile().name} on WhatsApp instead and we'll reply there.`,
+      },
+      { status: 503 }
+    );
   }
 
   try {

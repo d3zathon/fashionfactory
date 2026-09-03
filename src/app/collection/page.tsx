@@ -146,9 +146,11 @@ function CollectionView() {
     searchInputRef.current?.focus();
   }
 
-  // "3 pairs matching "chelsea" in Boots." — one sentence that always says
-  // what was searched and where, so the number is never ambiguous.
-  const resultSummary = `${visible.length} ${visible.length === 1 ? "pair" : "pairs"}${
+  // "3 items matching "chelsea" in Boots." — one sentence that always says
+  // what was searched and where, so the number is never ambiguous. "items"
+  // rather than "pairs": the shop sells clothing as well as shoes, and a shirt
+  // does not come in pairs.
+  const resultSummary = `${visible.length} ${visible.length === 1 ? "item" : "items"}${
     searching ? ` matching \u201C${query.trim()}\u201D` : ""
   }${activeCategory ? ` in ${activeCategory.name}` : ""}.`;
 
@@ -257,15 +259,15 @@ function CollectionView() {
               <div className="state-block collection-empty">
                 <p className="collection-empty-title">
                   {searching ? (
-                    <>No pairs match &ldquo;{query.trim()}&rdquo;{activeCategory ? ` in ${activeCategory.name}` : ""}.</>
+                    <>Nothing matches &ldquo;{query.trim()}&rdquo;{activeCategory ? ` in ${activeCategory.name}` : ""}.</>
                   ) : (
                     <>Nothing in {activeCategory ? activeCategory.name : "the shop"} listed yet.</>
                   )}
                 </p>
                 <p className="collection-empty-body">
                   {searching
-                    ? "Try fewer words, or a different category — and we can check the shelf for you on WhatsApp."
-                    : "The shop is listed here as pairs are photographed. Message us on WhatsApp and we'll tell you what's in stock today."}
+                    ? "Try fewer words, or a different category — and we can check the shop for you on WhatsApp."
+                    : "The shop is listed here as items are photographed. Message us on WhatsApp and we'll tell you what's in stock today."}
                 </p>
                 <div className="collection-empty-actions">
                   {filtersApplied && (

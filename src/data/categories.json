@@ -1,11 +1,12 @@
 {
   "generatedAt": "2026-09-03T00:00:00.000Z",
   "categories": [
-    { "id": "new", "name": "New Arrivals", "slug": "new-arrivals", "description": "The most recent pairs to land in the shop.", "active": true, "sortOrder": 1 },
+    { "id": "new", "name": "New Arrivals", "slug": "new-arrivals", "description": "The most recent shoes and clothing to land in the shop.", "active": true, "sortOrder": 1 },
     { "id": "sneakers", "name": "Sneakers", "slug": "sneakers", "description": "Everyday trainers and low-tops.", "active": true, "sortOrder": 2 },
     { "id": "formal", "name": "Formal & Office", "slug": "formal", "description": "Loafers, derbies and dress shoes.", "active": true, "sortOrder": 3 },
     { "id": "boots", "name": "Boots", "slug": "boots", "description": "Ankle boots, chukkas and high-tops.", "active": true, "sortOrder": 4 },
     { "id": "sandals", "name": "Sandals & Slides", "slug": "sandals", "description": "Open pairs for warm days and indoors.", "active": true, "sortOrder": 5 },
-    { "id": "womens", "name": "Women's", "slug": "womens", "description": "The women's rail across every style.", "active": true, "sortOrder": 6 }
+    { "id": "mens-clothing", "name": "Men's Clothing", "slug": "mens-clothing", "description": "Shirts, tees, trousers and outerwear.", "active": true, "sortOrder": 6 },
+    { "id": "womens-clothing", "name": "Women's Clothing", "slug": "womens-clothing", "description": "Tops, dresses, trousers and outerwear.", "active": true, "sortOrder": 7 }
   ]
 }

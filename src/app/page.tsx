@@ -78,7 +78,7 @@ export default function HomePage() {
   // JSON is a build-time constant, so these read as stably as hardcoded strings
   // while staying correct on any store's storefront, not just this one's.
   const tickerItems = [
-    "New arrivals on the shelf",
+    "New arrivals in store",
     store?.locationLabel ?? built.locationLabel,
     "Ask about your size on WhatsApp",
     store?.openingHours ?? built.openingHours,
@@ -164,7 +164,7 @@ export default function HomePage() {
               <span className="idx">{idx()}</span>
               <p className="eyebrow">The index</p>
             </div>
-            <h2 className="section-title">Find your pair.</h2>
+            <h2 className="section-title">Find your fit.</h2>
           </div>
           <Link className="link-rule" href="/collection">
             View everything <ArrowUpRight size={14} />
@@ -192,12 +192,12 @@ export default function HomePage() {
           <div>
             <div className="head-meta">
               <span className="idx">{idx()}</span>
-              <p className="eyebrow">Selected pairs</p>
+              <p className="eyebrow">In the shop</p>
             </div>
             <h2 className="section-title">Worth a closer look.</h2>
           </div>
           <p className="muted" style={{ maxWidth: "30ch", margin: 0 }}>
-            Ask about sizes before you come in — every pair is answered on WhatsApp.
+            Ask about sizes before you come in — every question is answered on WhatsApp.
           </p>
         </div>
         <div className="product-grid">
@@ -240,7 +240,7 @@ export default function HomePage() {
           </div>
           <div className="editorial-step">
             <b>02</b>
-            <div><p>Ask</p><small>Message us on WhatsApp with the pair and your size.</small></div>
+            <div><p>Ask</p><small>Message us on WhatsApp with the item and your size.</small></div>
           </div>
           <div className="editorial-step">
             <b>03</b>
@@ -256,12 +256,12 @@ export default function HomePage() {
       <div className="container">
         {/* The quiz was the one section carrying no entry label, which is what
             left a hole at 06. The eyebrow names the section rather than
-            repeating the card's own "Find your pair" heading. */}
+            repeating the card's own "Find what you're after" heading. */}
         <div className="section-head">
           <div>
             <div className="head-meta">
               <span className="idx">{idx()}</span>
-              <p className="eyebrow">The shoe finder</p>
+              <p className="eyebrow">The shop finder</p>
             </div>
           </div>
         </div>
@@ -438,8 +438,8 @@ export default function HomePage() {
     <section className="final">
       <div className="container final-inner">
         <p className="eyebrow">{store?.name ?? built.name}</p>
-        <h2>{home?.finalCtaTitle ?? "Find your next pair."}</h2>
-        <p>{home?.finalCtaBody ?? `Visit ${store?.name ?? built.name}, or message the shop about a pair.`}</p>
+        <h2>{home?.finalCtaTitle ?? "Find what fits."}</h2>
+        <p>{home?.finalCtaBody ?? `Visit ${store?.name ?? built.name}, or message the shop about anything in it.`}</p>
         <div className="final-actions">
           <Link className="btn btn-dark" href="/collection">Browse the shop</Link>
           <a className="btn" href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click", { placement: "final_cta" })}>Order on WhatsApp</a>

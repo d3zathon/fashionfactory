@@ -21,7 +21,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           <h1>We couldn&rsquo;t load this.</h1>
           <p>
             Try again — and if it keeps happening, message the shop on WhatsApp
-            and we&rsquo;ll help you find the pair you&rsquo;re looking for.
+            and we&rsquo;ll help you find what you&rsquo;re looking for.
           </p>
           <div className="route-state-actions">
             <button className="btn btn-dark" type="button" onClick={() => reset()}>

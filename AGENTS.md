@@ -7,7 +7,7 @@
 - Main working branch: feat/fashion-factory-foundation
 
 ## Store
-- Store: Jutta Nepal — footwear, Bhaisepati, Lalitpur, Nepal 44700
+- Store: Jutta Nepal — shoes and clothing, Bhaisepati, Lalitpur, Nepal 44700
 - WhatsApp: https://wa.me/9779702042301 · Phone: +977 9702042301
 - Instagram: @jutta__nepal
 - Everything store-specific lives in `src/data/store.json` (profile),

@@ -12,6 +12,11 @@ interface FieldErrors {
 export function ContactForm() {
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errors, setErrors] = useState<FieldErrors>({});
+  // What the server said went wrong, when it said anything useful. Previously
+  // every failure — including "this form has no delivery route configured, your
+  // message went nowhere" — was flattened into "please try again", which sends
+  // the customer around a loop that cannot succeed.
+  const [failure, setFailure] = useState<string | null>(null);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,11 +36,13 @@ export function ContactForm() {
 
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) {
+      setFailure(null);
       setState("error");
       return;
     }
 
     setState("loading");
+    setFailure(null);
     try {
       const result = await ContactService.submitInquiry(
         { name, phone, message, categoryId: category || undefined },
@@ -46,7 +53,8 @@ export function ContactForm() {
       form.reset();
       setErrors({});
       setState("success");
-    } catch {
+    } catch (error) {
+      setFailure(error instanceof Error ? error.message : null);
       setState("error");
     }
   }
@@ -71,7 +79,11 @@ export function ContactForm() {
       <label>Message<textarea name="message" required rows={5} placeholder="Tell us what you'd like to know..." aria-invalid={Boolean(errors.message)} aria-describedby={errors.message ? "contact-message-error" : undefined} />{errors.message && <span id="contact-message-error" className="field-error">{errors.message}</span>}</label>
       <button className="btn btn-dark" disabled={state === "loading"}>{state === "loading" ? "Sending…" : "Send Inquiry"}</button>
       {state === "success" && <p className="form-success" role="status">Thanks — your inquiry was received.</p>}
-      {state === "error" && !Object.keys(errors).length && <p className="form-error" role="alert">We couldn&rsquo;t send your inquiry. Please try again.</p>}
+      {state === "error" && !Object.keys(errors).length && (
+        <p className="form-error" role="alert">
+          {failure ?? "We couldn't send your inquiry. Please try again."}
+        </p>
+      )}
     </form>
   );
 }

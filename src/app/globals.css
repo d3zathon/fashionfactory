@@ -460,6 +460,10 @@ h1, h2, h3 { font-weight: 600; }
 .card-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 13px; border-top: 1px solid var(--line); margin-top: 12px; }
 .card-name { font-weight: 600; font-size: 0.96rem; margin: 0; letter-spacing: -0.01em; }
 .card-cat { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+/* Takes the category's place on the card when the shop publishes a price. Full
+   ink rather than --muted, and tabular figures so a column of cards lines its
+   prices up instead of jittering between 1 and 4. */
+.card-price { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.04em; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 /* --------------------------------------------------------------------------
    12. Editorial split

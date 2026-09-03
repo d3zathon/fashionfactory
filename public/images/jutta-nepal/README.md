@@ -12,7 +12,7 @@ the shop owner never touches code.
 
 `src/data/products.json` currently holds an **empty catalogue**. Jutta Nepal's
 own photography has not been supplied, and the alternative — stock photographs
-of shoes the shop does not sell, or the previous store's clothing — would put
+of shoes or clothing the shop does not sell — would put
 someone else's products on this storefront under Jutta Nepal's name. Every
 page handles an empty catalogue deliberately rather than accidentally:
 

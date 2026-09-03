@@ -1,6 +1,6 @@
 # Jutta Nepal
 
-A storefront for **Jutta Nepal**, a footwear store in Bhaisepati, Lalitpur —
+A storefront for **Jutta Nepal**, a shoe and clothing store in Bhaisepati, Lalitpur —
 and the platform it runs on. One codebase serves any number of stores:
 everything store-specific (name, contact details, social handles, branding,
 copy, which sections render) is data, not code.
@@ -180,11 +180,11 @@ select id, email, null from auth.users where email = 'owner@example.com';
 
 Setup:
 1. Create a free Supabase project, then apply `supabase/migrations/` in filename
-   order, `0001` through `0005`. Together they create `stores`, `products`,
+   order, `0001` through `0006`. Together they create `stores`, `products`,
    `categories`, `store_locations`, `admin_users`, the store-scoped RLS
-   policies, the `product-images` bucket, and — in `0005` — the `jutta-nepal`
-   store with its categories and branch, plus the `returns_policy` column the
-   footer, FAQ and product pages read.
+   policies, the `product-images` bucket, the `jutta-nepal` store with its
+   categories and branch, the `returns_policy` column the footer, FAQ and
+   product pages read, and the clothing rails alongside the footwear ones.
 2. In Authentication > Providers, turn off public sign-ups, manually add the
    owner account under Authentication > Users, then grant it admin rights with
    the SQL above.

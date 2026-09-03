@@ -88,14 +88,16 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   );
   const socialProfiles = [store.instagramUrl, store.tiktokUrl, store.facebookUrl].filter(Boolean);
 
-  // ShoeStore is schema.org's own subtype for a footwear retailer, and the
-  // country comes from the store's profile rather than a literal so a branch
-  // outside Nepal would not be described as being in it. openingHours is
-  // omitted entirely when the store has recorded no structured hours — an
-  // empty array would assert "open no hours at all".
+  // Both schema.org subtypes, because the shop is both: ShoeStore and
+  // ClothingStore are each a Store, and an array of types is how JSON-LD says
+  // "this is genuinely both" rather than making us pick the half that is
+  // wrong. The country comes from the store's profile rather than a literal so
+  // a branch outside Nepal would not be described as being in it, and
+  // openingHours is omitted entirely when the store has recorded no structured
+  // hours — an empty array would assert "open no hours at all".
   const localBusinesses = store.locations.map((location) => ({
     "@context": "https://schema.org",
-    "@type": "ShoeStore",
+    "@type": ["ShoeStore", "ClothingStore"],
     name: location.name,
     telephone: store.phone,
     ...(store.logoUrl ? { image: store.logoUrl, logo: store.logoUrl } : {}),
