@@ -8,7 +8,12 @@ export interface AdminProduct {
   slug: string;
   categoryId: string;
   description: string | null;
+  /** The first entry of `imageUrls`, mirrored for readers that predate the gallery. */
   imageUrl: string | null;
+  /** The ordered gallery. Empty means the product has no photos yet. */
+  imageUrls: string[];
+  /** NULL in the database — the shop publishes no price for this item. */
+  price: number | null;
   /** Empty array means the column is NULL — the owner never specified any. */
   sizes: string[];
   colors: string[];
@@ -17,6 +22,9 @@ export interface AdminProduct {
   isVisible: boolean;
   updatedAt: string;
 }
+
+/** Beyond this a product page stops being a gallery and starts being a scroll. */
+export const MAX_PRODUCT_IMAGES = 6;
 
 /**
  * Category choices for the product form, read from the categories table.
@@ -47,6 +55,13 @@ function fromRow(row: Record<string, unknown>): AdminProduct {
     categoryId: row.category_id as string,
     description: (row.description as string) ?? null,
     imageUrl: (row.image_url as string) ?? null,
+    // Falls back to the single legacy URL so a row written before 0008 — or by
+    // anything that only knows about image_url — still reads as a gallery of one.
+    imageUrls: (row.image_urls as string[]) ?? ((row.image_url as string) ? [row.image_url as string] : []),
+    // numeric arrives as a string over the wire; Number() here keeps the rest
+    // of the app dealing in numbers. NULL stays null rather than becoming 0,
+    // which would publish a price of nothing.
+    price: row.price === null || row.price === undefined ? null : Number(row.price),
     // NULL and [] both surface as an empty array here; the difference only
     // matters to the database, and toColumn() below restores it on write.
     sizes: (row.sizes as string[]) ?? [],
@@ -78,13 +93,16 @@ function toColumn(values: string[] | undefined): string[] | null {
  * migration instead, the way the publish route names 0003 when
  * admin_manages_store() is missing.
  *
- * Used only by the two writes that carry sizes, colours and featured — the
- * columns 0004 adds. Everywhere else the raw message is already the whole story.
+ * Used only by the two writes that carry the columns later migrations add:
+ * sizes/colours/featured (0004), price (0007) and the gallery (0008). The
+ * failing column name is in the message, so the hint names all three files
+ * rather than guessing which one is missing. Everywhere else the raw message is
+ * already the whole story.
  */
 function writeError(error: { code?: string; message: string }): Error {
   if (error.code !== "PGRST204") return new Error(error.message);
   return new Error(
-    `${error.message} This database has not had supabase/migrations/0004_product_variants.sql applied yet — apply it, then try again.`
+    `${error.message} This database is missing a migration — apply supabase/migrations/ in order (0004_product_variants.sql, 0007_product_prices.sql and 0008_product_gallery.sql all add product columns), then try again.`
   );
 }
 
@@ -130,11 +148,26 @@ export interface ProductInput {
   name: string;
   categoryId: string;
   description?: string | null;
-  imageUrl?: string | null;
+  /** The ordered gallery. `image_url` is derived from its first entry on write. */
+  imageUrls?: string[];
+  price?: number | null;
   sizes?: string[];
   colors?: string[];
   featured: boolean;
   isVisible: boolean;
+}
+
+/**
+ * The gallery, and the primary image derived from it.
+ *
+ * 0008 keeps `image_url` as a mirror of the first gallery entry so the publish
+ * generator and any other reader that predates the gallery keep working. That
+ * invariant is owned here, in the one place both columns are written, rather
+ * than left to each call site to remember.
+ */
+function imageColumns(imageUrls: string[] | undefined) {
+  const gallery = (imageUrls ?? []).filter(Boolean).slice(0, MAX_PRODUCT_IMAGES);
+  return { image_urls: gallery.length > 0 ? gallery : null, image_url: gallery[0] ?? null };
 }
 
 export async function createProduct(input: ProductInput): Promise<AdminProduct> {
@@ -155,7 +188,8 @@ export async function createProduct(input: ProductInput): Promise<AdminProduct> 
       slug,
       category_id: input.categoryId,
       description: input.description ?? null,
-      image_url: input.imageUrl ?? null,
+      ...imageColumns(input.imageUrls),
+      price: input.price ?? null,
       sizes: toColumn(input.sizes),
       colors: toColumn(input.colors),
       featured: input.featured,
@@ -180,7 +214,8 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Ad
       slug,
       category_id: input.categoryId,
       description: input.description ?? null,
-      image_url: input.imageUrl ?? null,
+      ...imageColumns(input.imageUrls),
+      price: input.price ?? null,
       sizes: toColumn(input.sizes),
       colors: toColumn(input.colors),
       featured: input.featured,
@@ -205,10 +240,23 @@ function storagePathFromUrl(url: string): string | null {
 // Deletes a file from the image bucket, ignoring anything that isn't one of
 // our storage URLs. Safe to call with a null/foreign URL.
 export async function deleteProductImage(url: string | null | undefined): Promise<void> {
-  if (!url) return;
-  const client = requireClient();
-  const path = storagePathFromUrl(url);
-  if (path) await client.storage.from(STORAGE_BUCKET).remove([path]);
+  return deleteProductImages([url]);
+}
+
+/**
+ * Deletes several at once — one storage call rather than one per file.
+ *
+ * Anything that is not one of our storage URLs is skipped rather than being an
+ * error, so this is safe to hand a mixed or partly-empty list.
+ */
+export async function deleteProductImages(urls: (string | null | undefined)[]): Promise<void> {
+  const paths = urls.flatMap((url) => {
+    if (!url) return [];
+    const path = storagePathFromUrl(url);
+    return path ? [path] : [];
+  });
+  if (paths.length === 0) return;
+  await requireClient().storage.from(STORAGE_BUCKET).remove(paths);
 }
 
 export async function deleteProduct(product: AdminProduct): Promise<void> {
@@ -218,7 +266,7 @@ export async function deleteProduct(product: AdminProduct): Promise<void> {
   // reverse order would leave a surviving row pointing at a deleted file.
   const { error } = await client.from("products").delete().eq("id", product.id).eq("store_id", storeId);
   if (error) throw new Error(error.message);
-  await deleteProductImage(product.imageUrl);
+  await deleteProductImages(product.imageUrls);
 }
 
 export async function setVisible(id: string, isVisible: boolean): Promise<void> {

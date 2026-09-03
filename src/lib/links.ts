@@ -1,7 +1,7 @@
 /**
  * Contact link builders.
  *
- * Business numbers are stored in human-readable form (e.g. "+977 9840260456")
+ * Business numbers are stored in human-readable form (e.g. "+977 9702042301")
  * but `tel:` and `wa.me` targets must not contain spaces or punctuation.
  */
 
@@ -25,7 +25,7 @@ export function whatsappHref(number: string | undefined, message: string): strin
  * Build a TikTok profile URL from a display handle.
  *
  * TikTok usernames only permit letters, digits, underscores and periods, so a
- * decorative "@" inside a display handle (e.g. "Fashionfactory@99") is stripped
+ * decorative "@" inside a display handle (e.g. "Shopname@99") is stripped
  * out to form the URL — the same reason telHref strips formatting out of a
  * phone number. Lowercased to match how TikTok canonicalises usernames; the
  * displayed handle keeps its original casing.
@@ -53,8 +53,15 @@ const defaultStoreName = () => getStoreProfile().name;
 
 /** Prefilled WhatsApp message for the site-wide contact actions. */
 export const generalWhatsappMessage = (storeName: string = defaultStoreName()) =>
-  `Hi ${storeName}, I found you through your website and would like to know more about your collection.`;
+  `Hi ${storeName}, I found you through your website and would like to know more about what you have in the shop.`;
 
-/** Prefilled WhatsApp message for a product availability inquiry. */
+/**
+ * Prefilled WhatsApp message for a product inquiry.
+ *
+ * Names the product and asks the one question that decides the sale in a shoe
+ * shop, so the shopkeeper can answer in a single reply. whatsappHref()
+ * percent-encodes the whole string, so product names with spaces, apostrophes
+ * or "&" survive the round trip.
+ */
 export const productWhatsappMessage = (productName: string, storeName: string = defaultStoreName()) =>
-  `Hi ${storeName}, I would like to ask about ${productName}. Is it currently available?`;
+  `Hi ${storeName}, I'm interested in ${productName}. Which sizes do you have?`;

@@ -1,39 +1,47 @@
 /* ==========================================================================
-   FASHION FACTORY — "The Index"
-   Design language: an atelier archive. Editorial serif display set against
-   monospace technical labels, hairline rules instead of boxes, numbered
-   entries, warm paper stock. Industrial precision, hand-made warmth.
+   JUTTA NEPAL — "The Index"
+   Design language taken from the shop's own mark: a high-contrast serif
+   monogram, pure black on white, split by a hairline rule. So the site is
+   monochrome by design — black ink, white paper, and no second colour
+   anywhere. Emphasis comes from weight, scale and rules, never hue, which is
+   also what keeps product photography the only colour on the page.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
    1. Tokens
    -------------------------------------------------------------------------- */
 :root {
-  /* Paper stock — warm, uncoated */
-  --paper: #f2ede3;
-  --paper-deep: #e8e1d3;
-  --wash: #ded5c3;
-  --white: #fffdf9;
+  /* Paper stock — the neutral white the logo badge sits on, dropped a shade
+     so that --white cards still read as raised against it. */
+  --paper: #f5f4f2;
+  --paper-deep: #eae9e6;
+  --wash: #dedcd8;
+  --white: #ffffff;
 
   /* Ink */
-  --ink: #14120f;
-  --ink-soft: #3d3831;
-  /* Passes 4.5:1 on --paper-deep as well as --paper; the previous #6b6459
-     measured 4.49:1 on the band-wash sections, just under AA. */
-  --muted: #655e53;
-  --line: #cfc6b4;
+  /* Sampled from the mark itself, which is very nearly pure black. */
+  --ink: #0d0d0d;
+  --ink-soft: #2e2e2e;
+  /* Measured against --paper-deep, the lightest ground it sits on: 5.1:1,
+     clear of AA. Every muted string on the site is checked there, not on
+     --paper, because the band-wash sections are the tighter case. */
+  --muted: #5c5b58;
+  --line: #d8d6d2;
 
-  /* Accent — a rust drawn from Nepali textile dye */
-  --accent: #8b3f35;
-  --accent-deep: #6d2f27;
-  /* The same rust lifted for dark grounds. At 10-11px the base rust reads
-     2.55:1 on --ink and never clears 3:1 anywhere on the hero scrim, so
-     anything accent-coloured sitting on ink or on photography uses this. */
-  --accent-light: #d98a76;
+  /* The accent IS the ink. The brand has no second colour, so rather than
+     inventing one, --accent stays the platform's hook for a store that does
+     have one while this store resolves it to black. Every rule that paints
+     with it on a dark ground was switched to --accent-light below, because
+     black on black is not a design decision, it is a disappearance. */
+  --accent: #0d0d0d;
+  --accent-deep: #000000;
+  /* The dark-ground counterpart: a warm-neutral grey that carries the same
+     emphasis against ink that black carries against paper (9.4:1 on --ink). */
+  --accent-light: #b8b6b2;
 
-  /* Secondary text on ink. --muted is tuned for paper and only reaches 2.9:1
-     against --ink, so every dark band needs this instead. */
-  --muted-on-ink: #9c9384;
+  /* Secondary text on ink. --muted is tuned for paper and falls under AA
+     against --ink, so every dark band needs this instead (6.3:1). */
+  --muted-on-ink: #96948f;
 
   --font-display: var(--font-serif), Georgia, "Times New Roman", serif;
   --font-body: var(--font-sans), system-ui, -apple-system, sans-serif;
@@ -212,10 +220,14 @@ h1, h2, h3 { font-weight: 600; }
   position: relative;
   z-index: 1;
 }
-.brand { display: grid; line-height: 0.84; letter-spacing: 0.1em; font-family: var(--font-mono); }
-.brand span { font-size: 0.66rem; }
-.brand strong { font-size: 1.05rem; font-weight: 600; letter-spacing: 0.06em; }
-.brand small { font-size: 0.44rem; letter-spacing: 0.42em; margin-top: 5px; }
+/* The lockup from the shop's mark: a high-contrast serif, mixed case, the
+   first word light over the second in bold — "Jutta" above "Nepal", exactly as
+   the badge sets it. Not the monospace caps the rest of the site labels in;
+   this is the one place the brand speaks in its own voice. */
+.brand { display: grid; line-height: 0.94; font-family: var(--font-display); letter-spacing: 0; }
+.brand span { font-size: 0.82rem; font-weight: 500; letter-spacing: 0.01em; }
+.brand strong { font-size: 1.34rem; font-weight: 700; letter-spacing: -0.015em; }
+.brand small { font-family: var(--font-mono); font-size: 0.44rem; letter-spacing: 0.42em; text-transform: uppercase; margin-top: 6px; }
 
 .nav-links { display: flex; align-items: center; gap: 30px; }
 .nav-links a {
@@ -261,13 +273,37 @@ h1, h2, h3 { font-weight: 600; }
   position: absolute;
   inset: 0;
   /* The headline sits in the lower half (the hero is align-items:flex-end), so
-     that band has to be reliably dark whatever photograph is behind it. The
-     previous ramp was still only ~0.2 alpha at the midpoint, which left the
-     rust line sitting on near-white clothing. */
+     that band has to be reliably dark whatever photograph is behind it. An
+     earlier ramp was only ~0.2 alpha at the midpoint, which left the accent
+     line sitting on a near-white sole or upper. */
   background:
     linear-gradient(180deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,.14) 24%, rgba(0,0,0,.46) 48%, rgba(0,0,0,.8) 70%, rgba(0,0,0,.9) 100%),
     linear-gradient(90deg, rgba(0,0,0,.5), transparent 62%);
 }
+/* The hero with no photograph behind it.
+   Jutta Nepal ships without stock imagery rather than borrowing another shop's
+   shoes, so the opening frame has to stand on ground and type alone. The
+   moment a real storefront photograph is set as the homepage hero image,
+   .hero-image renders instead and this never applies — nothing else about the
+   hero changes, so swapping one in later is a data edit, not a CSS edit. */
+.hero-plate {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(118% 88% at 80% 8%, rgba(255, 255, 255, 0.14), transparent 60%),
+    linear-gradient(200deg, #262626 0%, var(--ink) 56%, #000000 100%);
+}
+/* Vertical hairlines, which is the mark's own device — the rule that splits
+   the J from the N — carried across the opening frame at the one scale where a
+   full-bleed field would otherwise read as empty. */
+.hero-plate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: clamp(58px, 8vw, 124px) 100%;
+}
+
 /* No width here — .container owns the width and gutter. Setting width:100%
    overrode it and pushed the headline flush to the viewport edge. */
 .hero-content { position: relative; z-index: 2; padding-bottom: clamp(36px, 7vh, 88px); }
@@ -280,8 +316,8 @@ h1, h2, h3 { font-weight: 600; }
   margin: 0.18em 0 0;
   max-width: 14ch;
 }
-/* Second line indents and turns rust — the signature hero move. The lifted
-   rust keeps that move while staying legible over the photograph. */
+/* Second line indents and turns indigo — the signature hero move. The lifted
+   tone keeps that move legible over a photograph as well as over the plate. */
 .hero-title em { font-style: normal; color: var(--accent-light); display: block; padding-left: 0.14em; }
 
 .hero-row {
@@ -299,9 +335,13 @@ h1, h2, h3 { font-weight: 600; }
 .hero .btn { border-color: rgba(255, 255, 255, 0.75); color: var(--white); }
 .hero .btn::before { background: var(--white); }
 .hero .btn:hover { color: var(--ink); border-color: var(--white); }
-.hero .btn-accent { border-color: var(--accent); background: var(--accent); }
-.hero .btn-accent::before { background: var(--accent-deep); }
-.hero .btn-accent:hover { color: var(--white); }
+/* Inverted rather than accent-filled. With a monochrome palette the accent is
+   the ink, so the filled variant would be a black button on a near-black
+   photograph or plate. Paper-on-ink is the strongest a mark like this can be,
+   and it is how the logo itself is built. */
+.hero .btn-accent { border-color: var(--paper); background: var(--paper); color: var(--ink); }
+.hero .btn-accent::before { background: var(--white); }
+.hero .btn-accent:hover { color: var(--ink); border-color: var(--white); }
 .hero-eyebrow { color: rgba(255, 255, 255, 0.72) !important; }
 
 /* --------------------------------------------------------------------------
@@ -321,7 +361,7 @@ h1, h2, h3 { font-weight: 600; }
   gap: 24px;
   white-space: nowrap;
 }
-.ticker-item::after { content: "◆"; font-size: 0.5rem; color: var(--accent); }
+.ticker-item::after { content: "◆"; font-size: 0.5rem; color: var(--accent-light); }
 .ticker:hover .ticker-track { animation-play-state: paused; }
 @keyframes ticker { to { transform: translateX(-50%); } }
 
@@ -366,14 +406,33 @@ h1, h2, h3 { font-weight: 600; }
 .cat-preview img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; opacity: 0; transform: scale(1.05); transition: opacity var(--speed) var(--ease), transform 1.1s var(--ease); }
 .cat-preview img.is-active { opacity: 1; transform: scale(1); }
 .cat-preview-label { position: absolute; left: 0; bottom: 0; z-index: 2; background: var(--ink); color: var(--paper); padding: 10px 18px; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; }
+/* Stands in for the preview plate before any product photography exists, so
+   the index keeps its two-column shape instead of leaving a grey rectangle. */
+.cat-preview-pending {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 24px;
+  /* Transparent: .cat-preview's own --wash ground is what makes this read as a
+     plate against the section's lighter --paper-deep band. --ink-soft rather
+     than --muted, which only reaches 4.4:1 on --wash. */
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
 
 /* --------------------------------------------------------------------------
    11. Product cards — numbered archive entries
    -------------------------------------------------------------------------- */
 /* Three up rather than auto-fill. auto-fill produced four columns at the
-   1320px container, which left the six featured pieces as a row of four and an
-   orphan row of two; three columns tiles both the featured set (6) and the full
-   catalogue (9) exactly, and gives the photography noticeably more room. */
+   1320px container, which left a six-strong featured set as a row of four and
+   an orphan row of two; three columns tiles a featured set of six and a
+   nine-strong catalogue exactly, and gives the photography noticeably more
+   room. */
 .product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(18px, 2.4vw, 32px) clamp(14px, 1.8vw, 24px); }
 
 .card { position: relative; display: block; }
@@ -411,11 +470,18 @@ h1, h2, h3 { font-weight: 600; }
 .card-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 13px; border-top: 1px solid var(--line); margin-top: 12px; }
 .card-name { font-weight: 600; font-size: 0.96rem; margin: 0; letter-spacing: -0.01em; }
 .card-cat { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+/* Takes the category's place on the card when the shop publishes a price. Full
+   ink rather than --muted, and tabular figures so a column of cards lines its
+   prices up instead of jittering between 1 and 4. */
+.card-price { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.04em; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 /* --------------------------------------------------------------------------
    12. Editorial split
    -------------------------------------------------------------------------- */
 .editorial { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+/* No catalogue photograph to pair the steps with — the same single column the
+   layout already falls back to below 900px, so nothing else has to change. */
+.editorial-solo { grid-template-columns: minmax(0, 1fr); }
 .editorial-media { position: relative; min-height: clamp(360px, 56vw, 700px); overflow: hidden; background: var(--wash); }
 .editorial-media img { width: 100%; height: 100%; object-fit: cover; }
 .editorial-body { display: flex; flex-direction: column; justify-content: center; padding: clamp(34px, 6vw, 92px); background: var(--ink); color: var(--paper); }
@@ -465,7 +531,9 @@ h1, h2, h3 { font-weight: 600; }
   gap: 20px; align-items: center; padding: 23px 0; font-weight: 600; font-size: 1rem;
   transition: color var(--speed) var(--ease);
 }
-.faq summary:hover { color: var(--accent); }
+/* Colour alone said "hover" here, which a monochrome palette cannot. The rule
+   underneath does it instead, and still works for a store with a real accent. */
+.faq summary:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
 .faq summary::-webkit-details-marker { display: none; }
 .faq summary svg { flex-shrink: 0; transition: transform var(--speed) var(--ease); }
 .faq details[open] summary svg { transform: rotate(180deg); }
@@ -513,12 +581,18 @@ h1, h2, h3 { font-weight: 600; }
 footer { background: var(--ink); color: var(--paper); padding: clamp(56px, 8vw, 88px) 0 26px; }
 .footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: clamp(28px, 4vw, 56px); padding-bottom: clamp(42px, 6vw, 74px); }
 .footer-grid > div:not(:first-child) { display: flex; flex-direction: column; gap: 12px; }
-.footer-grid > div:not(:first-child) a { font-size: 0.9rem; color: #cdc5b6; transition: color var(--speed) var(--ease); width: fit-content; }
+.footer-grid > div:not(:first-child) a { font-size: 0.9rem; color: #c6c4c0; transition: color var(--speed) var(--ease); width: fit-content; }
 .footer-grid > div:not(:first-child) a:hover { color: var(--white); }
-.footer-grid .eyebrow { color: #8a8172; margin-bottom: 6px; }
+.footer-grid .eyebrow { color: #8a8884; margin-bottom: 6px; }
 .footer-brand { margin-bottom: 22px; }
 .footer-grid .muted { color: var(--muted-on-ink); max-width: 34ch; line-height: 1.7; }
-.footer-bottom { border-top: 1px solid #2f2b25; padding-top: 22px; color: #8a8172; font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+/* Policy block in the brand column. The first column is a plain block (the
+   flex rule below targets only its siblings), so this sets its own rhythm. */
+.footer-policy { margin-top: clamp(22px, 3vw, 32px); max-width: 40ch; }
+.footer-policy p { margin: 0; }
+.footer-policy p + p { margin-top: 8px; color: var(--muted-on-ink); font-size: 0.86rem; line-height: 1.65; }
+
+.footer-bottom { border-top: 1px solid #282828; padding-top: 22px; color: #8a8884; font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
 /* --------------------------------------------------------------------------
    19. Collection page
@@ -614,7 +688,11 @@ footer { background: var(--ink); color: var(--paper); padding: clamp(56px, 8vw, 
    -------------------------------------------------------------------------- */
 .skip-link { position: absolute; left: -9999px; top: 0; z-index: 100; background: var(--ink); color: var(--white); padding: 12px 18px; font-weight: 600; font-size: 0.85rem; }
 .skip-link:focus { left: 8px; top: 8px; outline: 2px solid var(--white); outline-offset: 2px; }
-a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* currentColor, not the accent: the focused element's own text colour is by
+   definition legible against its ground, so the ring is guaranteed to be too —
+   on paper, on the ink bands, and over a photograph in the hero. A fixed black
+   ring vanished on every dark surface. */
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 .nav a:focus-visible, .nav button:focus-visible, .band-ink a:focus-visible, footer a:focus-visible, .final a:focus-visible { outline-color: #fff; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
@@ -642,15 +720,22 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
     padding: clamp(28px, 8vw, 56px); gap: 4px; z-index: 40;
   }
   .nav-links.open { display: flex; }
+  /* The overlay is a positioned sibling of the wordmark and the toggle inside
+     .nav-inner, so at z-index 40 it painted over both: with the menu open there
+     was no visible close button and no way back to the home link on touch.
+     Escape and the focus trap already worked; this makes the way out visible.
+     One above the overlay, not an arbitrary jump — .nav's own z-index:30 is the
+     stacking context, so these values only compete with each other. */
+  .nav-inner > .brand, .menu { position: relative; z-index: 41; }
   .nav-links a { font-family: var(--font-display); font-size: clamp(2.1rem, 8.5vw, 3.2rem); letter-spacing: -0.03em; text-transform: none; padding: 9px 0; }
   /* The desktop rule is inset to clear its larger hit area; in the overlay the
      link box is already tight to the display type, so it sits at the edge. */
-  .nav-links a::after { background: var(--accent); height: 2px; bottom: 0; }
+  .nav-links a::after { background: var(--accent-light); height: 2px; bottom: 0; }
   .nav-links .nav-cta { font-family: var(--font-mono); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.14em; margin-top: 22px; border-color: rgba(242,237,227,.4); padding: 16px 22px; }
   .hero { min-height: 92svh; }
   /* The desktop gradient only darkens near the very bottom. On a phone the
-     headline sits higher in the frame and the rust line was landing on light
-     clothing, so the scrim has to start earlier and go deeper here. */
+     headline sits higher in the frame and the accent line lands on whatever is
+     mid-frame, so the scrim has to start earlier and go deeper here. */
   .hero-image::after {
     background:
       linear-gradient(180deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,.15) 20%, rgba(0,0,0,.45) 46%, rgba(0,0,0,.88) 72%, rgba(0,0,0,.94) 100%);
@@ -684,15 +769,17 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
     background: var(--ink); color: var(--paper);
     display: grid; grid-template-columns: repeat(3, 1fr);
     padding-bottom: env(safe-area-inset-bottom);
-    border-top: 1px solid #2f2b25;
+    border-top: 1px solid #282828;
   }
   .mobile-actions a {
     display: flex; align-items: center; justify-content: center; gap: 7px;
     min-height: 58px; font-family: var(--font-mono); font-size: 0.62rem;
-    letter-spacing: 0.12em; text-transform: uppercase; border-right: 1px solid #2f2b25;
+    letter-spacing: 0.12em; text-transform: uppercase; border-right: 1px solid #282828;
   }
   .mobile-actions a:last-child { border-right: 0; }
-  .mobile-actions a:active { background: var(--accent); }
+  /* Inverted rather than accent-filled: the bar is already ink, so a black
+     press state was no state at all. */
+  .mobile-actions a:active { background: var(--paper); color: var(--ink); }
   footer { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
   .collection-page { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
 }
@@ -735,7 +822,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 /* Segmented progress reads as steps rather than a loading bar. */
 .quiz-bar { display: flex; gap: 5px; margin: 14px 0 26px; }
 .quiz-bar span { flex: 1; height: 2px; background: var(--line); transition: background-color var(--speed) var(--ease); }
-.quiz-bar span.is-done { background: var(--accent); }
+.quiz-bar span.is-done { background: var(--muted); }
 .quiz-bar span.is-current { background: var(--ink); }
 
 .quiz-question { font-family: var(--font-display); font-size: clamp(1.6rem, 3.4vw, 2.6rem); line-height: 1.05; letter-spacing: -0.032em; margin: 0 0 22px; max-width: 20ch; }
@@ -755,7 +842,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .quiz-answer:hover svg, .quiz-answer:focus-visible svg { opacity: 1; transform: translateX(0); }
 
 .quiz-result-name { font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 3.6rem); line-height: 1; letter-spacing: -0.04em; margin: 8px 0 0; color: var(--accent); }
-/* Real pieces from the recommended category — the result is browsable, not a label. */
+/* Real pairs from the recommended category — the result is browsable, not a label. */
 /* Columns are capped rather than fractional: with only two pieces in a
    category, 1fr columns stretched the images to ~670px tall and swamped the card. */
 .quiz-picks { display: grid; grid-template-columns: repeat(3, minmax(0, 190px)); gap: 12px; margin-top: 26px; }

@@ -137,9 +137,8 @@ export interface HomepageContent {
 // Store / tenant
 // ---------------------------------------------------------------------------
 // One deployment serves one store, selected at publish time by STORE_SLUG. The
-// fields below are everything the codebase needs to render a storefront that is
-// not Fashion Factory's — nothing store-specific should be typed into a
-// component again.
+// fields below are everything the codebase needs to render any store's
+// storefront — nothing store-specific should be typed into a component.
 
 /** Palette and wordmark. Optional throughout: a store that sets none renders the default theme. */
 export interface StoreBranding {
@@ -150,8 +149,8 @@ export interface StoreBranding {
   paper?: string;
   /**
    * The header/footer lockup, rendered as three tiers (regular, bold, small).
-   * "Fashion Factory Nepal" -> ["FASHION", "FACTORY", "NEPAL"]. Falls back to
-   * splitting the store name on spaces.
+   * ["JUTTA", "NEPAL"] for Jutta Nepal. Falls back to splitting the store
+   * name on spaces, which produces the same thing for a two-word name.
    */
   wordmark?: string[];
 }
@@ -211,6 +210,16 @@ export interface StoreProfile extends StoreSettings {
    */
   visitTitle?: string;
   visitStepBody?: string;
+  /**
+   * The store's returns and exchanges terms, in the shop's own words.
+   *
+   * Configuration rather than page copy: it is a commitment the business makes
+   * and changes on its own schedule, it has to read identically in the footer,
+   * the FAQ and on every product page, and no two stores' terms are the same.
+   * A store that has not recorded any renders no policy line at all — the
+   * alternative would be inventing terms on the shop's behalf.
+   */
+  returnsPolicy?: string;
   /**
    * Search metadata. Kept explicit rather than derived from name + tagline:
    * the title tag and keyword set are the store's own SEO decisions, and a

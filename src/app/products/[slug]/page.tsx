@@ -73,9 +73,28 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   const productUrl = siteUrl ? `${siteUrl}/products/${product.slug}` : undefined;
 
-  // Product schema without an Offer: this store publishes no prices and has no
-  // checkout, so claiming price/availability would be false structured data.
-  // Google accepts a priceless Product; a fabricated Offer risks a manual action.
+  // An Offer only when the shop has actually published a price. A physical shop
+  // selling an item at a stated price is exactly what an Offer describes, so
+  // this is true structured data — and it is what puts the price in Google's
+  // results. Without a price there is no Offer at all rather than an empty or
+  // zero one: an invented Offer is false, and false structured data risks a
+  // manual action against the whole site.
+  //
+  // `availability` is set only where the store has confirmed it. Omitted is
+  // honest for a shop with no stock system; asserting InStock on every product
+  // would contradict the page's own "ask which sizes are in stock".
+  const offer =
+    product.price !== undefined
+      ? {
+          "@type": "Offer",
+          price: product.price,
+          priceCurrency: product.currency ?? "NPR",
+          ...(productUrl ? { url: productUrl } : {}),
+          ...(product.available === true ? { availability: "https://schema.org/InStock" } : {}),
+          seller: { "@type": "Organization", name: store.name },
+        }
+      : null;
+
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -87,6 +106,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     brand: { "@type": "Brand", name: store.name },
     ...(product.colors?.length ? { color: product.colors.join(", ") } : {}),
     ...(product.sizes?.length ? { size: product.sizes } : {}),
+    ...(offer ? { offers: offer } : {}),
   };
 
   const breadcrumbSchema = siteUrl
@@ -95,7 +115,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-          { "@type": "ListItem", position: 2, name: "Collection", item: `${siteUrl}/collection` },
+          { "@type": "ListItem", position: 2, name: "Shop", item: `${siteUrl}/collection` },
           ...(category
             ? [{ "@type": "ListItem", position: 3, name: category.name, item: `${siteUrl}/collection#${category.slug}` }]
             : []),
@@ -116,7 +136,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <nav className={styles.crumbs} aria-label="Breadcrumb">
           <Link href="/">Home</Link>
           <span aria-hidden="true">/</span>
-          <Link href="/collection">Collection</Link>
+          <Link href="/collection">Shop</Link>
           {category && (
             <>
               <span aria-hidden="true">/</span>
@@ -137,7 +157,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           <aside className={styles.info}>
-            <p className="eyebrow">{category?.name ?? "Fashion"}</p>
+            <p className="eyebrow">{category?.name ?? store.name}</p>
             <h1 className="serif">{product.name}</h1>
             {product.description && <p className={styles.description}>{product.description}</p>}
             {product.price !== undefined && <p className={styles.price}>{product.currency ?? "NPR"} {product.price.toLocaleString()}</p>}
@@ -157,13 +177,23 @@ export default async function ProductPage({ params }: ProductPageProps) {
             ) : null}
 
             <div className={styles.availability}>
-              <span>{product.available === true ? "Availability confirmed by the store" : "Ask the store about current availability"}</span>
+              <span>{product.available === true ? "Availability confirmed by the store" : "Ask the store which sizes are in stock"}</span>
             </div>
 
             <div className={styles.actions}>
-              <a className="btn btn-dark" href={whatsappUrl} target="_blank" rel="noreferrer">Ask for Availability <ArrowUpRight size={16} /></a>
+              <a className="btn btn-dark" href={whatsappUrl} target="_blank" rel="noreferrer">Ask About This Item <ArrowUpRight size={16} /></a>
               <Link className="btn btn-light" href="/#visit-us"><MapPin size={16} /> Visit Store</Link>
             </div>
+
+            {/* The terms belong next to the buy decision, not only in the
+                footer. Same string as the footer and the FAQ — all three read
+                the store profile. */}
+            {store.returnsPolicy && (
+              <div className={styles.policy}>
+                <span className={styles.label}>Returns &amp; Exchanges</span>
+                <p>{store.returnsPolicy}</p>
+              </div>
+            )}
           </aside>
         </div>
 
@@ -171,10 +201,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <section className={styles.related} aria-labelledby="related-heading">
             <div className={styles.relatedHead}>
               <h2 id="related-heading" className="serif">
-                {sameCategory.length > 0 && category ? `More in ${category.name}` : "More from the collection"}
+                {sameCategory.length > 0 && category ? `More in ${category.name}` : "More from the shop"}
               </h2>
               <Link className={styles.relatedLink} href="/collection">
-                View the collection <ArrowUpRight size={14} />
+                View the shop <ArrowUpRight size={14} />
               </Link>
             </div>
             <div className={styles.relatedGrid}>
@@ -184,7 +214,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     <img src={item.images[0]?.src} alt={item.images[0]?.alt ?? item.name} loading="lazy" />
                   </figure>
                   <p>{item.name}</p>
-                  <span>{item.categoryId === product.categoryId ? category?.name : "Collection"}</span>
+                  <span>{item.categoryId === product.categoryId ? category?.name : "The shop"}</span>
                 </Link>
               ))}
             </div>

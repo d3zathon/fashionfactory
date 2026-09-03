@@ -62,7 +62,16 @@ export function ProductCard({
         <p className="card-name">
           <Link href={`/products/${product.slug}`} onClick={() => track("product_click")}>{product.name}</Link>
         </p>
-        {categoryName && <span className="card-cat">{categoryName}</span>}
+        {/* Price where the category label sits, when the shop publishes one:
+            it is the thing a browsing customer is actually looking for, and a
+            product with no price simply keeps the category as before. */}
+        {product.price !== undefined ? (
+          <span className="card-price">
+            {product.currency ?? "NPR"} {product.price.toLocaleString()}
+          </span>
+        ) : (
+          categoryName && <span className="card-cat">{categoryName}</span>
+        )}
       </div>
     </article>
   );

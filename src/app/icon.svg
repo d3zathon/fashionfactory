@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Jutta Nepal">
+  <!-- The mark is a black monogram on a white badge, split by a hairline rule.
+       At favicon size the "Jutta Nepal" line under it is unreadable, so this
+       keeps the two things that survive: the JN and the rule between them. -->
+  <rect width="64" height="64" fill="#ffffff"/>
+  <text x="19" y="45"
+        font-family="Playfair Display, Georgia, 'Times New Roman', serif"
+        font-size="40" font-weight="700" text-anchor="middle" fill="#0d0d0d">J</text>
+  <rect x="31.4" y="14" width="1.2" height="30" fill="#0d0d0d"/>
+  <text x="46" y="45"
+        font-family="Playfair Display, Georgia, 'Times New Roman', serif"
+        font-size="40" font-weight="700" text-anchor="middle" fill="#0d0d0d">N</text>
+</svg>

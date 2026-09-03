@@ -1,13 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { MessageCircle, Menu, X } from "lucide-react";
 import Link from "next/link";
 import styles from "./Navbar.module.css";
 import { getStoreProfile } from "@/providers/static";
 import { Wordmark } from "@/components/Wordmark";
+import { AnalyticsService } from "@/services";
+import { generalWhatsappMessage, whatsappHref } from "@/lib/links";
 
 const built = getStoreProfile();
+// Build-time constant — the store's own number, resolved from the committed
+// profile, so the header CTA is correct in the very first painted frame.
+const navWhatsapp = whatsappHref(built.whatsappNumber, generalWhatsappMessage(built.name));
 
 interface NavbarProps {
   tone?: "dark" | "light";
@@ -78,12 +83,25 @@ export function Navbar({ tone = "dark" }: NavbarProps) {
           className={menuOpen ? "nav-links open" : "nav-links"}
           aria-label="Primary navigation"
         >
-          <Link href="/collection" onClick={close}>Collection</Link>
+          <Link href="/collection" onClick={close}>Shop</Link>
+          <Link href="/#collection" onClick={close}>Categories</Link>
           <Link href="/#about" onClick={close}>About</Link>
-          <Link href="/#instagram" onClick={close}>Instagram</Link>
           <Link href="/#visit-us" onClick={close}>Visit Us</Link>
           <Link href="/#contact" onClick={close}>Contact</Link>
-          <Link className="nav-cta" href="/#visit-us" onClick={close}>Visit Store <ArrowUpRight size={16} /></Link>
+          {/* WhatsApp rather than an in-page anchor: it is the shop's actual
+              order channel, and the header is the one place it is reachable
+              from every page without scrolling. */}
+          {navWhatsapp && (
+            <a
+              className="nav-cta"
+              href={navWhatsapp}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => { close(); AnalyticsService.track("whatsapp_click", { placement: "navbar" }); }}
+            >
+              Order on WhatsApp <MessageCircle size={16} />
+            </a>
+          )}
         </nav>
         <button
           ref={toggleRef}

@@ -8,8 +8,8 @@
 //
 // Multi-store: STORE_SLUG selects which tenant to publish. One deployment
 // serves one store, so a store's site is built from its own generated JSON.
-// Defaults to whatever the committed store.json already holds, which keeps
-// Fashion Factory's pipeline working with no workflow change.
+// Defaults to whatever the committed store.json already holds, so a deployment
+// that only ever serves one store needs no workflow change.
 //
 // Validates before writing: a publish that would break the storefront fails
 // loudly here rather than shipping bad data to the live site.
@@ -97,7 +97,7 @@ const locationRows = await fetchAll(
 const errors = [];
 const warnings = [];
 
-if (categoryRows.length === 0) errors.push("No active categories — the collection page would render empty.");
+if (categoryRows.length === 0) errors.push("No active categories — the shop page would render empty.");
 if (locationRows.length === 0) warnings.push("No active store locations — the Visit Us section will be empty.");
 
 // A publish is a one-click action from the admin panel, and the storefront is
@@ -128,15 +128,20 @@ for (const p of productRows) {
     errors.push(`Product "${p.name}" references category "${p.category_id}", which is not active.`);
   }
   // Not fatal: the storefront renders a placeholder, but it looks unfinished.
-  if (!p.image_url) warnings.push(`Product "${p.name}" has no photo.`);
+  // image_urls is the gallery (0008); image_url is its mirrored first entry, so
+  // a row written before that migration still counts as having a photo.
+  if (!p.image_urls?.length && !p.image_url) warnings.push(`Product "${p.name}" has no photo.`);
+  if (p.price !== null && p.price !== undefined && !(Number(p.price) >= 0)) {
+    errors.push(`Product "${p.name}" has a price that is not a usable number.`);
+  }
 }
 
-// The homepage's "Selected pieces" section filters on this flag, so a catalogue
+// The homepage's "Selected pairs" section filters on this flag, so a catalogue
 // with none leaves that section blank. A warning rather than an error: a shop
 // is allowed to feature nothing, it just rarely means to.
 if (productRows.length > 0 && !productRows.some((p) => p.featured)) {
   warnings.push(
-    `No product is marked featured, so the homepage "Selected pieces" section will be empty. Tick "Feature on the homepage" on the pieces that belong there.`
+    `No product is marked featured, so the homepage "Selected pairs" section will be empty. Tick "Feature on the homepage" on the products that belong there.`
   );
 }
 
@@ -150,17 +155,36 @@ if (errors.length) {
 // ---------------------------------------------------------------------------
 // Write
 // ---------------------------------------------------------------------------
-// sizes/colors are omitted entirely when the column is null or empty, which is
-// what keeps them optional in the model rather than becoming empty arrays that
-// render as an empty Sizes group. featured is always written, so the generated
-// file states outright which pieces the homepage will show.
+// sizes/colors/price are omitted entirely when the column is null or empty,
+// which is what keeps them optional in the model rather than becoming empty
+// arrays that render as an empty Sizes group, or a price of zero. featured is
+// always written, so the generated file states outright which products the
+// homepage will show.
+//
+// The gallery falls back to the single mirrored image_url, so a row written
+// before 0008 still publishes its photo. The first image keeps the product's
+// own id so nothing that already referenced it moves; the rest are numbered.
+// Alt text is numbered too rather than repeating the product name on every
+// frame, which is what a screen reader would otherwise read out five times.
+const galleryOf = (row) => {
+  const urls = row.image_urls?.length ? row.image_urls : row.image_url ? [row.image_url] : [];
+  return urls.map((src, i) => ({
+    id: i === 0 ? row.id : `${row.id}-${i + 1}`,
+    src,
+    alt: i === 0 ? row.name : `${row.name} — view ${i + 1}`,
+  }));
+};
+
 const products = productRows.map((row, index) => ({
   id: row.id,
   name: row.name,
   slug: row.slug,
   categoryId: row.category_id,
   description: row.description ?? undefined,
-  images: row.image_url ? [{ id: row.id, src: row.image_url, alt: row.name }] : [],
+  images: galleryOf(row),
+  ...(row.price !== null && row.price !== undefined
+    ? { price: Number(row.price), currency: storeRow.currency }
+    : {}),
   ...(row.sizes?.length ? { sizes: row.sizes } : {}),
   ...(row.colors?.length ? { colors: row.colors } : {}),
   featured: row.featured === true,
@@ -202,6 +226,7 @@ const store = {
     address: orNothing(storeRow.address),
     visitTitle: orNothing(storeRow.visit_title),
     visitStepBody: orNothing(storeRow.visit_step_body),
+    returnsPolicy: orNothing(storeRow.returns_policy),
     openingHours: storeRow.opening_hours,
     businessHours: storeRow.business_hours ?? [],
     countryCode: storeRow.country_code,

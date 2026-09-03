@@ -1,7 +1,15 @@
 # Production deployment
 
 How to take this repository from a fresh clone to a live storefront, and how to
-add a second store to the same platform afterwards.
+add another store to the same platform afterwards.
+
+**This deployment serves `jutta-nepal`** (Jutta Nepal, shoes and clothing,
+Bhaisepati, Lalitpur). `0005_jutta_nepal_store.sql` seeds that store, its
+categories and its branch, and `0006_shoes_and_clothing.sql` widens the rail
+list to cover clothing, so after the migrations the only store-specific work
+left is the product catalogue. Where a step below needs a store slug, use `jutta-nepal`;
+`fashion-factory-nepal` still exists as the platform's default tenant and is
+used in some examples as the "other store".
 
 Steps marked **[HUMAN]** cannot be automated — they need an account, a secret, or
 a decision only the owner can make. Everything else can be run by anyone with
@@ -313,7 +321,7 @@ across a refresh.
 
 **[HUMAN]** Authentication → URL Configuration:
 
-- **Site URL**: the production origin, e.g. `https://fashionfactory.com.np`
+- **Site URL**: the production origin, e.g. `https://juttanepal.com.np`
 - **Redirect URLs**: add
   - `https://<your-domain>/**`
   - `http://localhost:3000/**` for local development
@@ -335,7 +343,7 @@ quality 82) before they leave the browser, so the size limit is a backstop.
 
 ```
 product-images/
-  fashion-factory-nepal/<uuid>.webp
+  jutta-nepal/<uuid>.webp
   <another-store-slug>/<uuid>.webp
 ```
 
@@ -563,7 +571,8 @@ No code changes, no fork.
 
 2. **Add its categories and branches**, using the same `store_id`. Category ids
    only need to be unique within the store, so `new`/`mens`/`womens` are free to
-   reuse.
+   reuse. `0005_jutta_nepal_store.sql` is a worked example of all three
+   statements (store, categories, branch) written to be idempotent.
 
 3. **Grant an admin**: insert into `admin_users` with that store's `store_id`.
 
@@ -587,8 +596,9 @@ No code changes, no fork.
 
 Name, slug, tagline, description, logo, favicon, phone, WhatsApp, email,
 Instagram, TikTok, Facebook, address, location label, opening hours, structured
-business hours, branch list, categories, products, the "Visit us" heading and
-step copy, SEO title/description/keywords, brand colours (`accent`,
+business hours, branch list, categories, products, the returns/exchange policy,
+the "Visit us" heading and step copy, SEO title/description/keywords, brand
+colours (`accent`,
 `accentDeep`, `accentLight`, `ink`, `paper`), the wordmark, and which sections
 render (`styleQuiz`, `instagramFeed`, `testimonials`, `faqs`, `contactForm`,
 `locations`).
@@ -607,5 +617,8 @@ render (`styleQuiz`, `instagramFeed`, `testimonials`, `faqs`, `contactForm`,
 8. Configure the domain at the registrar and set `NEXT_PUBLIC_SITE_URL`.
 9. Set the Supabase Site URL and redirect URLs.
 10. Create the Telegram bot and the Instagram token, if those integrations are wanted.
-11. Enter the real product catalogue before the first Publish.
+11. Enter the real product catalogue before the first Publish. Jutta Nepal ships
+    with an **empty** `src/data/products.json` on purpose, so this is the one
+    outstanding piece of content — until it is done the shop page shows its
+    empty state and the homepage drops its product sections.
 12. Walk the post-deployment checklist on the live domain.

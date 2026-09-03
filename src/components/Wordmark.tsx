@@ -5,8 +5,8 @@ import type { StoreProfile } from "@/models";
  *
  * Three tiers — regular, bold, small — which is what `.brand` in globals.css is
  * built to style. A store can set `branding.wordmark` explicitly; otherwise the
- * tiers are its name split on spaces, which reproduces the original
- * FASHION / FACTORY / NEPAL lockup from "Fashion Factory Nepal" exactly.
+ * tiers are its name split on spaces, so "Jutta Nepal" becomes the
+ * JUTTA / NEPAL lockup with no configuration at all.
  *
  * Any words past the third join into the small tier rather than being dropped,
  * so a longer name degrades instead of losing part of the business's identity.

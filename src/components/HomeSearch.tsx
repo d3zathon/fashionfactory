@@ -9,7 +9,7 @@ import { AnalyticsService } from "@/services";
 /**
  * Homepage search. Hands the query to /collection rather than filtering here.
  *
- * The collection page already owns product search — the URL is the handoff, so
+ * The shop page already owns product search — the URL is the handoff, so
  * there is exactly one implementation of matching and one set of results copy.
  * That also makes what the visitor typed a shareable link from the first
  * keystroke they submit.
@@ -41,7 +41,7 @@ export function HomeSearch() {
     <form className="home-search" onSubmit={handleSubmit} role="search">
       <SearchField
         id="home-search"
-        label="Search the collection"
+        label="Search the shop"
         placeholder="Try a name, colour or category"
         value={query}
         onChange={setQuery}

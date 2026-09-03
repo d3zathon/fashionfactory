@@ -14,6 +14,10 @@ import { AnalyticsService } from "@/services";
  *
  * All preview images are rendered and cross-faded via opacity, so switching
  * never triggers a network request mid-interaction.
+ *
+ * `fallbackImage` is optional: a shop whose catalogue has no photography yet
+ * gets a typographic plate rather than a borrowed stock photograph, and the
+ * list — the part that actually navigates — is unaffected either way.
  */
 export function CategoryIndex({
   categories,
@@ -22,7 +26,7 @@ export function CategoryIndex({
 }: {
   categories: Category[];
   products: Product[];
-  fallbackImage: string;
+  fallbackImage?: string;
 }) {
   const [active, setActive] = useState(0);
 
@@ -31,6 +35,10 @@ export function CategoryIndex({
     products.find((product) => product.categoryId === category.id)?.images[0]?.src ??
     products[i % Math.max(products.length, 1)]?.images[0]?.src ??
     fallbackImage;
+
+  // One check for the whole plate: if no category resolves to an image, none
+  // of the <img> elements below would have a src at all.
+  const hasPreviews = categories.some((category, i) => Boolean(imageFor(category, i)));
 
   return (
     <div className="cat-index">
@@ -55,15 +63,19 @@ export function CategoryIndex({
       </div>
 
       <div className="cat-preview" aria-hidden="true">
-        {categories.map((category, i) => (
-          <img
-            key={category.id}
-            src={imageFor(category, i)}
-            alt=""
-            loading="lazy"
-            className={i === active ? "is-active" : ""}
-          />
-        ))}
+        {hasPreviews ? (
+          categories.map((category, i) => (
+            <img
+              key={category.id}
+              src={imageFor(category, i)}
+              alt=""
+              loading="lazy"
+              className={i === active ? "is-active" : ""}
+            />
+          ))
+        ) : (
+          <span className="cat-preview-pending">Photography coming soon</span>
+        )}
         <span className="cat-preview-label">{categories[active]?.name}</span>
       </div>
     </div>

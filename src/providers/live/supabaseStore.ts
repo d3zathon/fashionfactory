@@ -23,6 +23,7 @@ export interface AdminStoreSettings {
   description: string | null;
   visitTitle: string | null;
   visitStepBody: string | null;
+  returnsPolicy: string | null;
   locationLabel: string;
   phone: string;
   email: string | null;
@@ -143,6 +144,7 @@ function toSettings(row: Record<string, unknown>): AdminStoreSettings {
     description: (row.description as string) ?? null,
     visitTitle: (row.visit_title as string) ?? null,
     visitStepBody: (row.visit_step_body as string) ?? null,
+    returnsPolicy: (row.returns_policy as string) ?? null,
     locationLabel: row.location_label as string,
     phone: row.phone as string,
     email: (row.email as string) ?? null,
@@ -185,6 +187,7 @@ export async function updateStoreSettings(input: AdminStoreSettings): Promise<vo
       description: input.description,
       visit_title: input.visitTitle,
       visit_step_body: input.visitStepBody,
+      returns_policy: input.returnsPolicy,
       location_label: input.locationLabel,
       phone: input.phone,
       email: input.email,

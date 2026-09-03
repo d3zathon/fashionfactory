@@ -1,5 +1,5 @@
 {
-  "name": "fashion-factory-nepal",
+  "name": "jutta-nepal",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -11,7 +11,9 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "validate": "npm run typecheck && npm run lint && npm run build"
+    "validate": "npm run typecheck && npm run lint && npm run build",
+    "preview:on": "node scripts/preview-catalogue.mjs on",
+    "preview:off": "node scripts/preview-catalogue.mjs off"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

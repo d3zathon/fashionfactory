@@ -9,14 +9,23 @@ import { AnalyticsService } from "@/services";
 import { getStoreProfile } from "@/providers/static";
 
 /**
- * "Find Your Edit" — a three-question styling quiz.
+ * "Find what you're after" — a three-question shop finder.
  *
  * Deliberately NOT a rewards mechanic. This store has no cart, checkout or
  * order system, so a discount code would have nothing to redeem against and a
  * "you won X" flow would be fabricated. Instead the quiz does something the
  * store can actually honour: it narrows the catalogue to one category, shows
- * real pieces from it, and hands the visitor to WhatsApp with a message the
+ * real items from it, and hands the visitor to WhatsApp with a message the
  * shopkeeper can act on.
+ *
+ * A heuristic, not a recommender. Three questions cannot branch, so the
+ * weights are tuned to land somewhere plausible across both families the shop
+ * sells — shoes and clothing — and the result is framed as a starting point
+ * rather than an answer.
+ *
+ * The weights name category ids from the store's own catalogue. Nothing breaks
+ * when a store uses different ids — an unmatched score falls through to the
+ * first category — but the questions are worth rewriting alongside them.
  *
  * Entirely client-side and stateless — no eligibility, limits or server trust,
  * so there is nothing to tamper with.
@@ -27,30 +36,30 @@ type Question = { id: string; prompt: string; answers: Answer[] };
 
 const QUESTIONS: Question[] = [
   {
-    id: "occasion",
+    id: "family",
     prompt: "What are you shopping for?",
     answers: [
-      { label: "Everyday wear", hint: "Things you'll reach for weekly", weight: ["mens", "womens"] },
-      { label: "An occasion", hint: "Something with a bit more presence", weight: ["womens", "new"] },
-      { label: "A gift", hint: "For someone else", weight: ["gifts", "accessories"] },
+      { label: "Shoes", hint: "Sneakers, formal, boots, sandals", weight: ["sneakers", "boots"] },
+      { label: "Clothing", hint: "Shirts, trousers, dresses, outerwear", weight: ["mens-clothing", "womens-clothing"] },
+      { label: "Whatever's new", hint: "The latest things in the shop", weight: ["new", "new"] },
     ],
   },
   {
-    id: "mood",
-    prompt: "How do you like to dress?",
+    id: "occasion",
+    prompt: "Where will you wear it?",
     answers: [
-      { label: "Quiet and understated", hint: "Clean lines, easy colours", weight: ["mens", "accessories"] },
-      { label: "A bit of a statement", hint: "Print, colour, silhouette", weight: ["womens", "new"] },
-      { label: "Depends on the day", hint: "A bit of both", weight: ["new", "mens"] },
+      { label: "Every day", hint: "College, errands, around the city", weight: ["sneakers", "mens-clothing"] },
+      { label: "Work or somewhere smarter", hint: "Office, an occasion", weight: ["formal", "womens-clothing"] },
+      { label: "Warm days and at home", hint: "Light and easy on", weight: ["sandals", "new"] },
     ],
   },
   {
     id: "who",
-    prompt: "Who are you shopping for?",
+    prompt: "Who is it for?",
     answers: [
-      { label: "Women's", hint: "", weight: ["womens", "womens"] },
-      { label: "Men's", hint: "", weight: ["mens", "mens"] },
-      { label: "Just browsing", hint: "Show me what's new", weight: ["new", "gifts"] },
+      { label: "Women's", hint: "", weight: ["womens-clothing", "womens-clothing"] },
+      { label: "Men's", hint: "", weight: ["mens-clothing", "formal"] },
+      { label: "Doesn't matter", hint: "Show me the best of it", weight: ["new", "boots"] },
     ],
   },
 ];
@@ -78,7 +87,7 @@ export function StyleQuiz({
   const result =
     categories.find((c) => c.id === Object.entries(scores).sort((a, b) => b[1] - a[1])[0]?.[0]) ?? categories[0];
 
-  // Real pieces from the recommended category, so the result is browsable
+  // Real items from the recommended category, so the result is browsable
   // rather than just a label.
   const picks = result
     ? products.filter((p) => p.categoryId === result.id).slice(0, 3)
@@ -99,8 +108,8 @@ export function StyleQuiz({
       <div className="quiz quiz-closed">
         <div>
           <p className="eyebrow">Not sure where to start?</p>
-          <h3 className="quiz-title">Find your edit in three questions.</h3>
-          <p className="quiz-sub">No sign-up, no email, no discount codes. Just a starting point — and a message you can send the store.</p>
+          <h3 className="quiz-title">Find what you&rsquo;re after in three questions.</h3>
+          <p className="quiz-sub">No sign-up, no email, no discount codes. Just a starting point — and a message you can send the shop.</p>
         </div>
         <button
           className="btn btn-dark"
@@ -116,9 +125,9 @@ export function StyleQuiz({
   return (
     <div className="quiz">
       <div className="quiz-head">
-        <p className="eyebrow">Find your edit</p>
+        <p className="eyebrow">Find what you&rsquo;re after</p>
         <button className="quiz-dismiss" type="button" onClick={() => { setOpen(false); restart(); }}>
-          Close<span className="sr-only"> the style quiz</span>
+          Close<span className="sr-only"> the shop finder</span>
         </button>
       </div>
 
@@ -185,13 +194,13 @@ export function StyleQuiz({
               className="btn"
               href={whatsappHref(
                 whatsappNumber,
-                `Hi ${getStoreProfile().name}, I'm looking for ${result?.name}. What do you have in store right now?`
+                `Hi ${getStoreProfile().name}, I'm looking for ${result?.name}. What do you have in my size right now?`
               )}
               target="_blank"
               rel="noreferrer"
               onClick={() => AnalyticsService.track("whatsapp_click", { source: "style_quiz" })}
             >
-              <MessageCircle size={15} /> Ask the store
+              <MessageCircle size={15} /> Ask on WhatsApp
             </a>
             <button className="quiz-restart" type="button" onClick={restart}>
               <RotateCcw size={13} aria-hidden="true" /> Start over
