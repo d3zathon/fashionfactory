@@ -15,11 +15,11 @@ export default function NotFound() {
           <p className="eyebrow">Error 404</p>
           <h1>Page not found.</h1>
           <p>
-            That page doesn&rsquo;t exist or is no longer available. The collection is
-            still here, and the store is a message away.
+            That page doesn&rsquo;t exist or is no longer available. The shop is
+            still here, and we&rsquo;re a WhatsApp message away.
           </p>
           <div className="route-state-actions">
-            <Link className="btn btn-dark" href="/collection">Browse the collection <ArrowUpRight size={15} /></Link>
+            <Link className="btn btn-dark" href="/collection">Browse the shop <ArrowUpRight size={15} /></Link>
             <Link className="btn" href="/"><ArrowLeft size={15} /> Back home</Link>
           </div>
         </div>

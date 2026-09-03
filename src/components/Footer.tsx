@@ -18,12 +18,21 @@ export function Footer() {
         <div>
           <Link className="brand footer-brand" href="/" aria-label={`${store?.name ?? "Store"} home`}><Wordmark store={store} /></Link>
           <p className="muted">{store?.locationLabel}</p>
+          {/* Where a customer expects to find the terms before they buy. The
+              same string as the FAQ and the product pages, because all three
+              read it from the store profile rather than restating it. */}
+          {store?.returnsPolicy && (
+            <div className="footer-policy">
+              <p className="eyebrow">Returns &amp; Exchanges</p>
+              <p>{store.returnsPolicy}</p>
+            </div>
+          )}
         </div>
         <div>
           <p className="eyebrow">Explore</p>
-          <Link href="/collection">Collection</Link>
+          <Link href="/collection">Shop</Link>
+          <Link href="/#collection">Categories</Link>
           <Link href="/#about">About</Link>
-          <Link href="/#instagram">Instagram</Link>
           <Link href="/#visit-us">Visit Us</Link>
           <Link href="/#contact">Contact</Link>
         </div>

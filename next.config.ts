@@ -6,11 +6,16 @@ import type { NextConfig } from "next";
  * The site uses plain <img> today, so this only binds if a component switches
  * to next/image — but it has to be right before that happens, not after: an
  * unlisted host makes next/image throw at request time rather than degrade.
- * The Supabase hostname is derived from the configured project so it stays
- * correct per environment instead of being pinned to one project ref.
+ *
+ * Only the store's own Supabase project, derived from the configured URL so it
+ * stays correct per environment instead of being pinned to one project ref.
+ * Product photography is uploaded through /admin into that project's
+ * `product-images` bucket; images committed to /public are same-origin and
+ * need no entry here. The stock-photo host the previous storefront's seed data
+ * pointed at is gone with that data.
  */
 function imageHosts() {
-  const hosts = [{ protocol: "https" as const, hostname: "images.unsplash.com" }];
+  const hosts: { protocol: "https"; hostname: string }[] = [];
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (supabaseUrl) {

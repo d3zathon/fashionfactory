@@ -11,6 +11,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { SearchField } from "@/components/SearchField";
 import { useCategories, useProducts, useStoreSettings } from "@/hooks";
 import { matchesAllTerms, searchTerms } from "@/lib/productSearch";
+import { generalWhatsappMessage, whatsappHref } from "@/lib/links";
 
 const ALL = "all";
 
@@ -137,6 +138,7 @@ function CollectionView() {
   };
 
   const filtersApplied = searching || active !== ALL;
+  const whatsapp = whatsappHref(store?.whatsappNumber, generalWhatsappMessage(store?.name));
 
   function clearAll() {
     setQuery("");
@@ -144,9 +146,9 @@ function CollectionView() {
     searchInputRef.current?.focus();
   }
 
-  // "3 pieces matching "denim" in Men's." — one sentence that always says what
-  // was searched and where, so the number is never ambiguous.
-  const resultSummary = `${visible.length} ${visible.length === 1 ? "piece" : "pieces"}${
+  // "3 pairs matching "chelsea" in Boots." — one sentence that always says
+  // what was searched and where, so the number is never ambiguous.
+  const resultSummary = `${visible.length} ${visible.length === 1 ? "pair" : "pairs"}${
     searching ? ` matching \u201C${query.trim()}\u201D` : ""
   }${activeCategory ? ` in ${activeCategory.name}` : ""}.`;
 
@@ -159,12 +161,12 @@ function CollectionView() {
           <Link href="/" className="back"><ArrowLeft size={14} /> Home</Link>
           <div className="head-meta" style={{ marginTop: 26 }}>
             <span className="idx">{String(products.length).padStart(2, "0")}</span>
-            <p className="eyebrow">The collection</p>
+            <p className="eyebrow">The shop</p>
           </div>
-          <h1>{activeCategory ? activeCategory.name : "Everything in store."}</h1>
+          <h1>{activeCategory ? activeCategory.name : "Everything in the shop."}</h1>
           <p className="collection-intro">
             {activeCategory?.description ??
-              "Browse the full catalogue, then message the store to check what's on the rail today."}
+              "Browse the shop, then message us on WhatsApp to check the size you need."}
           </p>
         </div>
       </header>
@@ -174,7 +176,7 @@ function CollectionView() {
         <div className="container">
           <SearchField
             id="collection-search"
-            label="Search the collection"
+            label="Search the shop"
             placeholder="Try a name, colour or category"
             value={query}
             onChange={setQuery}
@@ -215,14 +217,14 @@ function CollectionView() {
       <div className="container">
         {loading ? (
           <>
-            <p className="filter-count" role="status">Loading the collection…</p>
+            <p className="filter-count" role="status">Loading the shop…</p>
             <div className="skeleton-grid" aria-hidden="true">
               {Array.from({ length: 6 }).map((_, i) => <div className="skeleton-card" key={i} />)}
             </div>
           </>
         ) : error ? (
           <div className="state-block state-error" role="alert">
-            We couldn&rsquo;t load the collection right now. Please refresh, or message the store on WhatsApp.
+            We couldn&rsquo;t load the shop right now. Please refresh, or message us on WhatsApp.
           </div>
         ) : (
           <>
@@ -255,15 +257,15 @@ function CollectionView() {
               <div className="state-block collection-empty">
                 <p className="collection-empty-title">
                   {searching ? (
-                    <>No pieces match &ldquo;{query.trim()}&rdquo;{activeCategory ? ` in ${activeCategory.name}` : ""}.</>
+                    <>No pairs match &ldquo;{query.trim()}&rdquo;{activeCategory ? ` in ${activeCategory.name}` : ""}.</>
                   ) : (
-                    <>Nothing in {activeCategory ? activeCategory.name : "the collection"} yet.</>
+                    <>Nothing in {activeCategory ? activeCategory.name : "the shop"} listed yet.</>
                   )}
                 </p>
                 <p className="collection-empty-body">
                   {searching
-                    ? "Try fewer words, or a different category — and the store can check the rail for you on WhatsApp."
-                    : "Message the store on WhatsApp and they'll tell you what's on the rail today."}
+                    ? "Try fewer words, or a different category — and we can check the shelf for you on WhatsApp."
+                    : "The shop is listed here as pairs are photographed. Message us on WhatsApp and we'll tell you what's in stock today."}
                 </p>
                 <div className="collection-empty-actions">
                   {filtersApplied && (
@@ -275,6 +277,14 @@ function CollectionView() {
                     <button className="btn" type="button" onClick={() => setActive(ALL)}>
                       Search all categories
                     </button>
+                  )}
+                  {/* Without this, an empty shop is a dead end: the filter
+                      buttons above only appear when there is a filter to
+                      clear, which is never the case before the first publish. */}
+                  {whatsapp && (
+                    <a className={filtersApplied ? "btn" : "btn btn-dark"} href={whatsapp} target="_blank" rel="noreferrer">
+                      Ask on WhatsApp
+                    </a>
                   )}
                 </div>
               </div>
@@ -296,7 +306,7 @@ export default function CollectionPage() {
       fallback={
         <main id="main" className="collection-page">
           <div className="container" style={{ paddingTop: 160 }}>
-            <p className="eyebrow" role="status">Loading the collection…</p>
+            <p className="eyebrow" role="status">Loading the shop…</p>
           </div>
         </main>
       }

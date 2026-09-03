@@ -8,8 +8,8 @@
 //
 // Multi-store: STORE_SLUG selects which tenant to publish. One deployment
 // serves one store, so a store's site is built from its own generated JSON.
-// Defaults to whatever the committed store.json already holds, which keeps
-// Fashion Factory's pipeline working with no workflow change.
+// Defaults to whatever the committed store.json already holds, so a deployment
+// that only ever serves one store needs no workflow change.
 //
 // Validates before writing: a publish that would break the storefront fails
 // loudly here rather than shipping bad data to the live site.
@@ -97,7 +97,7 @@ const locationRows = await fetchAll(
 const errors = [];
 const warnings = [];
 
-if (categoryRows.length === 0) errors.push("No active categories — the collection page would render empty.");
+if (categoryRows.length === 0) errors.push("No active categories — the shop page would render empty.");
 if (locationRows.length === 0) warnings.push("No active store locations — the Visit Us section will be empty.");
 
 // A publish is a one-click action from the admin panel, and the storefront is
@@ -131,12 +131,12 @@ for (const p of productRows) {
   if (!p.image_url) warnings.push(`Product "${p.name}" has no photo.`);
 }
 
-// The homepage's "Selected pieces" section filters on this flag, so a catalogue
+// The homepage's "Selected pairs" section filters on this flag, so a catalogue
 // with none leaves that section blank. A warning rather than an error: a shop
 // is allowed to feature nothing, it just rarely means to.
 if (productRows.length > 0 && !productRows.some((p) => p.featured)) {
   warnings.push(
-    `No product is marked featured, so the homepage "Selected pieces" section will be empty. Tick "Feature on the homepage" on the pieces that belong there.`
+    `No product is marked featured, so the homepage "Selected pairs" section will be empty. Tick "Feature on the homepage" on the products that belong there.`
   );
 }
 
@@ -153,7 +153,7 @@ if (errors.length) {
 // sizes/colors are omitted entirely when the column is null or empty, which is
 // what keeps them optional in the model rather than becoming empty arrays that
 // render as an empty Sizes group. featured is always written, so the generated
-// file states outright which pieces the homepage will show.
+// file states outright which products the homepage will show.
 const products = productRows.map((row, index) => ({
   id: row.id,
   name: row.name,
@@ -202,6 +202,7 @@ const store = {
     address: orNothing(storeRow.address),
     visitTitle: orNothing(storeRow.visit_title),
     visitStepBody: orNothing(storeRow.visit_step_body),
+    returnsPolicy: orNothing(storeRow.returns_policy),
     openingHours: storeRow.opening_hours,
     businessHours: storeRow.business_hours ?? [],
     countryCode: storeRow.country_code,

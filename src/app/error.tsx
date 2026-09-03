@@ -20,14 +20,14 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           <p className="eyebrow">Something went wrong</p>
           <h1>We couldn&rsquo;t load this.</h1>
           <p>
-            Try again — and if it keeps happening, message the store directly and
-            we&rsquo;ll help you find what you&rsquo;re looking for.
+            Try again — and if it keeps happening, message the shop on WhatsApp
+            and we&rsquo;ll help you find the pair you&rsquo;re looking for.
           </p>
           <div className="route-state-actions">
             <button className="btn btn-dark" type="button" onClick={() => reset()}>
               <RotateCcw size={15} /> Try again
             </button>
-            <Link className="btn" href="/collection">Browse the collection <ArrowUpRight size={15} /></Link>
+            <Link className="btn" href="/collection">Browse the shop <ArrowUpRight size={15} /></Link>
           </div>
         </div>
       </section>

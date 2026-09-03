@@ -28,8 +28,19 @@ export const useFeaturedProducts = () => useAsync<Product[]>(ProductService.getF
 export const useCategories = () => useAsync<Category[]>(CategoryService.getCategories, []);
 export const useCollections = () => useAsync<Collection[]>(CollectionService.getCollections, []);
 export const useStoreSettings = () => useAsync<StoreProfile>(StoreSettingsService.getStoreSettings, {} as StoreProfile);
-export const useInstagram = () => {
-  const loadInstagram = useCallback(() => InstagramService.getLatestPosts(4), []);
+/**
+ * Latest Instagram posts.
+ *
+ * `enabled` is what a store's `instagramFeed` feature flag maps onto: a store
+ * with the section switched off should not pay for the request that fills it.
+ * Disabled resolves to an empty list rather than skipping the hook, so the
+ * caller's hook order never changes with the flag.
+ */
+export const useInstagram = (enabled = true) => {
+  const loadInstagram = useCallback(
+    () => (enabled ? InstagramService.getLatestPosts(4) : Promise.resolve<InstagramPost[]>([])),
+    [enabled]
+  );
   return useAsync<InstagramPost[]>(loadInstagram, []);
 };
 export const useTestimonials = () => useAsync<Testimonial[]>(TestimonialService.getTestimonials, []);

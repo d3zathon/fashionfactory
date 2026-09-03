@@ -20,3 +20,9 @@
 .crumbs { padding-top: clamp(24px, 4vw, 44px); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin-bottom: clamp(30px, 5vw, 54px); }
 .crumbs a:hover { color: var(--accent); }
 .crumbs span[aria-current] { color: var(--ink); }
+
+/* Returns and exchange terms, sitting under the CTAs where a customer reads
+   them before deciding — same rule-and-label language as the Sizes/Colors
+   groups above, so it reads as part of the product's own detail. */
+.policy { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--line); }
+.policy p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.65; max-width: 46ch; }

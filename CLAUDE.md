@@ -1,8 +1,18 @@
-# Fashion Factory Nepal
+# Jutta Nepal
 
 ## Repository
 - GitHub: https://github.com/d3zathon/fashionfactory
+- Repository history: began as the Fashion Factory Nepal storefront; it is now a
+  multi-store platform, and this deployment serves the `jutta-nepal` store.
 - Main working branch: feat/fashion-factory-foundation
+
+## Store
+- Store: Jutta Nepal — footwear, Bhaisepati, Lalitpur, Nepal 44700
+- WhatsApp: https://wa.me/9779702042301 · Phone: +977 9702042301
+- Instagram: @jutta__nepal
+- Everything store-specific lives in `src/data/store.json` (profile),
+  `src/data/categories.json`, `src/data/products.json` and `src/data/mock.ts`.
+  Never type a store's name, number, handle or address into a component.
 
 ## Rules
 - Preserve the existing architecture: UI → hooks → services → providers.

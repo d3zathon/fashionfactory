@@ -18,19 +18,24 @@ import { AnalyticsService } from "@/services";
 import { generalWhatsappMessage, telHref, tiktokLink, whatsappHref } from "@/lib/links";
 import { getStoreProfile } from "@/providers/static";
 
-const fallbackHero = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2200&q=88";
-
 // The store this deployment was built for. useStoreSettings resolves to the
 // same data, but only after the first render, so this stands in for it wherever
-// a fallback used to be a Fashion Factory literal.
+// a fallback would otherwise have to be a store-specific literal.
 const built = getStoreProfile();
+
+// Sections a store has switched off in its settings never render. Unset counts
+// as on, so a store that has never touched these keeps everything. Module-level
+// because the profile is a build-time constant, and because the hooks below
+// need it before the component body runs.
+const feature = (key: keyof NonNullable<typeof built.features>) => built.features?.[key] !== false;
 
 export default function HomePage() {
   const { data: home } = useHomepageContent();
   const { data: store } = useStoreSettings();
   const { data: categories } = useCategories();
   const { data: products } = useFeaturedProducts();
-  const { data: instagram } = useInstagram();
+  // Skips the request outright when the store has the section switched off.
+  const { data: instagram } = useInstagram(feature("instagramFeed"));
   const { data: testimonials } = useTestimonials();
   const { data: faqs } = useFAQs();
 
@@ -43,9 +48,20 @@ export default function HomePage() {
     tiktokUrl: store?.tiktokUrl ?? built.tiktokUrl,
     tiktokHandle: store?.tiktokHandle ?? built.tiktokHandle,
   });
-  const heroSrc = home?.heroImage?.src ?? fallbackHero;
+  // Optional on purpose. A store with no photography of its own gets the brand
+  // ground rather than a stock photograph of someone else's stock.
+  const heroSrc = home?.heroImage?.src;
 
-  // Headline is split so the second line can indent and shift to rust.
+  // Everything on this page that shows a product is skipped when the catalogue
+  // is empty, rather than rendering an empty grid or a sourceless <img>.
+  const hasProducts = products.length > 0;
+
+  // "Bhaisepati" / "Lalitpur, Nepal" from "Bhaisepati, Lalitpur, Nepal". Split
+  // rather than typed in: the neighbourhood is the store's data, and a literal
+  // here would be the one thing on this page a different store could not change.
+  const [place, ...placeRest] = (store?.locationLabel ?? built.locationLabel).split(",");
+
+  // Headline is split so the second line can indent and shift to the accent.
   const headline = home?.headline ?? built.tagline ?? built.name;
   const [headOne, ...headRest] = headline.split(" ");
 
@@ -58,18 +74,14 @@ export default function HomePage() {
   let entry = 1;
   const idx = () => String(++entry).padStart(2, "0");
 
-  // Sections a store has switched off in its settings never render. Unset
-  // counts as on, so a store that has never touched these keeps everything.
-  const feature = (key: keyof NonNullable<typeof built.features>) => built.features?.[key] !== false;
-
   // Falls back to the built store's own profile rather than to literals: the
   // JSON is a build-time constant, so these read as stably as hardcoded strings
-  // while staying correct on a storefront that isn't Fashion Factory's.
+  // while staying correct on any store's storefront, not just this one's.
   const tickerItems = [
-    "New arrivals in store",
+    "New arrivals on the shelf",
     store?.locationLabel ?? built.locationLabel,
+    "Ask about your size on WhatsApp",
     store?.openingHours ?? built.openingHours,
-    "Ask us on WhatsApp",
     store?.instagramHandle ?? built.instagramHandle,
     ...(built.tiktokHandle ? [`Follow us on TikTok — ${store?.tiktokHandle ?? built.tiktokHandle}`] : []),
   ];
@@ -77,12 +89,16 @@ export default function HomePage() {
   return <main id="main">
     {/* The hero is the LCP element but is a CSS background image, which the
         browser cannot discover until stylesheets and JS have run. */}
-    <link rel="preload" as="image" href={heroSrc} fetchPriority="high" />
+    {heroSrc && <link rel="preload" as="image" href={heroSrc} fetchPriority="high" />}
     <Navbar />
 
     {/* 01 — HERO -------------------------------------------------------- */}
     <section id="top" className="hero">
-      <div className="hero-image" style={{ backgroundImage: `url(${heroSrc})` }} aria-hidden="true" />
+      {heroSrc ? (
+        <div className="hero-image" style={{ backgroundImage: `url(${heroSrc})` }} aria-hidden="true" />
+      ) : (
+        <div className="hero-plate" aria-hidden="true" />
+      )}
       <div className="container hero-content">
         <p className="eyebrow hero-eyebrow">{home?.eyebrow ?? built.locationLabel}</p>
         <h1 className="hero-title">
@@ -92,9 +108,11 @@ export default function HomePage() {
           <p className="hero-blurb">{home?.description ?? built.description}</p>
           <div className="hero-actions">
             <Link className="btn btn-accent" href="/collection" onClick={() => track("collection_click")}>
-              Browse the collection <ArrowUpRight size={15} />
+              Browse the shop <ArrowUpRight size={15} />
             </Link>
-            <Link className="btn" href="#visit-us">Visit the store</Link>
+            <a className="btn" href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click", { placement: "hero" })}>
+              Order on WhatsApp <MessageCircle size={15} />
+            </a>
           </div>
         </div>
       </div>
@@ -114,18 +132,21 @@ export default function HomePage() {
             <div>
               <h2 className="intro-copy">{home?.introductionTitle ?? built.tagline}</h2>
               <p className="intro-body">{home?.introductionBody ?? built.description}</p>
+              {/* Deliberately not a branch count or a years-in-business figure:
+                  the first would read as a claim that these are all the shop's
+                  doors, and the second is not ours to state. */}
               <div className="intro-stats">
                 <div className="intro-stat">
-                  <strong>{store?.locations?.length ?? 2}</strong>
-                  <span>Branches</span>
-                </div>
-                <div className="intro-stat">
-                  <strong>{categories.length || 5}</strong>
+                  <strong>{categories.length || 6}</strong>
                   <span>Categories</span>
                 </div>
                 <div className="intro-stat">
-                  <strong>Daily</strong>
-                  <span>{store?.openingHours ?? built.openingHours}</span>
+                  <strong>{place.trim()}</strong>
+                  <span>{placeRest.join(",").trim()}</span>
+                </div>
+                <div className="intro-stat">
+                  <strong>WhatsApp</strong>
+                  <span>Sizes and availability, same chat</span>
                 </div>
               </div>
             </div>
@@ -143,7 +164,7 @@ export default function HomePage() {
               <span className="idx">{idx()}</span>
               <p className="eyebrow">The index</p>
             </div>
-            <h2 className="section-title">Find your category.</h2>
+            <h2 className="section-title">Find your pair.</h2>
           </div>
           <Link className="link-rule" href="/collection">
             View everything <ArrowUpRight size={14} />
@@ -155,24 +176,28 @@ export default function HomePage() {
             keeps its two CTAs and nothing else. */}
         <HomeSearch />
         <Reveal>
-          <CategoryIndex categories={categories} products={products} fallbackImage={fallbackHero} />
+          <CategoryIndex categories={categories} products={products} />
         </Reveal>
       </div>
     </section>
 
     {/* 04 — FEATURED ---------------------------------------------------- */}
+    {/* Only rendered once the shop has featured something. An empty product
+        grid under "Worth a closer look" reads as a broken page rather than as
+        a catalogue that has not been published yet. */}
+    {hasProducts && (
     <section id="lookbook" className="section rule-top">
       <div className="container">
         <div className="section-head">
           <div>
             <div className="head-meta">
               <span className="idx">{idx()}</span>
-              <p className="eyebrow">Selected pieces</p>
+              <p className="eyebrow">Selected pairs</p>
             </div>
             <h2 className="section-title">Worth a closer look.</h2>
           </div>
           <p className="muted" style={{ maxWidth: "30ch", margin: 0 }}>
-            Ask the store about availability — every piece is answered on WhatsApp.
+            Ask about sizes before you come in — every pair is answered on WhatsApp.
           </p>
         </div>
         <div className="product-grid">
@@ -190,26 +215,32 @@ export default function HomePage() {
         </div>
       </div>
     </section>
+    )}
 
     {/* 05 — EDITORIAL --------------------------------------------------- */}
-    <section className="editorial">
-      <div className="editorial-media">
-        <img src={products[1]?.images[0]?.src ?? fallbackHero} alt="" loading="lazy" />
-      </div>
+    {/* The media half is dropped rather than filled with a placeholder when
+        there is no catalogue photograph to show; CSS collapses the grid to the
+        single column it already uses on tablet and below. */}
+    <section className={products[1]?.images[0]?.src ? "editorial" : "editorial editorial-solo"}>
+      {products[1]?.images[0]?.src && (
+        <div className="editorial-media">
+          <img src={products[1].images[0].src} alt="" loading="lazy" />
+        </div>
+      )}
       <div className="editorial-body">
         <div className="head-meta">
           <span className="idx">{idx()}</span>
           <p className="eyebrow">How it works</p>
         </div>
-        <h2 className="editorial-quote">See it. Try it.<br />Take it home.</h2>
+        <h2 className="editorial-quote">See it. Try it on.<br />Walk out in it.</h2>
         <div className="editorial-steps">
           <div className="editorial-step">
             <b>01</b>
-            <div><p>Discover</p><small>Browse the collection here or on Instagram.</small></div>
+            <div><p>Browse</p><small>Look through the shop here, or on Instagram.</small></div>
           </div>
           <div className="editorial-step">
             <b>02</b>
-            <div><p>Ask</p><small>Message the store on WhatsApp to check what&rsquo;s in stock.</small></div>
+            <div><p>Ask</p><small>Message us on WhatsApp with the pair and your size.</small></div>
           </div>
           <div className="editorial-step">
             <b>03</b>
@@ -225,12 +256,12 @@ export default function HomePage() {
       <div className="container">
         {/* The quiz was the one section carrying no entry label, which is what
             left a hole at 06. The eyebrow names the section rather than
-            repeating the card's own "Find your edit" heading. */}
+            repeating the card's own "Find your pair" heading. */}
         <div className="section-head">
           <div>
             <div className="head-meta">
               <span className="idx">{idx()}</span>
-              <p className="eyebrow">The styling quiz</p>
+              <p className="eyebrow">The shoe finder</p>
             </div>
           </div>
         </div>
@@ -251,7 +282,7 @@ export default function HomePage() {
               <span className="idx">{idx()}</span>
               <p className="eyebrow">Social edit</p>
             </div>
-            <h2 className="section-title">What&rsquo;s new in store.</h2>
+            <h2 className="section-title">What&rsquo;s new on the shelf.</h2>
           </div>
           {/* Both handles sit in the existing section header rather than in a
               section of their own — the social edit is already the place a
@@ -390,13 +421,13 @@ export default function HomePage() {
             <span className="idx">{idx()}</span>
             <p className="eyebrow">Talk to the store</p>
           </div>
-          <h2 className="section-title">Have a question<br />about a look?</h2>
+          <h2 className="section-title">Looking for<br />a size?</h2>
           <p className="muted" style={{ marginTop: 18, maxWidth: "42ch", lineHeight: 1.7 }}>
-            Send an inquiry and the store will follow up using the contact details you provide.
+            Send an inquiry and the shop will follow up using the contact details you provide.
             For the fastest reply, message us on WhatsApp.
           </p>
-          <a className="btn btn-dark" style={{ marginTop: 22 }} href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click")}>
-            <MessageCircle size={15} /> WhatsApp the store
+          <a className="btn btn-dark" style={{ marginTop: 22 }} href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click", { placement: "contact" })}>
+            <MessageCircle size={15} /> Chat on WhatsApp
           </a>
         </div>
         <ContactForm />
@@ -407,11 +438,11 @@ export default function HomePage() {
     <section className="final">
       <div className="container final-inner">
         <p className="eyebrow">{store?.name ?? built.name}</p>
-        <h2>{home?.finalCtaTitle ?? "Your Next Look Starts Here."}</h2>
-        <p>{home?.finalCtaBody ?? `Visit ${store?.name ?? built.name}, or message the store to ask about a piece.`}</p>
+        <h2>{home?.finalCtaTitle ?? "Find your next pair."}</h2>
+        <p>{home?.finalCtaBody ?? `Visit ${store?.name ?? built.name}, or message the shop about a pair.`}</p>
         <div className="final-actions">
-          <Link className="btn btn-dark" href="/collection">Browse the collection</Link>
-          <a className="btn" href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click")}>WhatsApp us</a>
+          <Link className="btn btn-dark" href="/collection">Browse the shop</Link>
+          <a className="btn" href={wa} target="_blank" rel="noreferrer" onClick={() => track("whatsapp_click", { placement: "final_cta" })}>Order on WhatsApp</a>
           <Link className="btn" href="#visit-us">Get directions</Link>
         </div>
       </div>

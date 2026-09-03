@@ -33,9 +33,24 @@ export const metadata: Metadata = {
   title: built.seo?.title ?? built.name,
   description: built.seo?.description ?? built.description,
   ...(built.seo?.keywords ? { keywords: built.seo.keywords } : {}),
-  openGraph: { title: built.name, description: built.tagline ?? built.description, type: "website" },
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: built.name,
+    description: built.seo?.description ?? built.description,
+    type: "website",
+    url: "/",
+    siteName: built.name,
+    locale: "en_NP",
+  },
+  // The OG image is emitted by src/app/opengraph-image.tsx; naming the card
+  // type is what makes X render it large rather than as a thumbnail.
+  twitter: {
+    card: "summary_large_image",
+    title: built.seo?.title ?? built.name,
+    description: built.seo?.description ?? built.description,
+  },
   // Only set when the store supplies one — otherwise Next's file-based
-  // src/app/icon.jpg keeps serving the favicon.
+  // src/app/icon.svg keeps serving the favicon.
   ...(built.faviconUrl ? { icons: { icon: built.faviconUrl } } : {}),
 };
 
@@ -73,15 +88,24 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   );
   const socialProfiles = [store.instagramUrl, store.tiktokUrl, store.facebookUrl].filter(Boolean);
 
+  // ShoeStore is schema.org's own subtype for a footwear retailer, and the
+  // country comes from the store's profile rather than a literal so a branch
+  // outside Nepal would not be described as being in it. openingHours is
+  // omitted entirely when the store has recorded no structured hours — an
+  // empty array would assert "open no hours at all".
   const localBusinesses = store.locations.map((location) => ({
     "@context": "https://schema.org",
-    "@type": "ClothingStore",
+    "@type": "ShoeStore",
     name: location.name,
     telephone: store.phone,
     ...(store.logoUrl ? { image: store.logoUrl, logo: store.logoUrl } : {}),
-    address: { "@type": "PostalAddress", streetAddress: location.address, addressCountry: "NP" },
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: location.address,
+      addressCountry: store.countryCode ?? "NP",
+    },
     geo: { "@type": "GeoCoordinates", latitude: location.lat, longitude: location.lng },
-    openingHours: schemaOpeningHours,
+    ...(schemaOpeningHours.length ? { openingHours: schemaOpeningHours } : {}),
     sameAs: socialProfiles,
     url: location.mapsUrl,
   }));

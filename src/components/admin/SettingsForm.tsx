@@ -16,7 +16,7 @@ import type { StoreFeatures } from "@/models";
 function validate(s: AdminStoreSettings): string | null {
   if (!s.name.trim()) return "Store name is required.";
   if (!/^\+?[\d\s().-]{7,}$/.test(s.phone)) return "Phone doesn't look like a dialable number.";
-  if (!/^\d{6,15}$/.test(s.whatsappNumber)) return "WhatsApp number must be digits only, including country code (e.g. 9779840260456 for Nepal) — no +, spaces, or dashes.";
+  if (!/^\d{6,15}$/.test(s.whatsappNumber)) return "WhatsApp number must be digits only, including country code (e.g. 9779702042301 for Nepal) — no +, spaces, or dashes.";
   if (s.instagramUrl && !/^https:\/\/(www\.)?instagram\.com\//.test(s.instagramUrl)) return "Instagram URL must start with https://instagram.com/";
   if (s.tiktokUrl && !/^https:\/\/(www\.)?tiktok\.com\//.test(s.tiktokUrl)) return "TikTok URL must start with https://tiktok.com/";
   if (s.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s.email)) return "That email address doesn't look right.";
@@ -143,6 +143,11 @@ export function SettingsForm() {
         </label>
         <label className="admin-field"><span>&ldquo;Visit&rdquo; step, under How it works</span>
           <input value={settings.visitStepBody ?? ""} onChange={(e) => optionalField("visitStepBody", e.target.value)} />
+        </label>
+        {/* Shown in the footer, in the FAQ and on every product page. Left
+            empty, no policy line appears anywhere rather than a made-up one. */}
+        <label className="admin-field"><span>Returns &amp; exchanges policy (shown in the footer and on product pages)</span>
+          <textarea rows={2} value={settings.returnsPolicy ?? ""} onChange={(e) => optionalField("returnsPolicy", e.target.value)} />
         </label>
         <label className="admin-field"><span>Logo URL (optional)</span>
           <input value={settings.logoUrl ?? ""} onChange={(e) => optionalField("logoUrl", e.target.value)} type="url" />

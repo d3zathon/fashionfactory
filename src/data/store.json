@@ -1,89 +1,65 @@
 {
-  "generatedAt": "2026-08-22T00:00:00.000Z",
-  "storeSlug": "fashion-factory-nepal",
+  "generatedAt": "2026-09-03T00:00:00.000Z",
+  "storeSlug": "jutta-nepal",
   "settings": {
-    "slug": "fashion-factory-nepal",
-    "name": "Fashion Factory Nepal",
-    "tagline": "Define Your Style.",
-    "description": "Fashion Factory is a Kathmandu-based fashion and clothing retail destination. Browse the collection, connect with the store, and visit in person to find your next look.",
-    "locationLabel": "Kathmandu Valley, Nepal · Kirtipur & Budhanilkantha",
-    "phone": "+977 9840260456",
-    "whatsappNumber": "9779840260456",
-    "instagramHandle": "@fashion.factory_2022",
-    "instagramUrl": "https://www.instagram.com/fashion.factory_2022/",
-    "tiktokHandle": "Fashionfactory@99",
-    "tiktokUrl": "https://www.tiktok.com/@fashionfactory99",
-    "openingHours": "9:00 AM – 5:00 PM daily",
-    "businessHours": [
-      {
-        "days": [
-          "Mo",
-          "Tu",
-          "We",
-          "Th",
-          "Fr",
-          "Sa",
-          "Su"
-        ],
-        "opens": "09:00",
-        "closes": "17:00"
-      }
-    ],
+    "slug": "jutta-nepal",
+    "name": "Jutta Nepal",
+    "tagline": "Every Step Counts.",
+    "description": "Jutta Nepal is a footwear store in Bhaisepati, Lalitpur. Browse what's in the shop, ask about a pair on WhatsApp, and come in to try it on.",
+    "locationLabel": "Bhaisepati, Lalitpur, Nepal",
+    "phone": "+977 9702042301",
+    "whatsappNumber": "9779702042301",
+    "instagramHandle": "@jutta__nepal",
+    "instagramUrl": "https://www.instagram.com/jutta__nepal/",
+    "openingHours": "Message us to confirm today's hours",
+    "businessHours": [],
+    "address": "Bhaisepati, Lalitpur, Nepal 44700",
     "countryCode": "NP",
     "currency": "NPR",
+    "returnsPolicy": "No refunds or returns. Exchanges are accepted within 2 days, subject to store policy and product condition.",
     "branding": {
-      "accent": "#8b3f35",
-      "accentDeep": "#6d2f27",
-      "accentLight": "#d98a76",
-      "ink": "#14120f",
-      "paper": "#f2ede3",
+      "accent": "#23375c",
+      "accentDeep": "#16233c",
+      "accentLight": "#93aad6",
+      "ink": "#12141a",
+      "paper": "#f3f2ef",
       "wordmark": [
-        "FASHION",
-        "FACTORY",
+        "JUTTA",
         "NEPAL"
       ]
     },
     "features": {
       "styleQuiz": true,
-      "instagramFeed": true,
-      "testimonials": true,
+      "instagramFeed": false,
+      "testimonials": false,
       "faqs": true,
       "contactForm": true,
       "locations": true
     },
     "seo": {
-      "title": "Fashion Factory Nepal | Fashion Store in Kathmandu",
-      "description": "Discover fashion at Fashion Factory Nepal. Browse the collection, contact the store, and get directions to our Kirtipur and Budhanilkantha branches.",
+      "title": "Jutta Nepal | Footwear Store in Bhaisepati, Lalitpur",
+      "description": "Jutta Nepal is a footwear store in Bhaisepati, Lalitpur. Browse the shoes, message the store on WhatsApp to ask about a pair, and get directions.",
       "keywords": [
-        "Fashion Factory Nepal",
-        "fashion store Kathmandu",
-        "clothing store Kathmandu",
-        "fashion shop Kathmandu",
-        "Fashion Factory Kirtipur",
-        "Fashion Factory Budhanilkantha"
+        "Jutta Nepal",
+        "shoe store Bhaisepati",
+        "footwear store Lalitpur",
+        "shoes Lalitpur",
+        "sneakers Kathmandu",
+        "jutta Nepal Bhaisepati"
       ]
     },
-    "visitTitle": "Two doors in the\nKathmandu Valley.",
-    "visitStepBody": "Come to Kirtipur or Budhanilkantha and try it on."
+    "visitTitle": "One shop in\nBhaisepati.",
+    "visitStepBody": "Come to Bhaisepati and try the pair on."
   },
   "locations": [
     {
-      "id": "kirtipur",
-      "name": "Fashion Factory — Kirtipur",
-      "address": "M7FJ+JHC, Kirtipur 44600, Nepal",
-      "mapsUrl": "https://www.google.com/maps/place/Fashion+Factory/@27.67409,85.2814289,3647m/data=!3m1!1e3!4m10!1m2!2m1!1sfashion+factory!3m6!1s0x39eb19d5f435a403:0x7d3cfd5ad03122c1!8m2!3d27.6740549!4d85.2814038!15sCg9mYXNoaW9uIGZhY3RvcnmSAQlnaWZ0X3Nob3DgAQA!16s%2Fg%2F11sxvnp1t0?entry=ttu&g_ep=EgoyMDI2MDgxNy4wIKXMDSoASAFQAw%3D%3D",
-      "lat": 27.6740549,
-      "lng": 85.2814038,
+      "id": "bhaisepati",
+      "name": "Jutta Nepal — Bhaisepati",
+      "address": "Bhaisepati, Lalitpur, Nepal 44700",
+      "mapsUrl": "https://www.google.com/maps/place/Jutta+Nepal+Bhaisepati/@27.6638716,85.2746002,7766m/data=!3m1!1e3!4m10!1m2!2m1!1sJutta+Nepal!3m6!1s0x39eb17002eec70c9:0x89aea1fde71432c1!8m2!3d27.6522818!4d85.3045567!15sCgtKdXR0YSBOZXBhbFoNIgtqdXR0YSBuZXBhbJIBCnNob2Vfc3RvcmXgAQA!16s%2Fg%2F11ytrt8gj4?entry=ttu&g_ep=EgoyMDI2MDgzMS4wIKXMDSoASAFQAw%3D%3D",
+      "lat": 27.6522818,
+      "lng": 85.3045567,
       "sortOrder": 1
-    },
-    {
-      "id": "budhanilkantha",
-      "name": "Fashion Factory — Budhanilkantha",
-      "address": "Q9G6+FMJ, Budhanilkantha 44600, Nepal",
-      "mapsUrl": "https://www.google.com/maps/place/Fashion+factory+budhanilkantha/@27.7762096,85.3590733,911m/data=!3m2!1e3!4b1!4m6!3m5!1s0x39eb1d004815b655:0x9d3cda67e875d3e0!8m2!3d27.7762049!4d85.3616482!16s%2Fg%2F11m5qgldvt?entry=ttu&g_ep=EgoyMDI2MDgxNy4wIKXMDSoASAFQAw%3D%3D",
-      "lat": 27.7762049,
-      "lng": 85.3616482,
-      "sortOrder": 2
     }
   ]
 }

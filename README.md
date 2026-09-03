@@ -1,9 +1,22 @@
-# Fashion Factory Nepal
+# Jutta Nepal
 
-A storefront for Fashion Factory Nepal, Kathmandu — and the platform it runs on.
-One codebase serves any number of stores: everything store-specific (name,
-contact details, social handles, branding, copy, which sections render) is data,
-not code. Fashion Factory is the default store.
+A storefront for **Jutta Nepal**, a footwear store in Bhaisepati, Lalitpur —
+and the platform it runs on. One codebase serves any number of stores:
+everything store-specific (name, contact details, social handles, branding,
+copy, which sections render) is data, not code.
+
+This deployment serves `jutta-nepal`. The repository began as the storefront
+for another shop, Fashion Factory Nepal, which is still the platform's default
+tenant in the database and still referenced by the earlier migrations — none of
+it reaches this storefront, which reads only the committed JSON in `src/data`.
+
+**What is and is not filled in.** Jutta Nepal's identity, contact details,
+policy, branch and SEO are complete and real. The **product catalogue is
+deliberately empty**: no photography has been supplied, and stock images would
+put shoes the shop does not sell on its own storefront. Every surface handles
+that state on purpose — see
+[public/images/jutta-nepal/README.md](public/images/jutta-nepal/README.md) for
+what happens where, and how to fill it.
 
 **Deploying it? Start with [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).**
 
@@ -49,8 +62,10 @@ npm run dev        # http://localhost:3000
 ```
 
 The site runs with no environment variables at all: content comes from the
-committed JSON in `src/data`, the contact form no-ops, the Instagram strip shows
-placeholders, and `/admin` reports that it is not configured. Copy
+committed JSON in `src/data`, the contact form no-ops, and `/admin` reports that
+it is not configured. (Jutta Nepal has the Instagram section switched off in its
+feature flags until there is a real feed to show, so no placeholder strip
+renders either.) Copy
 `.env.example` to `.env.local` and fill in the Supabase values to work on
 `/admin`.
 
@@ -67,7 +82,9 @@ npm run validate   # all three, in that order
 
 Collections, homepage copy, testimonials and FAQs still come from mock providers
 (`src/data/mock.ts`); products, categories and store details come from the
-committed JSON that the admin's Publish flow regenerates.
+committed JSON that the admin's Publish flow regenerates. The homepage hero
+image is one of the mock-provider fields and is **optional** — with none set,
+the hero renders the brand ground rather than a photograph.
 
 Contact and Instagram switch between mock and live behavior automatically based on **environment variables set on the host** — no code change or redeploy needed to go live:
 
@@ -115,8 +132,9 @@ Admin sections: **Overview** (what needs attention), **Products** (CRUD,
 reorder, visibility, image upload), **Categories** (rename/describe/reorder/
 hide — ids and slugs are locked because products reference them and they appear
 in live URLs), and **Settings** (identity, contact details, social handles,
-storefront copy, SEO, which sections render, and branch addresses — these drive
-every Call/WhatsApp/Directions CTA on the public site).
+storefront copy, the returns/exchange policy, SEO, which sections render, and
+branch addresses — these drive every Call/WhatsApp/Directions CTA on the public
+site).
 
 ### Authorization model
 
@@ -162,9 +180,11 @@ select id, email, null from auth.users where email = 'owner@example.com';
 
 Setup:
 1. Create a free Supabase project, then apply `supabase/migrations/` in filename
-   order (`0001_baseline.sql` then `0002_multi_store.sql`). Together they create
-   `stores`, `products`, `categories`, `store_locations`, `admin_users`, the
-   store-scoped RLS policies, and the `product-images` bucket.
+   order, `0001` through `0005`. Together they create `stores`, `products`,
+   `categories`, `store_locations`, `admin_users`, the store-scoped RLS
+   policies, the `product-images` bucket, and — in `0005` — the `jutta-nepal`
+   store with its categories and branch, plus the `returns_policy` column the
+   footer, FAQ and product pages read.
 2. In Authentication > Providers, turn off public sign-ups, manually add the
    owner account under Authentication > Users, then grant it admin rights with
    the SQL above.
@@ -186,6 +206,17 @@ also available) to stay ahead of the free tier's 7-day inactivity pause; it no-o
 cleanly if the secrets above aren't set yet. `/admin` is excluded from search via
 `robots.ts` and per-page `noindex` metadata.
 
+## Store policy
+
+Returns and exchange terms live on the store profile (`returnsPolicy`, editable
+in `/admin → Settings`), not in page copy, and render in three places from that
+one string: the footer, the FAQ list, and every product page. A store that
+records none renders no policy line anywhere — the site never states terms on a
+shop's behalf.
+
 ## Important
 
-Development imagery is clearly separated from business data so real store/product media can be substituted through `MediaService` without rewriting the UI. No credentials or API secrets belong in the frontend.
+Imagery is business data, not code: product photos are uploaded through
+`/admin` and reach the site through Publish, and fixed brand imagery goes in
+`public/images/<store>/`. Neither needs a component change. No credentials or
+API secrets belong in the frontend.
