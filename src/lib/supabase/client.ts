@@ -1,11 +1,10 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { isSupabaseConfigured } from "./config";
 
 let client: SupabaseClient | null = null;
 
-export function isSupabaseConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-}
+export { isSupabaseConfigured };
 
 // Cookie-backed session (not localStorage) so middleware and server routes can
 // see the session too — that's what makes real server-side authorization possible.

@@ -2,10 +2,9 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { ACTIVE_STORE_SLUG } from "@/lib/activeStore";
+import { isSupabaseConfigured } from "./config";
 
-export function isSupabaseConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-}
+export { isSupabaseConfigured };
 
 export async function getServerSupabase(): Promise<SupabaseClient | null> {
   if (!isSupabaseConfigured()) return null;

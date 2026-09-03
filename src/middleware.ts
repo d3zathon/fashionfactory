@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { ACTIVE_STORE_SLUG } from "@/lib/activeStore";
+import { isHttpUrl } from "@/lib/supabase/config";
 
 const LOGIN_PATH = "/admin/login";
 
@@ -151,14 +152,4 @@ async function managesActiveStore(
   if (!store) return false;
 
   return adminRows.some((row) => row.store_id === store.id);
-}
-
-/** Is this a URL createServerClient will accept? It throws on anything else. */
-function isHttpUrl(value: string): boolean {
-  try {
-    const { protocol } = new URL(value);
-    return protocol === "http:" || protocol === "https:";
-  } catch {
-    return false;
-  }
 }
