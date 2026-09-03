@@ -24,6 +24,25 @@ page handles an empty catalogue deliberately rather than accidentally:
 
 Publish one real product and all of it comes back on its own.
 
+### Seeing the layout full before you have photos
+
+`placeholders/` holds nine tiles in the brand's monochrome — the JN monogram
+and its hairline rule on the three grounds the site uses. They are **not
+photographs and are not trying to be**: each one says "photo pending" across
+the bottom. They exist so the grid, the price line and the category rails can
+be reviewed with the shop full.
+
+```bash
+npm run preview:on     # fills the storefront with placeholder products
+npm run preview:off    # empties it again
+```
+
+`src/data/products.preview.json` holds those entries — generic slot names, and
+every description says it is a placeholder. Turning the preview on rewrites
+`src/data/products.json` with a `_comment` saying the same, so the state is
+obvious in `git status`. **Run `preview:off` before committing**, and never
+deploy with it on. Publishing from `/admin` overwrites it either way.
+
 ## 2. Fixed brand imagery → this folder
 
 For images that belong to the site rather than to the catalogue — a storefront
