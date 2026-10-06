@@ -1,10 +1,70 @@
 {
-  "generatedAt": "2026-08-22T00:00:00.000Z",
+  "generatedAt": "2026-10-06T00:00:00.000Z",
   "categories": [
-    { "id": "new", "name": "New Arrivals", "slug": "new-arrivals", "description": "Fresh pieces to discover.", "active": true, "sortOrder": 1 },
-    { "id": "mens", "name": "Men's", "slug": "mens", "description": "Everyday and occasion-ready styles.", "active": true, "sortOrder": 2 },
-    { "id": "womens", "name": "Women's", "slug": "womens", "description": "Contemporary pieces for your wardrobe.", "active": true, "sortOrder": 3 },
-    { "id": "accessories", "name": "Accessories", "slug": "accessories", "description": "Finishing touches for your look.", "active": true, "sortOrder": 4 },
-    { "id": "gifts", "name": "Gifts", "slug": "gifts", "description": "Thoughtful finds to take home.", "active": true, "sortOrder": 5 }
+    {
+      "id": "new",
+      "name": "New Arrivals",
+      "slug": "new-arrivals",
+      "description": "Fresh finds from the latest store edit.",
+      "image": {
+        "id": "new-arrivals",
+        "src": "/images/products/orange-ridged-carry-on.jpg",
+        "alt": "Orange ridged carry-on case"
+      },
+      "active": true,
+      "sortOrder": 1
+    },
+    {
+      "id": "mens",
+      "name": "Handbags",
+      "slug": "handbags",
+      "description": "Everyday shapes, statement bags and polished classics.",
+      "image": {
+        "id": "handbags",
+        "src": "/images/products/colorblock-top-handle-bag.jpg",
+        "alt": "Colorblock top-handle bag"
+      },
+      "active": true,
+      "sortOrder": 2
+    },
+    {
+      "id": "womens",
+      "name": "Shoulder Bags & Clutches",
+      "slug": "shoulder-bags-clutches",
+      "description": "Compact crossbodies, shoulder bags and occasion pieces.",
+      "image": {
+        "id": "shoulder-bags",
+        "src": "/images/products/cream-quilted-crossbody.jpg",
+        "alt": "Cream quilted crossbody"
+      },
+      "active": true,
+      "sortOrder": 3
+    },
+    {
+      "id": "accessories",
+      "name": "Jewelry & Accessories",
+      "slug": "jewelry-accessories",
+      "description": "Finishing touches and small statement pieces.",
+      "image": {
+        "id": "jewelry",
+        "src": "/images/products/colorful-jhumka-earrings.jpg",
+        "alt": "Colorful jhumka earrings"
+      },
+      "active": true,
+      "sortOrder": 4
+    },
+    {
+      "id": "gifts",
+      "name": "Gifts & Drinkware",
+      "slug": "gifts-drinkware",
+      "description": "Colorful mugs and thoughtful little gifts.",
+      "image": {
+        "id": "gifts",
+        "src": "/images/products/queen-and-king-mugs.jpg",
+        "alt": "King and queen gift mugs"
+      },
+      "active": true,
+      "sortOrder": 5
+    }
   ]
 }

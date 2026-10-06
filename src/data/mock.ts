@@ -33,32 +33,35 @@ export const storeSettings: StoreSettings = {
 export const homepageContent: HomepageContent = {
   eyebrow: "Kathmandu, Nepal",
   headline: "Define Your Style.",
-  description: "Discover fashion at Fashion Factory Nepal, Kathmandu.",
-  heroImage: image("hero", "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2200&q=88", "Fashion clothing displayed on a rack"),
+  description: "Discover handbags, accessories and gifts at Fashion Factory Nepal in Kathmandu.",
+  heroImage: image("hero", "/images/store/store-handbag-shelves.jpg", "Fashion Factory's handbag display in Kathmandu"),
   introductionTitle: "Fashion Made Easy to Discover.",
-  introductionBody: "Fashion Factory is a Kathmandu-based fashion and clothing retail destination. Browse the collection, connect with the store, and visit in person to find your next look.",
+  introductionBody: "Fashion Factory is a Kathmandu destination for handbags, jewelry, accessories and thoughtful gifts. Browse the collection, connect with the store, and visit in person to find your next favorite.",
   finalCtaTitle: "Your Next Look Starts Here.",
   finalCtaBody: "Visit Fashion Factory in Kathmandu or connect with us online.",
 };
 
 export const categories: Category[] = [
   { id: "new", name: "New Arrivals", slug: "new-arrivals", description: "Fresh pieces to discover.", active: true, sortOrder: 1 },
-  { id: "mens", name: "Men's", slug: "mens", description: "Everyday and occasion-ready styles.", active: true, sortOrder: 2 },
-  { id: "womens", name: "Women's", slug: "womens", description: "Contemporary pieces for your wardrobe.", active: true, sortOrder: 3 },
-  { id: "accessories", name: "Accessories", slug: "accessories", description: "Finishing touches for your look.", active: true, sortOrder: 4 },
-  { id: "gifts", name: "Gifts", slug: "gifts", description: "Thoughtful finds to take home.", active: true, sortOrder: 5 },
+  { id: "mens", name: "Handbags", slug: "handbags", description: "Everyday shapes, statement bags and polished classics.", active: true, sortOrder: 2 },
+  { id: "womens", name: "Shoulder Bags & Clutches", slug: "shoulder-bags-clutches", description: "Compact crossbodies, shoulder bags and occasion pieces.", active: true, sortOrder: 3 },
+  { id: "accessories", name: "Jewelry & Accessories", slug: "jewelry-accessories", description: "Finishing touches and small statement pieces.", active: true, sortOrder: 4 },
+  { id: "gifts", name: "Gifts & Drinkware", slug: "gifts-drinkware", description: "Colorful mugs and thoughtful little gifts.", active: true, sortOrder: 5 },
 ];
 
 export const collections: Collection[] = [
-  { id: "all", name: "The Collection", slug: "all", description: "A curated catalogue for the storefront experience.", productIds: ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9"], active: true, sortOrder: 1 },
-  { id: "featured", name: "Featured", slug: "featured", description: "Selected pieces highlighted on the storefront.", productIds: ["p1", "p2", "p3", "p5", "p7"], active: true, sortOrder: 2 },
+  { id: "all", name: "The Collection", slug: "all", description: "A curated catalogue of bags, accessories and gifts.", productIds: Array.from({ length: 24 }, (_, i) => `ff${String(i + 1).padStart(2, "0")}`), active: true, sortOrder: 1 },
+  { id: "featured", name: "Featured", slug: "featured", description: "Selected pieces highlighted on the storefront.", productIds: ["ff04", "ff09", "ff08", "ff18", "ff16", "ff02", "ff15", "ff24"], active: true, sortOrder: 2 },
 ];
 
 export const instagramPosts: InstagramPost[] = [
-  { id: "ig1", image: image("ig1", "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=85", "Fashion rack"), caption: "What's new in store.", permalink: storeSettings.instagramUrl, publishedAt: "2026-08-15" },
-  { id: "ig2", image: image("ig2", "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=85", "Clothing collection"), caption: "Find your next look.", permalink: storeSettings.instagramUrl, publishedAt: "2026-08-12" },
-  { id: "ig3", image: image("ig3", "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1000&q=85", "Contemporary fashion"), permalink: storeSettings.instagramUrl, publishedAt: "2026-08-09" },
-  { id: "ig4", image: image("ig4", "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1000&q=85", "Fashion store"), caption: "Visit us in Kathmandu.", permalink: storeSettings.instagramUrl, publishedAt: "2026-08-05" },
+  { id: "ig1", image: image("ig1", "/images/store/store-accessories-display.jpg", "Accessories display at Fashion Factory"), caption: "Details from the store.", permalink: storeSettings.instagramUrl, publishedAt: "2026-10-06" },
+  { id: "ig2", image: image("ig2", "/images/store/store-counter-and-display.jpg", "The Fashion Factory shop floor"), caption: "Find your next favorite.", permalink: storeSettings.instagramUrl, publishedAt: "2026-10-06" },
+  { id: "ig3", image: image("ig3", "/images/store/store-handbag-shelves.jpg", "Handbags displayed in store"), caption: "A closer look at the bag edit.", permalink: storeSettings.instagramUrl, publishedAt: "2026-10-06" },
+  { id: "ig4", image: image("ig4", "/images/store/store-handbag-wall.jpg", "Handbag wall at Fashion Factory"), caption: "Visit us in Kathmandu.", permalink: storeSettings.instagramUrl, publishedAt: "2026-10-06" },
+  { id: "ig5", image: image("ig5", "/images/store/store-sunglasses-and-bags.jpg", "Sunglasses and handbags at Fashion Factory"), caption: "Explore the in-store edit.", permalink: storeSettings.instagramUrl, publishedAt: "2026-10-06" },
+  { id: "ig6", image: image("ig6", "/images/store/store-handbag-display.jpg", "Handbag display at Fashion Factory"), caption: "New details to discover.", permalink: storeSettings.instagramUrl, publishedAt: "2026-10-06" },
+  { id: "ig7", image: image("ig7", "/images/store/store-featured-clutch.jpg", "Featured clutch at Fashion Factory"), caption: "Find us in Kathmandu.", permalink: storeSettings.instagramUrl, publishedAt: "2026-10-06" },
 ];
 
 export const testimonials: Testimonial[] = [];

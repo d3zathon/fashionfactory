@@ -30,27 +30,27 @@ const QUESTIONS: Question[] = [
     id: "occasion",
     prompt: "What are you shopping for?",
     answers: [
-      { label: "Everyday wear", hint: "Things you'll reach for weekly", weight: ["mens", "womens"] },
-      { label: "An occasion", hint: "Something with a bit more presence", weight: ["womens", "new"] },
+      { label: "An everyday bag", hint: "An easy favorite to carry often", weight: ["mens", "womens"] },
+      { label: "A statement piece", hint: "Something with a bit more presence", weight: ["womens", "new"] },
       { label: "A gift", hint: "For someone else", weight: ["gifts", "accessories"] },
     ],
   },
   {
     id: "mood",
-    prompt: "How do you like to dress?",
+    prompt: "What kind of detail catches your eye?",
     answers: [
-      { label: "Quiet and understated", hint: "Clean lines, easy colours", weight: ["mens", "accessories"] },
-      { label: "A bit of a statement", hint: "Print, colour, silhouette", weight: ["womens", "new"] },
-      { label: "Depends on the day", hint: "A bit of both", weight: ["new", "mens"] },
+      { label: "Clean and classic", hint: "Simple shapes and easy colours", weight: ["mens", "accessories"] },
+      { label: "Color and character", hint: "Print, playful details, standout shapes", weight: ["womens", "new"] },
+      { label: "A useful little find", hint: "Something practical or giftable", weight: ["new", "gifts"] },
     ],
   },
   {
     id: "who",
-    prompt: "Who are you shopping for?",
+    prompt: "What would you like to browse?",
     answers: [
-      { label: "Women's", hint: "", weight: ["womens", "womens"] },
-      { label: "Men's", hint: "", weight: ["mens", "mens"] },
-      { label: "Just browsing", hint: "Show me what's new", weight: ["new", "gifts"] },
+      { label: "Handbags", hint: "Everyday and top-handle styles", weight: ["mens", "mens"] },
+      { label: "Shoulder bags & clutches", hint: "Compact crossbodies and occasion pieces", weight: ["womens", "womens"] },
+      { label: "Gifts & drinkware", hint: "A little something for someone", weight: ["gifts", "gifts"] },
     ],
   },
 ];

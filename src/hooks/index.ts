@@ -29,7 +29,7 @@ export const useCategories = () => useAsync<Category[]>(CategoryService.getCateg
 export const useCollections = () => useAsync<Collection[]>(CollectionService.getCollections, []);
 export const useStoreSettings = () => useAsync<StoreProfile>(StoreSettingsService.getStoreSettings, {} as StoreProfile);
 export const useInstagram = () => {
-  const loadInstagram = useCallback(() => InstagramService.getLatestPosts(4), []);
+  const loadInstagram = useCallback(() => InstagramService.getLatestPosts(7), []);
   return useAsync<InstagramPost[]>(loadInstagram, []);
 };
 export const useTestimonials = () => useAsync<Testimonial[]>(TestimonialService.getTestimonials, []);

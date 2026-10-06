@@ -1,14 +1,389 @@
 {
-  "generatedAt": "2026-08-21T00:00:00.000Z",
+  "generatedAt": "2026-10-06T00:00:00.000Z",
   "products": [
-    { "id": "p1", "name": "Everyday Overshirt", "slug": "everyday-overshirt", "categoryId": "mens", "description": "A versatile layered piece.", "sizes": ["M", "L", "XL"], "colors": ["Black", "Stone"], "images": [{ "id": "p1", "src": "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=1200&q=85", "alt": "Neutral overshirt" }], "featured": true, "sortOrder": 1 },
-    { "id": "p2", "name": "Relaxed Statement Look", "slug": "relaxed-statement-look", "categoryId": "womens", "description": "A polished silhouette for everyday styling.", "sizes": ["S", "M", "L"], "colors": ["Cream", "Black"], "images": [{ "id": "p2", "src": "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=85", "alt": "Fashion look" }], "featured": true, "sortOrder": 2 },
-    { "id": "p3", "name": "Classic Layer", "slug": "classic-layer", "categoryId": "new", "description": "An easy piece to build a look around.", "sizes": ["M", "L"], "images": [{ "id": "p3", "src": "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=85", "alt": "Layered fashion" }], "featured": true, "sortOrder": 3 },
-    { "id": "p4", "name": "Minimal Accessories", "slug": "minimal-accessories", "categoryId": "accessories", "description": "Simple details that complete a look.", "images": [{ "id": "p4", "src": "https://images.unsplash.com/photo-1612902456551-333ac5afa26e?auto=format&fit=crop&w=1200&q=85", "alt": "Fashion accessories" }], "featured": false, "sortOrder": 4 },
-    { "id": "p5", "name": "Weekend Edit", "slug": "weekend-edit", "categoryId": "womens", "description": "An easygoing look for relaxed days.", "sizes": ["S", "M", "L"], "colors": ["White", "Black"], "images": [{ "id": "p5", "src": "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=1200&q=85", "alt": "Casual fashion look" }], "featured": true, "sortOrder": 5 },
-    { "id": "p6", "name": "Giftable Detail", "slug": "giftable-detail", "categoryId": "gifts", "description": "A small fashion find with easy gifting appeal.", "images": [{ "id": "p6", "src": "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&w=1200&q=85", "alt": "Fashion gift detail" }], "featured": false, "sortOrder": 6 },
-    { "id": "p7", "name": "Clean Everyday Tee", "slug": "clean-everyday-tee", "categoryId": "mens", "description": "A simple wardrobe staple for everyday styling.", "sizes": ["M", "L", "XL"], "colors": ["White", "Charcoal"], "images": [{ "id": "p7", "src": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=85", "alt": "Everyday t-shirt" }], "featured": true, "sortOrder": 7 },
-    { "id": "p8", "name": "Soft Layering Piece", "slug": "soft-layering-piece", "categoryId": "new", "description": "A relaxed layer for building a versatile look.", "sizes": ["S", "M", "L"], "colors": ["Beige", "Black"], "images": [{ "id": "p8", "src": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=1200&q=85", "alt": "Layering piece" }], "featured": true, "sortOrder": 8 },
-    { "id": "p9", "name": "Finishing Touch", "slug": "finishing-touch", "categoryId": "accessories", "description": "A minimal accessory to complete a look.", "images": [{ "id": "p9", "src": "https://images.unsplash.com/photo-1523779917675-b6ed3a42a561?auto=format&fit=crop&w=1200&q=85", "alt": "Accessory detail" }], "featured": false, "sortOrder": 9 }
+    {
+      "id": "ff04",
+      "name": "Colorblock Top-Handle Bag",
+      "slug": "colorblock-top-handle-bag",
+      "categoryId": "womens",
+      "description": "A polished top-handle silhouette in soft colorblocking.",
+      "images": [
+        {
+          "id": "ff04-1",
+          "src": "/images/products/colorblock-top-handle-bag.jpg",
+          "alt": "Colorblock Top-Handle Bag"
+        }
+      ],
+      "featured": true,
+      "sortOrder": 1
+    },
+    {
+      "id": "ff09",
+      "name": "Soft Tan Shoulder Bag",
+      "slug": "soft-tan-shoulder-bag",
+      "categoryId": "womens",
+      "description": "A relaxed tan shoulder bag with a softly gathered shape.",
+      "images": [
+        {
+          "id": "ff09-1",
+          "src": "/images/products/soft-tan-shoulder-bag.jpg",
+          "alt": "Soft Tan Shoulder Bag"
+        }
+      ],
+      "featured": true,
+      "sortOrder": 2
+    },
+    {
+      "id": "ff08",
+      "name": "Cream Quilted Crossbody",
+      "slug": "cream-quilted-crossbody",
+      "categoryId": "womens",
+      "description": "A cream quilted mini bag with a chain strap.",
+      "images": [
+        {
+          "id": "ff08-1",
+          "src": "/images/products/cream-quilted-crossbody.jpg",
+          "alt": "Cream Quilted Crossbody"
+        }
+      ],
+      "featured": true,
+      "sortOrder": 3
+    },
+    {
+      "id": "ff18",
+      "name": "Black Bow-Detail Mini Bag",
+      "slug": "black-bow-detail-bag",
+      "categoryId": "womens",
+      "description": "A compact black bag finished with a patterned bow.",
+      "images": [
+        {
+          "id": "ff18-1",
+          "src": "/images/products/black-bow-detail-bag.jpg",
+          "alt": "Black Bow-Detail Mini Bag"
+        }
+      ],
+      "featured": true,
+      "sortOrder": 4
+    },
+    {
+      "id": "ff16",
+      "name": "Orange Ridged Carry-On Case",
+      "slug": "orange-ridged-carry-on",
+      "categoryId": "new",
+      "description": "A bright, ridged carry-on case accented with a patterned scarf.",
+      "images": [
+        {
+          "id": "ff16-1",
+          "src": "/images/products/orange-ridged-carry-on.jpg",
+          "alt": "Orange Ridged Carry-On Case"
+        }
+      ],
+      "featured": true,
+      "sortOrder": 5
+    },
+    {
+      "id": "ff02",
+      "name": "Colorful Jhumka Earrings",
+      "slug": "colorful-jhumka-earrings",
+      "categoryId": "accessories",
+      "description": "Colorful statement earrings from the in-store edit.",
+      "images": [
+        {
+          "id": "ff02-1",
+          "src": "/images/products/colorful-jhumka-earrings.jpg",
+          "alt": "Colorful Jhumka Earrings"
+        }
+      ],
+      "featured": true,
+      "sortOrder": 6
+    },
+    {
+      "id": "ff15",
+      "name": "King & Queen Mug Set",
+      "slug": "queen-and-king-mugs",
+      "categoryId": "gifts",
+      "description": "A matching pair of gift mugs with decorative gold-tone lids.",
+      "images": [
+        {
+          "id": "ff15-1",
+          "src": "/images/products/queen-and-king-mugs.jpg",
+          "alt": "King & Queen Mug Set"
+        }
+      ],
+      "featured": true,
+      "sortOrder": 7
+    },
+    {
+      "id": "ff24",
+      "name": "Black Sunburst Clutch",
+      "slug": "black-sunburst-clutch",
+      "categoryId": "accessories",
+      "description": "A black wristlet with a statement sunburst clasp.",
+      "images": [
+        {
+          "id": "ff24-1",
+          "src": "/images/products/black-sunburst-clutch.jpg",
+          "alt": "Black Sunburst Clutch"
+        }
+      ],
+      "featured": true,
+      "sortOrder": 8
+    },
+    {
+      "id": "ff13",
+      "name": "Birthday Gift Mug",
+      "slug": "birthday-gift-mug",
+      "categoryId": "gifts",
+      "description": "A birthday-themed mug with a gold-tone lid.",
+      "images": [
+        {
+          "id": "ff13-1",
+          "src": "/images/products/birthday-gift-mug.jpg",
+          "alt": "Birthday Gift Mug"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 9
+    },
+    {
+      "id": "ff22",
+      "name": "Black Quilted Mini Bag",
+      "slug": "black-quilted-mini-bag",
+      "categoryId": "womens",
+      "description": "A black quilted mini bag with contrast trim.",
+      "images": [
+        {
+          "id": "ff22-1",
+          "src": "/images/products/black-quilted-mini-bag.jpg",
+          "alt": "Black Quilted Mini Bag"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 10
+    },
+    {
+      "id": "ff23",
+      "name": "Brown Sunburst Clutch",
+      "slug": "brown-sunburst-clutch",
+      "categoryId": "accessories",
+      "description": "A compact brown clutch with a sculpted circular clasp.",
+      "images": [
+        {
+          "id": "ff23-1",
+          "src": "/images/products/brown-sunburst-clutch.jpg",
+          "alt": "Brown Sunburst Clutch"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 11
+    },
+    {
+      "id": "ff05",
+      "name": "Chain-Strap Shoulder Bag",
+      "slug": "chain-strap-shoulder-bag",
+      "categoryId": "womens",
+      "description": "A light neutral shoulder bag with a braided chain detail.",
+      "images": [
+        {
+          "id": "ff05-1",
+          "src": "/images/products/chain-strap-shoulder-bag.jpg",
+          "alt": "Chain-Strap Shoulder Bag"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 12
+    },
+    {
+      "id": "ff12",
+      "name": "Crown Gift Mug",
+      "slug": "crown-gift-mug",
+      "categoryId": "gifts",
+      "description": "A red crown-top mug for a fun gift moment.",
+      "images": [
+        {
+          "id": "ff12-1",
+          "src": "/images/products/crown-gift-mug.jpg",
+          "alt": "Crown Gift Mug"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 13
+    },
+    {
+      "id": "ff11",
+      "name": "Happy Travel Mug",
+      "slug": "yellow-happy-travel-mug",
+      "categoryId": "gifts",
+      "description": "A bright handled travel cup with a cheerful character lid.",
+      "images": [
+        {
+          "id": "ff11-1",
+          "src": "/images/products/yellow-happy-travel-mug.jpg",
+          "alt": "Happy Travel Mug"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 14
+    },
+    {
+      "id": "ff20",
+      "name": "Ivory Top-Handle Bag",
+      "slug": "ivory-top-handle-bag",
+      "categoryId": "womens",
+      "description": "A softly structured ivory bag for day-to-evening styling.",
+      "images": [
+        {
+          "id": "ff20-1",
+          "src": "/images/products/ivory-top-handle-bag.jpg",
+          "alt": "Ivory Top-Handle Bag"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 15
+    },
+    {
+      "id": "ff17",
+      "name": "Neutral Ridged Top-Handle Bag",
+      "slug": "neutral-ridged-top-handle-bag",
+      "categoryId": "womens",
+      "description": "A structured neutral top-handle bag with a ridged finish.",
+      "images": [
+        {
+          "id": "ff17-1",
+          "src": "/images/products/neutral-ridged-top-handle-bag.jpg",
+          "alt": "Neutral Ridged Top-Handle Bag"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 16
+    },
+    {
+      "id": "ff06",
+      "name": "Patterned Mini Bags",
+      "slug": "patterned-mini-bags",
+      "categoryId": "new",
+      "description": "A pair of compact bags in a classic repeating pattern.",
+      "images": [
+        {
+          "id": "ff06-1",
+          "src": "/images/products/patterned-mini-bags.jpg",
+          "alt": "Patterned Mini Bags"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 17
+    },
+    {
+      "id": "ff14",
+      "name": "Rainbow Lidded Mug",
+      "slug": "rainbow-lidded-mug",
+      "categoryId": "gifts",
+      "description": "A pastel character mug with a snug decorative lid.",
+      "images": [
+        {
+          "id": "ff14-1",
+          "src": "/images/products/rainbow-lidded-mug.jpg",
+          "alt": "Rainbow Lidded Mug"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 18
+    },
+    {
+      "id": "ff10",
+      "name": "Smile Gift Mug",
+      "slug": "black-smile-gift-mug",
+      "categoryId": "gifts",
+      "description": "A playful black-and-gold mug, ready for gifting.",
+      "images": [
+        {
+          "id": "ff10-1",
+          "src": "/images/products/black-smile-gift-mug.jpg",
+          "alt": "Smile Gift Mug"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 19
+    },
+    {
+      "id": "ff07",
+      "name": "Soft Gathered Pouches",
+      "slug": "soft-gathered-pouches",
+      "categoryId": "accessories",
+      "description": "Small gathered pouches in fresh, easy-to-style colors.",
+      "images": [
+        {
+          "id": "ff07-1",
+          "src": "/images/products/soft-gathered-pouches.jpg",
+          "alt": "Soft Gathered Pouches"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 20
+    },
+    {
+      "id": "ff01",
+      "name": "Statement Gold-Tone Jewelry",
+      "slug": "statement-gold-jewelry",
+      "categoryId": "accessories",
+      "description": "A detailed gold-tone jewelry set, photographed in store.",
+      "images": [
+        {
+          "id": "ff01-1",
+          "src": "/images/products/statement-gold-jewelry.jpg",
+          "alt": "Statement Gold-Tone Jewelry"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 21
+    },
+    {
+      "id": "ff19",
+      "name": "Taupe Top-Handle Bag",
+      "slug": "taupe-top-handle-bag",
+      "categoryId": "womens",
+      "description": "A classic taupe top-handle shape with polished hardware.",
+      "images": [
+        {
+          "id": "ff19-1",
+          "src": "/images/products/taupe-top-handle-bag.jpg",
+          "alt": "Taupe Top-Handle Bag"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 22
+    },
+    {
+      "id": "ff21",
+      "name": "White Top-Handle Bag",
+      "slug": "white-top-handle-bag",
+      "categoryId": "new",
+      "description": "A clean white top-handle bag with a subtle quilted finish.",
+      "images": [
+        {
+          "id": "ff21-1",
+          "src": "/images/products/white-top-handle-bag.jpg",
+          "alt": "White Top-Handle Bag"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 23
+    },
+    {
+      "id": "ff03",
+      "name": "Woven-Handle Mini Bag",
+      "slug": "woven-handle-mini-bag",
+      "categoryId": "womens",
+      "description": "A compact mini bag with a sculptural woven handle.",
+      "images": [
+        {
+          "id": "ff03-1",
+          "src": "/images/products/woven-handle-mini-bag.jpg",
+          "alt": "Woven-Handle Mini Bag"
+        }
+      ],
+      "featured": false,
+      "sortOrder": 24
+    }
   ]
 }

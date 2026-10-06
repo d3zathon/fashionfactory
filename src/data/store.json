@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-22T00:00:00.000Z",
+  "generatedAt": "2026-10-06T00:00:00.000Z",
   "storeSlug": "fashion-factory-nepal",
   "settings": {
     "slug": "fashion-factory-nepal",
     "name": "Fashion Factory Nepal",
     "tagline": "Define Your Style.",
-    "description": "Fashion Factory is a Kathmandu-based fashion and clothing retail destination. Browse the collection, connect with the store, and visit in person to find your next look.",
+    "description": "Fashion Factory is a Kathmandu destination for handbags, jewelry, accessories and thoughtful gifts. Browse the collection, connect with the store, and visit in person to find your next favorite.",
     "locationLabel": "Kathmandu Valley, Nepal · Kirtipur & Budhanilkantha",
     "phone": "+977 9840260456",
     "whatsappNumber": "9779840260456",
@@ -53,12 +53,13 @@
     },
     "seo": {
       "title": "Fashion Factory Nepal | Fashion Store in Kathmandu",
-      "description": "Discover fashion at Fashion Factory Nepal. Browse the collection, contact the store, and get directions to our Kirtipur and Budhanilkantha branches.",
+      "description": "Discover handbags, jewelry, accessories and gifts at Fashion Factory Nepal. Browse the collection, contact the store, and visit our Kirtipur and Budhanilkantha branches.",
       "keywords": [
         "Fashion Factory Nepal",
         "fashion store Kathmandu",
-        "clothing store Kathmandu",
-        "fashion shop Kathmandu",
+        "handbag store Kathmandu",
+        "accessories shop Kathmandu",
+        "gift shop Kathmandu",
         "Fashion Factory Kirtipur",
         "Fashion Factory Budhanilkantha"
       ]

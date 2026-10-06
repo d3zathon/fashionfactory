@@ -18,7 +18,7 @@ import { AnalyticsService } from "@/services";
 import { generalWhatsappMessage, telHref, tiktokLink, whatsappHref } from "@/lib/links";
 import { getStoreProfile } from "@/providers/static";
 
-const fallbackHero = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2200&q=88";
+const fallbackHero = "/images/store/store-handbag-shelves.jpg";
 
 // The store this deployment was built for. useStoreSettings resolves to the
 // same data, but only after the first render, so this stands in for it wherever
