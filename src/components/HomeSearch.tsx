@@ -42,7 +42,7 @@ export function HomeSearch() {
       <SearchField
         id="home-search"
         label="Search the collection"
-        placeholder="Try a name, colour or category"
+        placeholder="Search bags, jewelry or gifts"
         value={query}
         onChange={setQuery}
         trailing={

@@ -78,12 +78,12 @@ export function Navbar({ tone = "dark" }: NavbarProps) {
           className={menuOpen ? "nav-links open" : "nav-links"}
           aria-label="Primary navigation"
         >
-          <Link href="/collection" onClick={close}>Collection</Link>
-          <Link href="/#about" onClick={close}>About</Link>
-          <Link href="/#instagram" onClick={close}>Instagram</Link>
-          <Link href="/#visit-us" onClick={close}>Visit Us</Link>
+          <Link href="/collection" onClick={close}>Shop</Link>
+          <Link href="/#about" onClick={close}>Our Story</Link>
+          <Link href="/#instagram" onClick={close}>In the Shop</Link>
+          <Link href="/#visit-us" onClick={close}>Find Us</Link>
           <Link href="/#contact" onClick={close}>Contact</Link>
-          <Link className="nav-cta" href="/#visit-us" onClick={close}>Visit Store <ArrowUpRight size={16} /></Link>
+          <Link className="nav-cta" href="/#visit-us" onClick={close}>Store Details <ArrowUpRight size={16} /></Link>
         </nav>
         <button
           ref={toggleRef}

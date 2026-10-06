@@ -32,11 +32,11 @@
     "countryCode": "NP",
     "currency": "NPR",
     "branding": {
-      "accent": "#8b3f35",
-      "accentDeep": "#6d2f27",
-      "accentLight": "#d98a76",
-      "ink": "#14120f",
-      "paper": "#f2ede3",
+      "accent": "#b63c30",
+      "accentDeep": "#81291f",
+      "accentLight": "#ffd15c",
+      "ink": "#2a211d",
+      "paper": "#fff7e8",
       "wordmark": [
         "FASHION",
         "FACTORY",

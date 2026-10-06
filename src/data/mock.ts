@@ -51,7 +51,7 @@ export const categories: Category[] = [
 
 export const collections: Collection[] = [
   { id: "all", name: "The Collection", slug: "all", description: "A curated catalogue of bags, accessories and gifts.", productIds: Array.from({ length: 24 }, (_, i) => `ff${String(i + 1).padStart(2, "0")}`), active: true, sortOrder: 1 },
-  { id: "featured", name: "Featured", slug: "featured", description: "Selected pieces highlighted on the storefront.", productIds: ["ff04", "ff09", "ff08", "ff18", "ff16", "ff02", "ff15", "ff24"], active: true, sortOrder: 2 },
+  { id: "featured", name: "Featured", slug: "featured", description: "Six easy-to-browse highlights from the shop.", productIds: ["ff04", "ff09", "ff08", "ff18", "ff16", "ff02"], active: true, sortOrder: 2 },
 ];
 
 export const instagramPosts: InstagramPost[] = [

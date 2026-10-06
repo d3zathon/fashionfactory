@@ -92,11 +92,12 @@ export default function HomePage() {
           <p className="hero-blurb">{home?.description ?? built.description}</p>
           <div className="hero-actions">
             <Link className="btn btn-accent" href="/collection" onClick={() => track("collection_click")}>
-              Browse the collection <ArrowUpRight size={15} />
+              Shop the collection <ArrowUpRight size={15} />
             </Link>
-            <Link className="btn" href="#visit-us">Visit the store</Link>
+            <Link className="btn" href="#visit-us">Find our stores</Link>
           </div>
         </div>
+        <div className="hero-search"><HomeSearch /></div>
       </div>
     </section>
 
@@ -141,19 +142,14 @@ export default function HomePage() {
           <div>
             <div className="head-meta">
               <span className="idx">{idx()}</span>
-              <p className="eyebrow">The index</p>
+              <p className="eyebrow">Shop by category</p>
             </div>
-            <h2 className="section-title">Find your category.</h2>
+            <h2 className="section-title">Pick your kind of find.</h2>
           </div>
           <Link className="link-rule" href="/collection">
             View everything <ArrowUpRight size={14} />
           </Link>
         </div>
-        {/* Search sits with the category index rather than in the hero: this is
-            the section that already promises "find", and pairing a query with
-            the categories mirrors how /collection itself is laid out. The hero
-            keeps its two CTAs and nothing else. */}
-        <HomeSearch />
         <Reveal>
           <CategoryIndex categories={categories} products={products} fallbackImage={fallbackHero} />
         </Reveal>
@@ -167,9 +163,9 @@ export default function HomePage() {
           <div>
             <div className="head-meta">
               <span className="idx">{idx()}</span>
-              <p className="eyebrow">Selected pieces</p>
+              <p className="eyebrow">Fresh from the shop</p>
             </div>
-            <h2 className="section-title">Worth a closer look.</h2>
+            <h2 className="section-title">A few favorites.</h2>
           </div>
           <p className="muted" style={{ maxWidth: "30ch", margin: 0 }}>
             Ask the store about availability — every piece is answered on WhatsApp.
