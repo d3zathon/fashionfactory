@@ -16,8 +16,18 @@ export function ProductList() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
-  const categoryName = (categoryId: string) =>
-    categories.find((option) => option.id === categoryId)?.name ?? categoryId;
+  const categoryNames = useMemo(
+    () => new Map(categories.map((category) => [category.id, category.name])),
+    [categories]
+  );
+  const categoryName = useCallback(
+    (categoryId: string) => categoryNames.get(categoryId) ?? categoryId,
+    [categoryNames]
+  );
+  const productPositions = useMemo(
+    () => new Map(products.map((product, index) => [product.id, index])),
+    [products]
+  );
 
   // Filters the rows already returned by listProducts(), which is scoped to
   // this deployment's store and further constrained by RLS. Searching is a
@@ -34,9 +44,7 @@ export function ProductList() {
           [categoryName(product.categoryId)]
         )
       ),
-    // categoryName closes over `categories`, which is why it is a dependency.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [products, terms, categories]
+    [products, terms, categoryName]
   );
 
   const load = useCallback(async () => {
@@ -164,7 +172,7 @@ export function ProductList() {
             // Reordering is a property of the whole catalogue, so position and
             // the neighbour to swap with always come from the full list — never
             // from the filtered view, where "up" would jump over hidden rows.
-            const index = products.findIndex((p) => p.id === product.id);
+            const index = productPositions.get(product.id) ?? -1;
             return (
             <div className="admin-product-card" key={product.id}>
               {product.imageUrl ? (

@@ -88,16 +88,14 @@ export function SettingsForm() {
     setError(null);
     try {
       await updateStoreSettings(settings);
-      for (const location of locations) {
-        await updateLocation(location.id, {
+      await Promise.all(locations.map((location) => updateLocation(location.id, {
           name: location.name,
           address: location.address,
           mapsUrl: location.mapsUrl,
           lat: location.lat,
           lng: location.lng,
           active: location.active,
-        });
-      }
+        })));
       setSaved(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't save settings.");

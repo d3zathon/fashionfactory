@@ -90,7 +90,14 @@ export default async function AdminOverviewPage() {
   const unpublished = Boolean(latestEdit && publishedAt && latestEdit > publishedAt);
   const publishedCount = publishedData.products?.length ?? 0;
 
-  const byCategory = categories.map((c) => ({ ...c, count: products.filter((p) => p.category_id === c.id).length }));
+  const productCounts = products.reduce<Record<string, number>>((counts, product) => {
+    counts[product.category_id] = (counts[product.category_id] ?? 0) + 1;
+    return counts;
+  }, {});
+  const byCategory = categories.map((category) => ({
+    ...category,
+    count: productCounts[category.id] ?? 0,
+  }));
   const emptyCategories = byCategory.filter((c) => c.count === 0);
 
   return (

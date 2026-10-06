@@ -77,7 +77,11 @@ export function ProductForm({ productId }: { productId?: string }) {
     let active = true;
     getProduct(productId)
       .then((product) => {
-        if (!active || !product) return;
+        if (!active) return;
+        if (!product) {
+          setError("This product could not be found. It may have been removed.");
+          return;
+        }
         existingProductRef.current = product;
         setName(product.name);
         setCategoryId(product.categoryId);
@@ -161,6 +165,15 @@ export function ProductForm({ productId }: { productId?: string }) {
   }
 
   if (loading) return <div className="admin-page"><p className="admin-muted" role="status">Loading…</p></div>;
+  if (isEdit && !existingProductRef.current) {
+    return (
+      <div className="admin-page">
+        <div className="admin-page-head"><h1 className="admin-title">Product unavailable</h1></div>
+        <p className="admin-error" role="alert">{error ?? "This product could not be found. It may have been removed."}</p>
+        <button className="admin-btn admin-btn-light" type="button" onClick={() => router.push("/admin/products")}>Back to products</button>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-page">

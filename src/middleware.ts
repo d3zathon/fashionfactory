@@ -81,6 +81,16 @@ async function authorize(request: NextRequest) {
     .select("user_id, store_id")
     .eq("user_id", user.id);
 
+  // Only migration/schema-cache errors justify the legacy fallback below.
+  // A transient database or permission error must never widen access to every
+  // store just because the older query happened to succeed.
+  if (scopedError && !isMissingMigrationObject(scopedError)) {
+    const message = "Admin access could not be verified. Please try again shortly.";
+    return isApiRoute
+      ? NextResponse.json({ success: false, error: message }, { status: 503 })
+      : new NextResponse(message, { status: 503 });
+  }
+
   // Selecting store_id on a project that has not run 0002 is an error, not an
   // empty result — falling straight through would lock the owner out of their
   // own panel. Fall back to the pre-tenancy question: are they an admin at all?
@@ -148,8 +158,12 @@ async function managesActiveStore(
     .eq("slug", ACTIVE_STORE_SLUG)
     .maybeSingle();
 
-  if (error) return true; // stores table not there yet — see above.
+  if (error) return isMissingMigrationObject(error); // legacy schema only.
   if (!store) return false;
 
   return adminRows.some((row) => row.store_id === store.id);
+}
+
+function isMissingMigrationObject(error: { code?: string; message?: string }): boolean {
+  return ["42703", "42P01", "PGRST204", "PGRST205"].includes(error.code ?? "");
 }
