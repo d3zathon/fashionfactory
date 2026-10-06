@@ -85,55 +85,70 @@ function CollectionView() {
   const loading = productsLoading || categoriesLoading;
   const error = productsError || categoriesError;
 
-  const activeCategory = categories.find((category) => category.slug === active);
-
-  const categoryNameFor = useCallback(
-    (categoryId: string) => categories.find((c) => c.id === categoryId)?.name,
+  const categoryBySlug = useMemo(
+    () => new Map(categories.map((category) => [category.slug, category])),
     [categories]
   );
+  const categoryNameById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category.name])),
+    [categories]
+  );
+  const productsByCategory = useMemo(() => {
+    const grouped = new Map<string, typeof products>();
+    for (const product of products) {
+      const group = grouped.get(product.categoryId) ?? [];
+      group.push(product);
+      grouped.set(product.categoryId, group);
+    }
+    return grouped;
+  }, [products]);
+
+  const activeCategory = categoryBySlug.get(active);
 
   const terms = useMemo(() => searchTerms(query), [query]);
   const searching = terms.length > 0;
 
-  const inCategory = useMemo(
-    () => (active === ALL || !activeCategory ? products : products.filter((p) => p.categoryId === activeCategory.id)),
-    [products, active, activeCategory]
-  );
-
-  // Search runs over the category-filtered set, so the two controls compose:
-  // a query narrows what the chips already selected. The category *name* is
-  // searchable too, which is what makes "mens" find the right rail even when
-  // no product text contains the word.
-  const visible = useMemo(
-    () =>
-      inCategory.filter((product) =>
-        matchesAllTerms(
-          [product.name, product.description, product.slug],
-          terms,
-          [categoryNameFor(product.categoryId)]
-        )
-      ),
-    [inCategory, terms, categoryNameFor]
-  );
-
-  // Chip counts reflect the current search, so a chip never promises results
-  // the query has already excluded.
-  const countFor = (slug: string) => {
-    const pool =
-      slug === ALL
-        ? products
-        : (() => {
-            const category = categories.find((c) => c.slug === slug);
-            return category ? products.filter((p) => p.categoryId === category.id) : [];
-          })();
-    if (!searching) return pool.length;
-    return pool.filter((product) =>
+  // Search the catalogue once per query, then use the result for both the grid
+  // and category counts. Category names are searchable alongside product text.
+  const matchingProducts = useMemo(
+    () => products.filter((product) =>
       matchesAllTerms(
         [product.name, product.description, product.slug],
         terms,
-        [categoryNameFor(product.categoryId)]
+        [categoryNameById.get(product.categoryId)]
       )
-    ).length;
+    ),
+    [products, terms, categoryNameById]
+  );
+
+  const matchingCountsByCategory = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const product of matchingProducts) {
+      counts.set(product.categoryId, (counts.get(product.categoryId) ?? 0) + 1);
+    }
+    return counts;
+  }, [matchingProducts]);
+
+  const visible = useMemo(
+    () => activeCategory
+      ? matchingProducts.filter((product) => product.categoryId === activeCategory.id)
+      : matchingProducts,
+    [matchingProducts, activeCategory]
+  );
+
+  useEffect(() => {
+    if (!categoriesLoading && active !== ALL && !categoryBySlug.has(active)) {
+      setActive(ALL);
+    }
+  }, [active, categoriesLoading, categoryBySlug]);
+
+  const countFor = (slug: string) => {
+    if (slug === ALL) return searching ? matchingProducts.length : products.length;
+    const category = categoryBySlug.get(slug);
+    if (!category) return 0;
+    return searching
+      ? matchingCountsByCategory.get(category.id) ?? 0
+      : productsByCategory.get(category.id)?.length ?? 0;
   };
 
   const filtersApplied = searching || active !== ALL;
@@ -245,7 +260,7 @@ function CollectionView() {
                     key={product.id}
                     product={product}
                     index={i}
-                    categoryName={categories.find((c) => c.id === product.categoryId)?.name}
+                    categoryName={categoryNameById.get(product.categoryId)}
                     whatsappNumber={store?.whatsappNumber}
                     priority={i < 4}
                   />

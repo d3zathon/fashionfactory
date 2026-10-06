@@ -165,7 +165,7 @@ export function StyleQuiz({
               {picks.map((product) => (
                 <Link className="quiz-pick" key={product.id} href={`/products/${product.slug}`}>
                   <span className="quiz-pick-media">
-                    <img src={product.images[0]?.src} alt={product.images[0]?.alt ?? product.name} loading="lazy" />
+                    <img src={product.images[0]?.src} alt="" loading="lazy" />
                   </span>
                   <span className="quiz-pick-name">{product.name}</span>
                 </Link>

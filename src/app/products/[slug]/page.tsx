@@ -181,7 +181,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {related.map((item) => (
                 <Link className={styles.relatedCard} key={item.id} href={`/products/${item.slug}`}>
                   <figure>
-                    <img src={item.images[0]?.src} alt={item.images[0]?.alt ?? item.name} loading="lazy" />
+                    <img src={item.images[0]?.src} alt="" loading="lazy" />
                   </figure>
                   <p>{item.name}</p>
                   <span>{item.categoryId === product.categoryId ? category?.name : "Collection"}</span>
